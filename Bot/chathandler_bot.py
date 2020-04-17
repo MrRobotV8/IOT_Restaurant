@@ -5,6 +5,7 @@ import logging
 import json
 import functions
 from BotFilters import *
+from RestaurantPublisher import Publisher
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -13,19 +14,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 class SmartRestaurant():
 	def __init__(self):
-		self.keyboard_filter = KeyboardFilter()
-
-
 		self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Wait', 'CheckOut']]
 		self.time_booking = [['19:00', '19:30', '20:00'], ['20:30', '21:00', '21:30']]
+
 		self.customers_path = 'Customers.json'
 		self.customers = functions.open_json(self.customers_path)
+		self.restaurants = functions.open_json('Restaurants.json')
 
-		self.START, self.COND_1, self.BOOK, self.ORDER, self.FEED, self.WAIT, self.CHECK, self.PEOPLE, self.TIME = range(9)
+		self.keyboard_filter = KeyboardFilter()
+		self.people_filter = PeopleFilter()
+		self.key_restaurant_filter = KeyRestaurantFilter(self.restaurants)
+
+		self.START, self.COND_1, self.BOOK, self.CHECK_BOOKING, self.ORDER, self.FEED, self.WAIT, self.CHECK, self.PEOPLE, self.TIME = range(10)
 		self.STATE = self.START
 
 	def start(self, bot, update):
-		self.user_id = bot.message.from_user.id
+		self.user_id = str(bot.message.from_user.id)
 		message = 'Welcome to the StartRestaurantBot. Select one of the following functions'
 		reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=False, resize_keyboard=True)
 		bot.message.reply_text(message, reply_markup=reply_markup)
@@ -39,6 +43,10 @@ class SmartRestaurant():
 		elif selection == 'Order':
 			return self.ORDER
 		elif selection == 'Feedback':
+			print('feedback')
+			message = 'Tap if you want to change the room_temperature'
+			reply_markup = ReplyKeyboardMarkup([['Lower', 'Raise', 'Good']], one_time_keyboard=True, resize_keyboard=True)
+			bot.message.reply_text(message, reply_markup=reply_markup)
 			return self.FEED
 		elif selection == 'Wait':
 			return self.Wait
@@ -46,36 +54,61 @@ class SmartRestaurant():
 			return self.CHECK
 
 	def book(self, bot, update):
-		# user_id = bot.message.from_user.id
-		customers_booked = self.customers.keys()
-		if self.user_id in customers_booked:
-			message = 'You already have a table booked'
-			bot.update.reply_text(message)
-			ConversationHandler.END
-			return 
+		message = 'At which Restaurant do you want to book a table? Select from the list the corresponding key'
+		bot.message.reply_text(message)
+		for i in functions.keys_restaurants(self.restaurants):
+			new_restaurant = f'{i[1]} -> {i[0]}'
+			bot.message.reply_text(new_restaurant)
+
+		return self.CHECK_BOOKING
+
+	def check_booking(self, bot, update):
+		self.key_restaurant = bot.message.text
+		restaurant_obj = self.restaurants[self.key_restaurant]
+		customers_restaurant = list(restaurant_obj.keys())
+
+		if self.user_id in customers_restaurant:
+			print('Already Booked')
+			message = 'You already have a booking'
 		else:
-			message = 'Welcome to the booking phase, please let us know for how many people are you booking'
+			print('Booking Phase')
+			message = 'For how many people? Type the number'
 			bot.message.reply_text(message)
 
 			return self.PEOPLE
 
 	def people(self, bot, update):
-		self.people = bot.message.text
-		message = 'Let us now know the time'
+		self.people = int(bot.message.text)
+		message = 'Let us now know the time. Select form the keyboard'
 		reply_markup = ReplyKeyboardMarkup(self.time_booking, one_time_keyboard=True, resize_keyboard=True)
-		bot.update.reply_text(message, reply_markup=reply_markup)
+		bot.message.reply_text(message, reply_markup=reply_markup)
 
 		return self.TIME
 
 	def time(self, bot, update):
 		self.time_selected = bot.message.text
-		functions.update_customers(self.user_id, self.people, self.time_selected, self.customers)
+		functions.update_customers(self.user_id, self.people, self.time_selected, self.key_restaurant, self.customers, self.restaurants)
 		print('SAVED')
+
+		message = f'Your booking has been saved. See you at {self.time_selected} in {self.restaurants[self.key_restaurant]["name"]}'
+		restart = 'Type /start if you want to select other features'
+		bot.message.reply_text(message)
+		bot.message.reply_text(restart)
+		return ConversationHandler.END
+
+	def order(self, bot, update):
+		message = 'Click on the link to begin the ordering phase'
+
+	def feedback(self, bot, update):
+		feeling = bot.message.text
+		feedback_key = self.customers[self.user_id]['active_booking']['key']
+		topic = f"Temperature_{feedback_key}"
+		pub = Publisher(clientID=self.user_id, topic=topic)
+		pub.publish(feeling)
 
 
 	def help_(self):
 		print('AAA')
-
 
 	def main(self):
 		updater = Updater('892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw', use_context=True)
@@ -87,8 +120,10 @@ class SmartRestaurant():
 			states={
 				self.COND_1: [MessageHandler(self.keyboard_filter, self.cond1)],
 				self.BOOK: [MessageHandler(Filters.text, self.book)],
+				self.CHECK_BOOKING: [MessageHandler(self.key_restaurant_filter, self.check_booking)],
 				self.PEOPLE: [MessageHandler(self.people_filter, self.people)],
-				self.TIME: [MessageHandler(self.time_filter, self.time)]
+				self.TIME: [MessageHandler(Filters.text, self.time)],
+				self.FEED: [MessageHandler(Filters.text, self.feedback)]
 				
 			},
 			fallbacks=[CommandHandler('help',self.help_),

@@ -1,0 +1,23 @@
+{
+    "0001": {
+        "name": "casa di pulc",
+        "customers": {
+            "c1": {
+                "time": "21:30",
+                "people": 4
+            },
+            "127081263": {
+                "time": "19:30",
+                "people": 4
+            }
+        }
+    },
+    "0002": {
+        "name": "McDonaldss",
+        "tables": {
+            "0": {
+                "count": 2
+            }
+        }
+    }
+}
