@@ -1,0 +1,63 @@
+{% if messg %}
+<script>
+
+    alert('{{ msg }}');
+
+</script>
+
+{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" href="https://img.icons8.com/nolan/64/restaurant.png">
+        <title> Sign Up Restaurant</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'rpanel/css/signin.css' %}">
+    </head>
+
+    <body>
+        <form action="{% url 'rpanel:Postsignup' %}" method="POST">
+            {% csrf_token %}
+            <div class="container" style="width: 30%; background-color: #231C65; padding: 50px; ">
+              <h1 style="text-align: center; color: white;">Sign Up</h1>
+              <p style="text-align: center; color: white;">Please fill in this form to create an account.</p>
+              <hr>
+
+              <label for="name" style="color:white;"><b>Restaurant Name</b></label>
+              <input type="text" placeholder="Enter your Name" name="name" required>
+
+              <label for="email" style="color:white;"><b>Email</b></label>
+              <input type="text" placeholder="Enter Email" name="email" required>
+          
+              <label for="psw" style="color:white;"><b>Password</b></label>
+              <input type="password" placeholder="Enter Password" name="psw" required>
+          
+              <label for="psw-repeat" style="color:white;"><b>Repeat Password</b></label>
+              <input type="password" placeholder="Repeat Password" name="psw-repeat" required>
+          
+              <label>
+                <input type="checkbox" checked="checked" name="remember" style="margin-bottom:15px"> <a style="color:white;"> Remember Me</a>
+              </label>
+          
+              <p style="color:white;">By creating an account you agree to our <a href="#" style="color:dodgerblue">Terms & Privacy</a>.</p>
+          
+              <div class="clearfix">
+                <button type="button" class="cancelbtn" style="width: 100%;" ><a href="javascript:history.go(-1)" 
+                  onMouseOver="self.status=document.referrer;return true" style="color: white;">Cancel</a></button>
+                <button type="submit" class="signupbtn">Sign Up</button>
+              </div>
+            </div>
+          </form> 
+     <!-- jQuery library -->
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+     <!-- Popper JS -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+     <!-- Latest compiled JavaScript -->
+     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <script src="{% static 'rpanel/js/main.js' %}"></script>
+    </body>
+</html>

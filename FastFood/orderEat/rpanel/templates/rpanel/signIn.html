@@ -1,0 +1,60 @@
+{% if messg %}
+<script>
+
+    alert('{{ message }}');
+
+</script>
+
+{% endif %}
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="icon" type="image/png" href="https://img.icons8.com/nolan/64/restaurant.png">
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'rpanel/css/signin.css' %}">
+
+</head>
+
+<body>
+  
+<h2 style="text-align: center; color: white;">Restaurant Login Form</h2>
+
+<form action="{% url 'rpanel:Postsignin' %}" method="POST">
+    {% csrf_token %}
+  <div class="imgcontainer">
+    <img src=https://img.icons8.com/nolan/64/restaurant.png alt="Avatar" class="avatar">
+  </div>
+
+  <div class="container" style="width: 30%; background-color: #231C65; padding: 50px; ">
+    <label for="email" style="color:white;" ><b>Email</b></label>
+    <input type="text" placeholder="Enter Username" name="email" required>
+
+    <label for="pass" style="color:white;"><b>Password</b></label>
+    <input type="password" placeholder="Enter Password" name="pass" required>
+        
+    <button type="submit">Login</button>
+    <button><a class="button" href="{% url 'rpanel:Signup' %}" role="button">Sign Up</a></button>
+ 
+
+      <input type="checkbox"  checked="checked" name="remember"> <p style="color:white;">Remember me</p>
+  
+  </div>
+
+  <div class="container" style="width: 30%; background-color: #231C65;">
+    <button type="button" class="cancelbtn"><a href="javascript:history.go(-1)" 
+      onMouseOver="self.status=document.referrer;return true" style="color: white;">Cancel</a></button>
+    <span class="psw" style="color:white;">Forgot <a href="#">password?</a></span>
+  </div>
+</form>
+ <!-- jQuery library -->
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+ <!-- Popper JS -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+ <!-- Latest compiled JavaScript -->
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+ <script src="{% static 'rpanel/js/main.js' %}"></script>
+</body>
+</html>

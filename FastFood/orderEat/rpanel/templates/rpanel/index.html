@@ -1,0 +1,27 @@
+{% extends 'rpanel/base.html' %}
+
+{% block title %}
+Index
+{% endblock %}
+
+{% block content %}
+<h2>Welcome {{ email }}</h2>
+
+<div class="card-columns">
+    <div class="card bg-primary">
+      <div class="card-body text-center">
+        <p class="card-text">Pizza 1</p>
+      </div>
+    </div>
+    <div class="card bg-warning">
+      <div class="card-body text-center">
+        <p class="card-text">Pizza 2</p>
+      </div>
+    </div>
+    <div class="card bg-success">
+      <div class="card-body text-center">
+        <p class="card-text">Pizza 3</p>
+      </div>
+    </div>
+
+{% endblock%}

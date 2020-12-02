@@ -1,0 +1,53 @@
+{% load food/static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width-device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/nolan/64/restaurant.png">
+    <title>{% block title %} {% endblock %} </title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{%static 'food/css/style.css' %}">
+
+</head>
+
+<body>
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    <!-- Brand/logo -->
+    <a class="navbar-brand" href="#">
+      <img src="https://img.icons8.com/nolan/40/restaurant.png" class="logo"/>
+    </a>
+    <!-- Links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'food:index' %}">Home</a> 
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Pizzas</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Burgers</a>
+      </li>    
+    </ul>
+      <nav class="navbar ml-auto" role="navigation">
+      <div class="container">
+          <span class="navbar-brand">{{ user }}</span>
+      <a class="btn navbar-btn btn-danger navbar-right pull-right" type="button" href="{% url 'food:log' %}">Logout</a>
+      </div>
+      </nav> 
+  </nav> 
+    {% block content %} {% endblock %}
+  </div> 
+
+
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{% static 'food/js/main.js' %}"></script>
+  </body>
+</html>

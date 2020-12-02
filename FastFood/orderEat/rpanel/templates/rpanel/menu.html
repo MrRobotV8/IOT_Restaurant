@@ -1,0 +1,59 @@
+{% extends 'rpanel/base.html' %}
+{% block title %}
+Menu
+{% endblock %}
+
+{% block content %}
+
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-xs-12 col-md-6">
+      <div class="container p-3 my-3 bg-add effect8 text-white text-center">
+        <label for="title"><h1>Add new item to your menu</h1></label>
+        <form action="{% url 'rpanel:postmenu' %}" method="POST">
+        {% csrf_token %}
+        <label for="title"><b>Menu Section</b>
+        <select class="select dark" name="item-section">
+            <option value="starter">Starters</option>
+            <option value="burger">Burgers</option>
+            <option value="pizza">Pizzas</option>
+            <option value="maindish">Main dishes</option>
+            <option value="dessert">Desserts</option>
+            <option value="drink">Drinks</option>
+          </select>
+        </label>
+        <br><br>
+        <label for="title"><b>Item Name</b>
+        <input type="text" name="item-name"><br><br>
+        Item Description: <br>
+    <textarea rows="4" cols="50" name="item-description"></textarea><br><br>
+    <input type="number" min="0.00" max="10000.00" step="0.01"  placeholder="Price € " name="item-price"> € (Euro) <br><br>
+    <input type="checkbox" checked="checked" name="available"> Availability
+    <br><br>
+    <input type="submit" class="btn btn-primary btn-block" value="Add Item">
+    </form>
+    </div>
+    
+    </div>
+    <div class="col-xs-12 col-md-6">
+      <div class="container p-3 my-3 bg-change effect8 text-white text-center">
+        <label for="title"><h1>Change Item in your Menu</h1></label>
+        <form action="{% url 'rpanel:postmenu' %}" method="GET" id="s">
+          {% csrf_token %}
+        <input type="text" placeholder="Search..." name="search">
+        <input type="hidden" value="{{ uid }}" name="uid">
+        <br><br>
+        <input type="submit" class="btn btn-primary btn-block" value="Go!" form="s">
+    </form>
+    </div>
+      
+    </div>
+  </div>
+  </div>
+  
+  
+
+
+
+{% endblock%}
