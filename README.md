@@ -16,3 +16,4 @@ once your virtual env is activated and you would like to run the platform in you
 
 python manage.py runserver
 
+# TO DO WEB APP
