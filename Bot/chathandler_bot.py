@@ -3,144 +3,249 @@ from telegram.ext import ConversationHandler, Filters
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import logging
 import json
-import functions
+from functions import *
 from BotFilters import *
 from RestaurantPublisher import Publisher
+from Firebase import Firebase
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-class SmartRestaurant():
-	def __init__(self):
-		self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Wait', 'CheckOut']]
-		self.time_booking = [['19:00', '19:30', '20:00'], ['20:30', '21:00', '21:30']]
-
-		self.customers_path = 'Customers.json'
-		self.customers = functions.open_json(self.customers_path)
-		self.restaurants = functions.open_json('Restaurants.json')
-
-		self.keyboard_filter = KeyboardFilter()
-		self.people_filter = PeopleFilter()
-		self.key_restaurant_filter = KeyRestaurantFilter(self.restaurants)
-
-		self.START, self.COND_1, self.BOOK, self.CHECK_BOOKING, self.ORDER, self.FEED, self.WAIT, self.CHECK, self.PEOPLE, self.TIME = range(10)
-		self.STATE = self.START
-
-	def start(self, bot, update):
-		self.user_id = str(bot.message.from_user.id)
-		message = 'Welcome to the StartRestaurantBot. Select one of the following functions'
-		reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=False, resize_keyboard=True)
-		bot.message.reply_text(message, reply_markup=reply_markup)
-
-		return self.COND_1
-
-	def cond1(self, bot, update):
-		selection = bot.message.text
-		if selection == 'Book':
-			return self.BOOK
-		elif selection == 'Order':
-			return self.ORDER
-		elif selection == 'Feedback':
-			print('feedback')
-			message = 'Tap if you want to change the room_temperature'
-			reply_markup = ReplyKeyboardMarkup([['Lower', 'Raise', 'Good']], one_time_keyboard=True, resize_keyboard=True)
-			bot.message.reply_text(message, reply_markup=reply_markup)
-			return self.FEED
-		elif selection == 'Wait':
-			return self.Wait
-		elif selection == 'CheckOut':
-			return self.CHECK
-
-	def book(self, bot, update):
-		message = 'At which Restaurant do you want to book a table? Select from the list the corresponding key'
-		bot.message.reply_text(message)
-		for i in functions.keys_restaurants(self.restaurants):
-			new_restaurant = f'{i[1]} -> {i[0]}'
-			bot.message.reply_text(new_restaurant)
-
-		return self.CHECK_BOOKING
-
-	def check_booking(self, bot, update):
-		self.key_restaurant = bot.message.text
-		restaurant_obj = self.restaurants[self.key_restaurant]
-		customers_restaurant = list(restaurant_obj.keys())
-
-		if self.user_id in customers_restaurant:
-			print('Already Booked')
-			message = 'You already have a booking'
-		else:
-			print('Booking Phase')
-			message = 'For how many people? Type the number'
-			bot.message.reply_text(message)
-
-			return self.PEOPLE
-
-	def people(self, bot, update):
-		self.people = int(bot.message.text)
-		message = 'Let us now know the time. Select form the keyboard'
-		reply_markup = ReplyKeyboardMarkup(self.time_booking, one_time_keyboard=True, resize_keyboard=True)
-		bot.message.reply_text(message, reply_markup=reply_markup)
-
-		return self.TIME
-
-	def time(self, bot, update):
-		self.time_selected = bot.message.text
-		functions.update_customers(self.user_id, self.people, self.time_selected, self.key_restaurant, self.customers, self.restaurants)
-		print('SAVED')
-
-		message = f'Your booking has been saved. See you at {self.time_selected} in {self.restaurants[self.key_restaurant]["name"]}'
-		restart = 'Type /start if you want to select other features'
-		bot.message.reply_text(message)
-		bot.message.reply_text(restart)
-		return ConversationHandler.END
-
-	def order(self, bot, update):
-		message = 'Click on the link to begin the ordering phase'
-
-	def feedback(self, bot, update):
-		feeling = bot.message.text
-		feedback_key = self.customers[self.user_id]['active_booking']['key']
-		topic = f"Temperature_{feedback_key}"
-		pub = Publisher(clientID=self.user_id, topic=topic)
-		pub.publish(feeling)
 
 
-	def help_(self):
-		print('AAA')
+class SmartRestaurant:
+    def __init__(self):
+        self.fb = Firebase()
+        self.fb.authenticate()
+        self.restaurants = self.fb.download('restaurants')
+        self.restaurants_names = [r['details']['name'] for r in self.restaurants.values()]
+        self.restaurants_mapper = {self.restaurants_names[i]: list(self.restaurants.keys())[i]
+                                   for i in range(len(self.restaurants_names))}
 
-	def main(self):
-		updater = Updater('892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw', use_context=True)
+        self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Wait', 'CheckOut']]
+        self.time_booking = [['19:00', '19:30', '20:00'], ['20:30', '21:00', '21:30']]
 
-		# Get the dispatcher to register handlers:
-		dp = updater.dispatcher
-		conv_handler = ConversationHandler(
-			entry_points=[CommandHandler('start',self.start)],
-			states={
-				self.COND_1: [MessageHandler(self.keyboard_filter, self.cond1)],
-				self.BOOK: [MessageHandler(Filters.text, self.book)],
-				self.CHECK_BOOKING: [MessageHandler(self.key_restaurant_filter, self.check_booking)],
-				self.PEOPLE: [MessageHandler(self.people_filter, self.people)],
-				self.TIME: [MessageHandler(Filters.text, self.time)],
-				self.FEED: [MessageHandler(Filters.text, self.feedback)]
-				
-			},
-			fallbacks=[CommandHandler('help',self.help_),
-						# CommandHandler('cancel', self.cancel)
-						],
-			allow_reentry=True
-		)
+        self.email_filter = EmailFilter()
+        self.keyboard_filter = KeyboardFilter()
+        self.people_filter = PeopleFilter()
+        self.key_restaurant_filter = KeyRestaurantFilter(self.restaurants_names)
 
-		dp.add_handler(conv_handler)
-		updater.start_polling()
-		updater.idle()
+        n_states = 14
+        self.START, self.START_RETURN, self.COND_1, self.EMAIL, self.PASSWORD, \
+            self.PASSWORD_2, self.NICK, self.CHECK_BOOKING, \
+            self.ORDER, self.FEED, self.WAIT, self.CHECK, \
+            self.PEOPLE, self.TIME = range(n_states)
+        self.STATE = self.START
+
+    def check_signin(self):
+        try:
+            users = self.fb.download('users')
+            bot_ids = [u['details']['bot_id'] for u in users.values()]
+            index = 0
+            for b in bot_ids:
+                if b == self.user_id:
+                    self.fb_id = list(users.keys())[index]
+                    return True
+                index = index + 1
+            else:
+                return False
+        except:
+            return False
+
+    def start_return(self, bot, update):
+        message = 'Welcome back. Please select one of the following.'
+        reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
+        bot.message.reply_text(message, reply_markup=reply_markup)
+
+        return self.COND_1
+
+    def start(self, bot, update):
+        self.user_id = str(bot.message.from_user.id)
+        if self.check_signin():
+            print(self.fb_id)
+            message = 'Welcome back. Please select one of the following.'
+            reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
+            bot.message.reply_text(message, reply_markup=reply_markup)
+            return self.COND_1
+        else:
+            message = 'Welcome to the StartRestaurantBot. Please sign-up if you want to use our services. Insert you ' \
+                      'email '
+            bot.message.reply_text(message)
+            return self.EMAIL
+
+    def email(self, bot, update):
+        self.email = bot.message.text
+        message = 'Insert your Nickname'
+        bot.message.reply_text(message)
+
+        return self.NICK
+
+    def nickname(self, bot, update):
+        self.nickname = bot.message.text
+        message = 'Insert now your password'
+        bot.message.reply_text(message)
+
+        return self.PASSWORD
+
+    def password(self, bot, update):
+        self.password = bot.message.text
+        message = 'Insert again'
+        bot.message.reply_text(message)
+        return self.PASSWORD_2
+
+    def password_2(self, bot, update):
+        if bot.message.text == self.password:
+            self.sign_up()
+            message = 'You have been signed-up!'
+            bot.message.reply_text(message)
+
+            return self.START_RETURN
+        else:
+            message = 'Your passwords do not coincide. Reinsert your password.'
+            bot.message.reply_text(message)
+
+            return self.PASSWORD
+
+    def sign_up(self):
+        user = self.fb.auth.create_user_with_email_and_password(self.email, self.password)
+        uid = user['localId']
+        data = {
+            'name': self.nickname,
+            'status': 1,
+            'bot_id': self.user_id
+        }
+        self.fb.db.child('users').child(uid).child('details').set(data)
+
+    def sign_in(self):
+        pass
+
+    def cond1(self, bot, update):
+        selection = bot.message.text
+        if selection == 'Book':
+            message = 'At which Restaurant do you want to book a table?'
+            bot.message.reply_text(message)
+            for i in self.restaurants_names:
+                new_restaurant = i
+                bot.message.reply_text(new_restaurant)
+            return self.CHECK_BOOKING
+
+        elif selection == 'Order':
+            return self.ORDER
+        elif selection == 'Feedback':
+            message = 'Tap if you want to change the room_temperature'
+            reply_markup = ReplyKeyboardMarkup([['Lower', 'Raise', 'Good']], one_time_keyboard=True,
+                                               resize_keyboard=True)
+            bot.message.reply_text(message, reply_markup=reply_markup)
+            return self.FEED
+        elif selection == 'Wait':
+            return self.Wait
+        elif selection == 'CheckOut':
+            return self.CHECK
+
+    def check_booking(self, bot, update):
+        restaurant_chosen = bot.message.text
+        restaurant_key = self.restaurants_mapper[restaurant_chosen]
+        restaurant_ids = self.restaurants[restaurant_key]['customers'].keys()
+        if self.user_id in list(restaurant_ids):
+            message = f'You already have a Booking at {restaurant_chosen}. Do you want to change it?'
+            reply_markup = ReplyKeyboardMarkup(['YES', 'NO'], one_time_keyboard=True, resize_keyboard=True)
+            bot.message.reply_text(message, reply_markup=reply_markup)
+        else:
+            self.restaurant_key = restaurant_key
+            message = 'How many People'
+            bot.message.reply_text(message)
+            return self.PEOPLE
+
+    def people(self, bot, update):
+        self.people = int(bot.message.text)
+        message = 'Let us now know the time. Select form the keyboard'
+        reply_markup = ReplyKeyboardMarkup(self.time_booking, one_time_keyboard=True, resize_keyboard=True)
+        bot.message.reply_text(message, reply_markup=reply_markup)
+
+        return self.TIME
+
+    def add_customer(self):
+        obj = {
+            'people': self.people,
+            'time': self.time_selected,
+            'firebase_key': self.fb_id,
+        }
+        self.fb.db.child('restaurants').child(self.restaurant_key).child('customers').child(self.user_id).set(obj)
+        obj_active = {
+            'restaurant_key': self.restaurant_key,
+        }
+        self.fb.db.child('users').child(self.fb_id).child('active').set(obj_active)
+
+    def time(self, bot, update):
+        self.time_selected = bot.message.text
+        self.add_customer()
+
+        return self.START_RETURN
+
+    def order(self, bot, update):
+        message = 'Click on the link to begin the ordering phase'
+
+    def search_user_restaurant(self):
+        users = self.fb.download('users')
+        for k, u in users.items():
+            if self.user_id == u['details']['bot_id']:
+                return u['active']['restaurant_key']
+
+    def feedback(self, bot, update):
+        feeling = bot.message.text
+        feedback_key = self.search_user_restaurant()
+        topic = f"Temperature/{feedback_key}"
+        pub = Publisher(clientID=self.user_id, topic=topic)
+        pub.publish(feeling)
+
+        return self.START_RETURN
+
+    def checkout(self, bot, update):
+        restaurant = self.search_user_restaurant()
+        user_info = restaurant[self.user_id]
+        history_new = {
+            restaurant: user_info
+        }
+        to_remove = self.fb.db.child('users').child(user_info['firebase_id']).child('active')
+        to_remove.remove()
+        self.fb.db.child('users').child(user_info['firebase_id']).child('history').push(history_new)
+
+    def help_(self):
+        print('AAA')
+
+    def main(self):
+        updater = Updater('892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw', use_context=True)
+
+        # Get the dispatcher to register handlers:
+        dp = updater.dispatcher
+        conv_handler = ConversationHandler(
+            entry_points=[CommandHandler('start', self.start)],
+            states={
+                self.START_RETURN: [MessageHandler(Filters.text, self.start_return)],
+                self.EMAIL: [MessageHandler(self.email_filter, self.email)],
+                self.PASSWORD: [MessageHandler(Filters.text, self.password)],
+                self.PASSWORD_2: [MessageHandler(Filters.text, self.password_2)],
+                self.COND_1: [MessageHandler(self.keyboard_filter, self.cond1)],
+                self.CHECK_BOOKING: [MessageHandler(self.key_restaurant_filter, self.check_booking)],
+                self.PEOPLE: [MessageHandler(self.people_filter, self.people)],
+                self.TIME: [MessageHandler(Filters.text, self.time)],
+                self.FEED: [MessageHandler(Filters.text, self.feedback)]
+
+            },
+            fallbacks=[CommandHandler('help', self.help_),
+                       # CommandHandler('cancel', self.cancel)
+                       ],
+            allow_reentry=True
+        )
+
+        dp.add_handler(conv_handler)
+        updater.start_polling()
+        updater.idle()
+
 
 if __name__ == '__main__':
-	sr = SmartRestaurant()
-	sr.main()
-
-
-
-
-
+    print('STARTED')
+    sr = SmartRestaurant()
+    sr.main()
