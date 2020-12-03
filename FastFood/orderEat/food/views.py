@@ -21,6 +21,13 @@ authe = firebase.auth()
 database = firebase.database()
 #firebase.analytics()
 
+all_restaurants=database.child('restaurants').get()
+uids=[]
+rest_names=[]
+for restaurant in all_restaurants.each():
+    print(type(restaurant))
+    uids.append(restaurant.key())
+
 def signIn(request):
 
     return render(request, 'food/signIn.html')
@@ -36,7 +43,7 @@ def postsign(request):
         return render(request, "food/signIn.html", ctx)
     ctx={'email':email}
     session_id=user['idToken']
-    request.session['uid']=str('session_id') 
+    request.session['uid']=str('session_id')
     return render(request, 'food/index.html', ctx)
 
 def logout(request):
