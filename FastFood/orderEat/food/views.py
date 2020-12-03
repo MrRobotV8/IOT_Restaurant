@@ -23,7 +23,6 @@ database = firebase.database()
 
 all_restaurants=database.child('restaurants').get()
 uids=[]
-rest_names=[]
 for restaurant in all_restaurants.each():
     print(type(restaurant))
     uids.append(restaurant.key())
