@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib import auth
 import pyrebase
+import json
+from collections import OrderedDict
 
 #Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
 config = {
@@ -20,18 +22,25 @@ firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 #firebase.analytics()
-
+'''
 all_restaurants=database.child('restaurants').get()
-uids=[]
+#uids=[]
+#rest_names=[]
+rest_list = {}
+
 for restaurant in all_restaurants.each():
-    print(type(restaurant))
-    uids.append(restaurant.key())
+    #print(restaurant.val())
+    print('\n\n')
+    rest_list[restaurant.key()]=restaurant.val()['details']['name']
+    #rest_names.append((restaurant.val()['details']['name']))
+    #uids.append(restaurant.key())
 
+print(rest_list)
+'''
 def signIn(request):
+    return render(request, 'food/login.html')
 
-    return render(request, 'food/signIn.html')
-
-def postsign(request):
+def postsign(request): #homepage
     email=request.POST.get('email')
     passw = request.POST.get('pass')
     try:
@@ -40,9 +49,27 @@ def postsign(request):
         message = "invalid credentials"
         ctx = {'message': message}
         return render(request, "food/signIn.html", ctx)
-    ctx={'email':email}
-    session_id=user['idToken']
-    request.session['uid']=str('session_id')
+    session_id = user['idToken']
+    request.session['uid'] = str(session_id)
+    idtoken = request.session['uid']
+    a = authe.get_account_info(idtoken)
+    a = a['users']
+    a = a[0]
+    a = a['localId']
+    all_restaurants=database.child('restaurants').get()
+    uids=[]
+    rest_names=[]
+    for restaurant in all_restaurants.each():
+        print(type(restaurant))
+        rest_names.append((restaurant.val()['details']['name']))
+        uids.append(restaurant.key())
+
+    name = database.child('users').child(a).child('details').child('name').get().val()
+    ctx={'email':email,
+        'rnames': rest_names,
+        'user': name,
+    
+    }
     return render(request, 'food/index.html', ctx)
 
 def logout(request):
@@ -78,8 +105,52 @@ def postsignup(request):
 def panelSelector(request):
     return render(request, 'food/zero.html')
     
-def index(request):
-    return render(request, 'food/index.html')
+def restaurants(request):
+    
+    idtoken = request.session['uid']
+    a = authe.get_account_info(idtoken)
+    a = a['users']
+    a = a[0]
+    a = a['localId']
+    all_restaurants=database.child('restaurants').get()
+    rest_list = {}
+    description = "ristorante stellato"
+    for restaurant in all_restaurants.each():
+        rest_list[restaurant.key()]={'name': restaurant.val()['details']['name'], 'description': description}
+    print(rest_list)
 
-def pizza(request):
-    return render(request, 'food/pizza.html')
+    name = database.child('users').child(a).child('details').child('name').get().val()
+    ctx={'user': name,
+        'rest_list': rest_list,    
+    }
+    return render(request, 'food/restaurants.html', ctx)
+
+def index(request):
+    context={}
+    return render(request, 'food/index.html', context)
+
+def menu(request):
+    selected = request.POST.get('selection') # IS it possibile to do that without POST/GET method? like session or other things 
+    data = database.child('restaurants').child(selected).child('menu').get().val()
+    '''
+    The following code is always the same to retreive the user ifnromation, i think we should use the session to cover this issue
+    '''
+    idtoken = request.session['uid']
+    a = authe.get_account_info(idtoken)
+    a = a['users']
+    a = a[0]
+    a = a['localId']
+    name = database.child('users').child(a).child('details').child('name').get().val() # 
+
+    context = {'data':data,
+            'user':name}
+    return render(request, 'food/menu.html', context)
+
+def cart(request):
+    context = {}
+    return render(request, 'food/cart.html', context)
+
+def checkout(request):
+    context={}
+    return render(request, 'food/checkout.html', context)
+    

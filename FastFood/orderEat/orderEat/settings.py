@@ -120,3 +120,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+## Firebase ORM
+'''
+FIREBASE_ORM_CERTIFICATE = 'orderEat/ordereat-94887-firebase-adminsdk-5vv59-ce02953eed.json'
+FIREBASE_ORM_BUCKET_NAME = 'ordereat-94887.firebaseio.com'
+'''

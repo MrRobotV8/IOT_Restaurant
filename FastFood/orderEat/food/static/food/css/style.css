@@ -143,18 +143,6 @@ body {
     margin-top: 3px;
 }
 
-.home{
-    position: absolute;
-    top:0;
-    left:0;
-    width: 100%;
-    height: 100vh;
-    background-image: url("../img/home.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    z-index: -1;
-}
 
 .title{
     position: relative;

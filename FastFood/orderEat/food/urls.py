@@ -5,8 +5,9 @@ from . import views
 app_name = 'food'
 
 urlpatterns = [
-    path('pizza/', views.pizza, name='pizzas'),
-    path('index/', views.index, name='index'), #with the / it doesn't work properly
+    path('index/', views.index, name='index'),
+    path('restaurants/', views.restaurants, name='restaurants'),
+    path('menu/', views.menu, name='menu'),
     path('signin/', views.signIn, name='signin'),
     path('postsign/', views.postsign, name='postsign'),
     path('logout/', views.logout, name='log'),

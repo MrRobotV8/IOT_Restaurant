@@ -7,8 +7,11 @@
     <link rel="icon" type="image/png" href="https://img.icons8.com/nolan/64/restaurant.png">
     <title>{% block title %} {% endblock %} </title>
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="{%static 'food/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'food/css/bootstrap.css' %} ">
+    <link rel="stylesheet" href="{% static 'food/css/bootstrap-grid.css' %} ">
+    <link rel="stylesheet" href="{% static 'food/css/bootstrap-reboot.css' %} ">
+    <link rel="stylesheet" href="{% static 'food/css/bootstrap-utilities.css' %} ">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 
 </head>
 
@@ -22,13 +25,7 @@
     <ul class="navbar-nav">
       <li class="nav-item">
         <a class="nav-link" href="{% url 'food:index' %}">Home</a> 
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Pizzas</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Burgers</a>
-      </li>    
+      </li>   
     </ul>
       <nav class="navbar ml-auto" role="navigation">
       <div class="container">
@@ -47,7 +44,12 @@
     <!-- Popper JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <!-- Latest compiled JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="{% static 'food/js/main.js' %}"></script>
+    <script src="{% static 'food/js/bootstrap.js' %}"></script>
+    <script src="{% static 'rpanel/js/main.js' %}"></script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-app.js"></script>
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-analytics.js"></script>
   </body>
 </html>

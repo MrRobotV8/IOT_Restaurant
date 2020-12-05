@@ -5,6 +5,19 @@ Home
 {% endblock %}
 
 {% block content %}
-    <div class="home"></div>
-    <h1>Welcome {{ email }}</h1>
+<div class="container">
+    <h1>Welcome {{ email }}</h1> <hr>
+    <div class="container">
+        <h1>Here we will show something about our System</h1>
+    </div>
+    <div class="container">
+        <h1>Would you like to order something to eat?</h1>
+        <a class="btn btn-primary" href="{% url 'food:restaurants' %}"> See Restaurants List</a>
+
+    </div>    
+    
+</div>
+
+
+
 {% endblock%}

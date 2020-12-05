@@ -1,0 +1,31 @@
+{% extends 'food/base.html' %}
+
+{% block title %}
+Restaurants List
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Welcome {{ email }}</h1>
+
+    {% for key, value in rest_list.items %}
+        <div class="card">
+            <div class="card-body">
+            <h4 class="card-title" style='color:black'> {{ value.name }}</h4>
+            <p>{{ value.description }}</p>
+            <form action="{% url 'food:menu' %}" method="POST">
+                {% csrf_token %}
+            <button type="submit" class="btn btn-primary" value="{{ key }}" name="selection">
+                Order
+            </button>
+        </form>
+        </div>
+        </div>
+        <br>
+    {% endfor %}
+    
+</div>
+
+
+
+{% endblock%}
