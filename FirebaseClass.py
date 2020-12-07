@@ -9,18 +9,16 @@ import json
 class Firebase():
 	def __init__(self):
 		random.seed(200)
-		self.config = {
-			"apiKey": "AIzaSyDS-H19n86DdyKfqbVhr0-G3llU7vaZjx4",
-			"authDomain": "smart-restaurant-project.firebaseapp.com",
-			"databaseURL": "https://smart-restaurant-project.firebaseio.com",
-			"storageBucket": "smart-restaurant-project.appspot.com"
-			}
+		with open('config_dan.json') as f:
+			self.config = json.load(f)	
+
 		self.firebase = pyrebase.initialize_app(self.config)
 		
 		self.auth = self.firebase.auth()
 		self.today = datetime.date.today()
 		self.n_bookings = 10
 		self.hours = ['2030','1900','2200']
+
 		self.users = {
 			'Giannino':'G1xxxx',
 			'Pinetto':'P1xxxx',
@@ -66,15 +64,21 @@ class Firebase():
 
 		for key in data.keys():
 			date, hour, n_people, user = self.unhash(key)
-			if user == user_b:
-				print('You already have a booking on %s for this restaurant\n'%(date))
-				# Maybe ask if the user want to book
-				book_state = False
 			print('Attempting on booking with following info:')
-			print('day:', date)
-			print('hour:', hour)
-			print('N° of people:', n_people)
-			print('user:', user)
+			print('	day:', date_b)
+			print('	hour:', hour_b)
+			print('	N° of people:', n_people_b)
+			print('	user:', user_b)
+
+			if user == user_b:
+				if date != date_b:
+					print('You already have a booking on %s for this restaurant;'%(date))
+					
+					# Retrieve answer from Telegram
+					book_state = random.choice([True,False])
+					print('Do you want to make another reservation?',book_state,'\n')
+				else:
+					book_state = False
 			print('++++++++++')
 		return book_state
 
