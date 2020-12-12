@@ -4,6 +4,7 @@ from django.contrib import auth
 import pyrebase
 import json
 from collections import OrderedDict
+from pprint import pprint
 
 #Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
 config = {
@@ -48,7 +49,7 @@ def postsign(request): #homepage
     except:
         message = "invalid credentials"
         ctx = {'message': message}
-        return render(request, "food/signIn.html", ctx)
+        return render(request, "food/login.html", ctx)
     session_id = user['idToken']
     request.session['uid'] = str(session_id)
     idtoken = request.session['uid']
@@ -112,14 +113,30 @@ def restaurants(request):
     a = a['users']
     a = a[0]
     a = a['localId']
+
     all_restaurants=database.child('restaurants').get()
+    all_restaurants_val=database.child('restaurants').get().val()
+    chiavi = all_restaurants_val.keys()
+    tmp = [all_restaurants_val[x]['details']['name'] for x in chiavi]
+    print('TMP \n')
+    pprint(tmp)
+    #print('all_restaurant_val: \n')
+    #pprint(dict(all_restaurants_val))
+
+    #print('all_restaurant \n')
+    #print(type(all_restaurants))
+    #print('\n\n')
+
     rest_list = {}
     description = "ristorante stellato"
     for restaurant in all_restaurants.each():
+        #print('single restaurant '+ str(type(restaurant)))
+        #pprint(restaurant.val())
         rest_list[restaurant.key()]={'name': restaurant.val()['details']['name'], 'description': description}
-    print(rest_list)
+    #print(rest_list)
 
     name = database.child('users').child(a).child('details').child('name').get().val()
+
     ctx={'user': name,
         'rest_list': rest_list,    
     }

@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 import pytz
 import json
 import collections
+from pprint import pprint
 
 #Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
 config = {
@@ -44,89 +45,53 @@ def postSignIn(request):
     except:
         message = 'invalid credentials'
         return render(request, 'rpanel/signIn.html', {"messg":message})
-    print(user['idToken'])
+
     session_id = user['idToken']
     request.session['uid'] = str(session_id)
-    idtoken = request.session['uid']
-    print("id" +" " + ' : ' + str(idtoken))
-    a = authe.get_account_info(idtoken)
-    print(a)
-    a = a['users']
-    a = a[0]
-    a = a['localId']
-    name = database.child('restaurants').child(a).child('details').child('name').get().val()
-    timestamps = database.child("restaurants").child(a).child('menu').shallow().get().val()
-    name = database.child("restaurants").child(a).child('details').child('name').get().val()
-   
-    #Converting  the timestamps dictionary into a list   
-    lis_time=[]
-    for i in timestamps:
-        lis_time.append(i)
-    lis_time.sort(reverse=True) # sorted list by addition time
+    a = user['localId']
 
-        
+    restaurant = database.child('restaurants').child(a).get().val()
     
-    names=[]
-    descriptions=[]
-    prices=[]
-    sections=[]
-    dates=[]
+    details = dict(restaurant['details'])
+    try:
+        menu = dict(restaurant['menu'])
+        ctx = {
+        'menu' : menu , 
+        'details': details
+        }
+        print("TRY \n")
+        return render(request, 'rpanel/home.html', ctx)
+    except:
+        ctx = {
+            'details': details 
+        }
+        print("Excpet \n")
+        return render(request, 'rpanel/index.html', ctx)
     
-   # This is too slow! change approach --> use json 
-
-    for i in lis_time:
-        nam = database.child('restaurants').child(a).child('menu').child(i).child('name').get().val()
-        des = database.child('restaurants').child(a).child('menu').child(i).child('description').get().val()
-        pri = database.child('restaurants').child(a).child('menu').child(i).child('price').get().val()
-        sec = database.child('restaurants').child(a).child('menu').child(i).child('section').get().val()
-        i = float(i)
-        dat = datetime.fromtimestamp(i).strftime('%H:%M %d-%m-%Y')
-        dates.append(dat)
-        names.append(nam)
-        descriptions.append(des)
-        prices.append(pri)
-        sections.append(sec)
-
-    
-    obj = database.child('restaurants').child(a).child('menu').get()
-    print('obj: ' + str(obj))
-    print('type: ' + str(type(obj)))
-    for o in obj.each(): 
-        print(o.val())
- 
-    
-    comb_lis = zip(dates, names, descriptions, prices, sections)
-
-
-    ctx={
-        'name': name,
-        'comb_lis': comb_lis,
-        #'data': sorted(obj.val().items()),
-        'data': obj.val().items(),
-    }
-    print(ctx)
-    print(type(ctx))
-       
-        
-    
-
-    return render (request, 'rpanel/home.html', ctx)
 
 
 
 def logout(request):
-    auth.logout(request)
+    
     return render(request, 'rpanel/signIn.html')
 
 def signUp(request):
 
-    return render(request, 'rpanel/signUp.html')
+    return render(request, 'rpanel/register.html')
 
 def postSignUp(request):
     name = request.POST.get('name')
     email = request.POST.get('email')
     passw = request.POST.get('psw')
     re_passw = request.POST.get('psw-repeat')
+    description = request.POST.get('description')
+    phone = request.POST.get('phone')
+    address = request.POST.get('address')
+    seats = request.POST.get('seats')
+    tfor2 = request.POST.get('tfor2')
+    tfor4 = request.POST.get('tfor4')
+    tfor6 = request.POST.get('tfor6')
+    
     added=0
     if passw == re_passw:
         try:
@@ -134,19 +99,24 @@ def postSignUp(request):
             added=1
         except:
             msg = "Unable to create account, try again"  #weak password
-            return render(request, 'rpanel/signUp.html', {'messg': msg})
+            print('except 1')
+            return render(request, 'rpanel/register.html', {'messg': msg})
     else:
         msg = "The passwords don’t match, please try again" # password matching
-        return render(request, 'rpanel/signUp.html', {'msg': msg})
+        print('except 2')
+        return render(request, 'rpanel/register.html', {'msg': msg})
     uid = user['localId']
-    print("uid:" + uid)
-        
-    data = {"name":name, "status":"1"}
-    database.child("restaurants").child(uid).child("details").set(data) # idtoken
-    mssg = "you may now sign in"
+    if added == 1:
+        data = {"name":name, "status":"1", "address": address, "description": description, "seats":seats, 'phone':phone, 'tables':{'2':tfor2, '4':tfor4, '6':tfor6}}
+        database.child("restaurants").child(uid).child("details").set(data) # idtoken
+        print("here")
+    else:
+        msg = "Something goes wrong, try again"
+        print("except 3")
+        return render(request, 'rpanel/register.html', {'messg': msg})
     return render(request, 'rpanel/signIn.html')
-
-def menu(request):
+  
+def menu(request): 
     idtoken = request.session['uid']
     a = authe.get_account_info(idtoken)
     a = a['users']

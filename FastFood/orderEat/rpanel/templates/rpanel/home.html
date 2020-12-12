@@ -44,6 +44,7 @@
       </ul>
         <nav class="navbar ml-auto" role="navigation">
         <div class="container">
+            <span class="navbar-brand" style="color:white">{{ details.name }}</span>
         <a class="btn navbar-btn btn-primary navbar-right pull-right" type="button" href="{% url 'rpanel:log' %}">Logout</a>
         </div>
         </nav> 
@@ -115,7 +116,7 @@
                      <div class="tab-pane fade" id="starter" role="tabpanel" aria-labelledby="starter-tab">
                         <div class="row">
                            <div class="col-md-6">
-                              {% for key, value in data %}
+                              {% for key, value in menu.items %}
                                  {% if value.section == 'starter' %}
                               <div class="single_menu_list">
                                  <img src="{% static 'rpanel/img/gallery_08.jpg' %}" alt="Not Available">
@@ -131,7 +132,7 @@
                      <div class="tab-pane fade" id="pizza" role="tabpanel" aria-labelledby="pizza-tab">
                         <div class="row">
                            <div class="col-md-6">
-                              {% for key, value in data %}
+                              {% for key, value in menu.items %}
                                  {% if value.section == 'pizza' %}
                               <div class="single_menu_list">
                                  <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">
@@ -139,7 +140,7 @@
                                     <p> {{ value.description }}</p>
                                  
                               </div>
-                                 {% endif %}
+                                 {% endif %}    
                                  {% endfor %}
                            </div>
                         </div>
@@ -148,7 +149,7 @@
                      <div class="tab-pane fade" id="burger" role="tabpanel" aria-labelledby="burger-tab">
                         <div class="row">
                            <div class="col-md-6">
-                              {% for key, value in data %}
+                              {% for key, value in menu.items %}
                                  {% if value.section == 'burger' %}
                               <div class="single_menu_list">
                                  <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">
@@ -166,7 +167,7 @@
                      <div class="tab-pane fade" id="maindish" role="tabpanel" aria-labelledby="maindish-tab">
                         <div class="row">
                            <div class="col-md-6">
-                              {% for key, value in data %}
+                              {% for key, value in menu.items %}
                                  {% if value.section == 'maindish' %}
                               <div class="single_menu_list">
                                  <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">
@@ -184,7 +185,7 @@
                      <div class="tab-pane fade" id="dessert" role="tabpanel" aria-labelledby="dessert-tab">
                         <div class="row">
                            <div class="col-md-6">
-                              {% for key, value in data %}
+                              {% for key, value in menu.items %}
                                  {% if value.section == 'dessert' %}
                               <div class="single_menu_list">
                                  <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">
@@ -202,7 +203,7 @@
                      <div class="tab-pane fade" id="drink" role="tabpanel" aria-labelledby="drink-tab">
                         <div class="row">
                            <div class="col-md-6">
-                              {% for key, value in data %}
+                              {% for key, value in menu.items %}
                                  {% if value.section == 'drink' %}
                               <div class="single_menu_list">
                                  <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">

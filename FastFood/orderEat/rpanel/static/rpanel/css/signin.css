@@ -15,6 +15,10 @@ input[type=text], input[type=password] {
   border: 1px solid #ccc;
   box-sizing: border-box;
 }
+
+input[type=text]:focus, [type=password]:focus, [type=number]:focus, textarea:focus{
+  border: 2px solid #32AFE2;
+}
 a.button{
   background-color: #32AFE2;
   color: white;
@@ -41,21 +45,12 @@ button:hover {
 .cancelbtn {
   width: auto;
   padding: 10px 18px;
-  background-color: #f44336;
+  background-color: #a632f9;
 }
 
 .imgcontainer {
   text-align: center;
   margin: 24px 0 12px 0;
-}
-
-img.avatar {
-  width: 5%;
-  border-radius: 50%;
-}
-
-.container {
-  padding: 16px;
 }
 
 span.psw {
