@@ -3,8 +3,9 @@ import os
 import pyrebase
 from collections import OrderedDict
 from collections import Counter
-import numpy as np
+import datetime
 import json
+import random
 
 
 class Firebase:
@@ -49,9 +50,79 @@ class Firebase:
         """
         self.db.child(field).child(key).set(data2upload)
 
-    def most_frequent(self, List, n):
-        occurence_count = Counter(List)
-        return occurence_count.most_common(n)
+    def upload_booking(self, restaurant_key, hour, n_people, user_id):
+        # Check before uploading
+        prev_data = self.db.child('restaurants').child(restaurant_key).child('bookings').get().val()
+        hash_key = self.hash_creator(user_id, hour, n_people)
+        if prev_data is None:
+            # No other bookings for that restaurant
+            data = {hash_key: user_id}
+            self.db.child('restaurants').child(restaurant_key).child('bookings').set(data)
+
+        else:
+            # check if user has already bookings for that restaurant
+            is_table = self.check_table_availability(restaurant_key, hash_key)
+
+            if is_table:
+                data = dict(prev_data)
+                data.update({hash_key: user_id})
+                self.db.child('restaurants').child(restaurant_key).child('bookings').set(data)
+            else:
+                # TODO: no tables available; create new path
+                print('Your booking was not uploaded')
+
+    # def check_booking(self, data, booking_key):
+    #     book_state = True
+    #
+    #     # check the requested booking vs. the already present ones
+    #     date_b, hour_b, n_people_b, user_b = self.unhash(booking_key)
+    #
+    #     for key in data.keys():
+    #         date, hour, n_people, user = self.unhash(key)
+    #         if user == user_b:
+    #             print('You already have a booking on %s for this restaurant\n' % date)
+    #             # Maybe ask if the user want to book
+    #             book_state = False
+    #     return book_state
+
+    def check_table_availability(self, restaurant_key, hash_key):
+        tables = self.download(f'restaurants/{restaurant_key}/details/tables')
+        bookings = self.download(f'restaurants/{restaurant_key}/bookings')
+        bookings_keys = bookings.keys()
+        u_date, u_hour, u_people, u_user = self.unhash(hash_key)
+        for k in bookings_keys:
+            date, hour, people, user = self.unhash(k)
+            if hour == u_hour:
+                p = str(int(people))
+                if p in tables.keys():
+                    tables[p] = tables[p] - 1
+        p = str(int(u_people))
+        if tables[p] > 0:
+            return True
+        else:
+            return False
+
+    def get_available_tables(self, restaurant_key):
+        tables = self.download(f'restaurants/{restaurant_key}/details/tables')
+        bookings = self.download(f'restaurants/{restaurant_key}/bookings').keys()
+        for b in bookings:
+            date, hour, people, user = self.unhash(b)
+
+
+
+    def hash_creator(self, user, hour, n_people):
+        date = datetime.date.today()
+        string = str(date.strftime('%d%m%Y')) + str(hour)
+        string = string + str(n_people).zfill(2) + user
+        return string
+
+    def unhash(self, key):
+        date = "%s/%s/%s" % (key[:2], key[2:4], key[4:8])
+        hour = "%s" % (key[8:13])
+        n_people = key[13:15]
+        user = key[15:]
+        print(date, hour, n_people, user)
+        return date, hour, n_people, user
 
     # def specific_download(self, field, reference, n=1):
     #     activity_times = [
@@ -84,12 +155,4 @@ class Firebase:
 if __name__ == '__main__':
     fb = Firebase()
     fb.authenticate()
-    # fb.download('restaurants')
-    obj = {
-        'details': {
-            'name': 'GIGGI'
-        }
-    }
-    new_user = fb.db.child('users').push(obj)
-    print(new_user)
-    print(new_user.key)
+    fb.check_table_availability('WVqxkU2XXuQ988euCmqbcUvrQfp1', '1112202019:3004127081263')

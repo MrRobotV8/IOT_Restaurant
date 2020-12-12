@@ -1,3 +1,4 @@
+import traceback
 from telegram.ext import Updater, CommandHandler, MessageHandler
 from telegram.ext import ConversationHandler, Filters
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
@@ -7,6 +8,7 @@ from functions import *
 from BotFilters import *
 from RestaurantPublisher import Publisher
 from Firebase import Firebase
+
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -32,11 +34,11 @@ class SmartRestaurant:
         self.people_filter = PeopleFilter()
         self.key_restaurant_filter = KeyRestaurantFilter(self.restaurants_names)
 
-        n_states = 14
+        n_states = 16
         self.START, self.START_RETURN, self.COND_1, self.EMAIL, self.PASSWORD, \
-            self.PASSWORD_2, self.NICK, self.CHECK_BOOKING, \
-            self.ORDER, self.FEED, self.WAIT, self.CHECK, \
-            self.PEOPLE, self.TIME = range(n_states)
+        self.PASSWORD_2, self.NICK, self.SIGN_IN, self.CHECK_SIGN, self.CHECK_BOOKING, \
+        self.ORDER, self.FEED, self.WAIT, self.CHECK, \
+        self.PEOPLE, self.TIME = range(n_states)
         self.STATE = self.START
 
     def check_signin(self):
@@ -45,6 +47,7 @@ class SmartRestaurant:
             bot_ids = [u['details']['bot_id'] for u in users.values()]
             index = 0
             for b in bot_ids:
+                print(b)
                 if b == self.user_id:
                     self.fb_id = list(users.keys())[index]
                     return True
@@ -64,23 +67,38 @@ class SmartRestaurant:
     def start(self, bot, update):
         self.user_id = str(bot.message.from_user.id)
         if self.check_signin():
-            print(self.fb_id)
             message = 'Welcome back. Please select one of the following.'
             reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
             bot.message.reply_text(message, reply_markup=reply_markup)
             return self.COND_1
         else:
-            message = 'Welcome to the StartRestaurantBot. Please sign-up if you want to use our services. Insert you ' \
-                      'email '
-            bot.message.reply_text(message)
+            message = 'Welcome to the StartRestaurantBot. Create an account or insert credentials ' \
+                      'if you already have one'
+            reply_markup = ReplyKeyboardMarkup([['Create Account', 'Sign-In']], one_time_keyboard=True,
+                                               resize_keyboard=True)
+            bot.message.reply_text(message, reply_markup=reply_markup)
+            return self.CHECK_SIGN
+
+    def check_sign(self, bot, update):
+        if bot.message.text == 'Create Account':
+            self.new = True
+            bot.message.reply_text('Please Inert your email')
+            return self.EMAIL
+        else:
+            self.new = False
+            bot.message.reply_text('Insert your email')
             return self.EMAIL
 
     def email(self, bot, update):
         self.email = bot.message.text
-        message = 'Insert your Nickname'
-        bot.message.reply_text(message)
-
-        return self.NICK
+        if self.new:
+            message = 'Insert your Nickname'
+            bot.message.reply_text(message)
+            return self.NICK
+        else:
+            message = 'Insert your password'
+            bot.message.reply_text(message)
+            return self.PASSWORD
 
     def nickname(self, bot, update):
         self.nickname = bot.message.text
@@ -91,9 +109,22 @@ class SmartRestaurant:
 
     def password(self, bot, update):
         self.password = bot.message.text
-        message = 'Insert again'
-        bot.message.reply_text(message)
-        return self.PASSWORD_2
+        if self.new:
+            message = 'Insert again'
+            bot.message.reply_text(message)
+            return self.PASSWORD_2
+        else:
+            if self.sign_in():
+                message = 'Welcome back. Please select one of the following.'
+                reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
+                bot.message.reply_text(message, reply_markup=reply_markup)
+                return self.COND_1
+            else:
+                message = 'Wrong Credentials.'
+                reply_markup = ReplyKeyboardMarkup([['Create Account', 'Sing-In']], one_time_keyboard=True,
+                                                   resize_keyboard=True)
+                bot.message.reply_text(message, reply_markup=reply_markup)
+                return self.CHECK_SIGN
 
     def password_2(self, bot, update):
         if bot.message.text == self.password:
@@ -119,7 +150,15 @@ class SmartRestaurant:
         self.fb.db.child('users').child(uid).child('details').set(data)
 
     def sign_in(self):
-        pass
+        try:
+            user = self.fb.auth.sign_in_with_email_and_password(self.email, self.password)
+            self.fb_id = user['localId']
+            ref = self.fb.db.child('users').child(self.fb_id)
+            ref.update({'bot_id': self.user_id})
+            return True
+        except:
+            traceback.print_exc()
+            return False
 
     def cond1(self, bot, update):
         selection = bot.message.text
@@ -139,8 +178,8 @@ class SmartRestaurant:
                                                resize_keyboard=True)
             bot.message.reply_text(message, reply_markup=reply_markup)
             return self.FEED
-        elif selection == 'Wait':
-            return self.Wait
+        # elif selection == 'Wait':
+        #     return self.Wait
         elif selection == 'CheckOut':
             return self.CHECK
 
@@ -166,7 +205,14 @@ class SmartRestaurant:
 
         return self.TIME
 
-    def add_customer(self):
+    def time(self, bot, update):
+        self.time_selected = bot.message.text
+        self.post_booking()
+
+        return self.START_RETURN
+
+    def post_booking(self):
+        # add new customer to restaurant's customers
         obj = {
             'people': self.people,
             'time': self.time_selected,
@@ -176,13 +222,12 @@ class SmartRestaurant:
         obj_active = {
             'restaurant_key': self.restaurant_key,
         }
+
+        # add new booking to user's active
         self.fb.db.child('users').child(self.fb_id).child('active').set(obj_active)
 
-    def time(self, bot, update):
-        self.time_selected = bot.message.text
-        self.add_customer()
-
-        return self.START_RETURN
+        # add new booking KEY to restaurant's bookings
+        self.fb.upload_booking(self.restaurant_key, self.time_selected, self.people, self.user_id)
 
     def order(self, bot, update):
         message = 'Click on the link to begin the ordering phase'
@@ -223,6 +268,7 @@ class SmartRestaurant:
         conv_handler = ConversationHandler(
             entry_points=[CommandHandler('start', self.start)],
             states={
+                self.CHECK_SIGN: [MessageHandler(Filters.text, self.check_sign)],
                 self.START_RETURN: [MessageHandler(Filters.text, self.start_return)],
                 self.EMAIL: [MessageHandler(self.email_filter, self.email)],
                 self.PASSWORD: [MessageHandler(Filters.text, self.password)],
