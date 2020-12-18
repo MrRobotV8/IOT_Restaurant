@@ -155,4 +155,5 @@ class Firebase:
 if __name__ == '__main__':
     fb = Firebase()
     fb.authenticate()
-    fb.check_table_availability('WVqxkU2XXuQ988euCmqbcUvrQfp1', '1112202019:3004127081263')
+    d = fb.download('users')
+    print(d)

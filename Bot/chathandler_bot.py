@@ -241,8 +241,9 @@ class SmartRestaurant:
     def feedback(self, bot, update):
         feeling = bot.message.text
         feedback_key = self.search_user_restaurant()
-        topic = f"Temperature/{feedback_key}"
-        pub = Publisher(clientID=self.user_id, topic=topic)
+        # topic = f"Temperature/{feedback_key}"
+        topic = f'{feedback_key}'
+        pub = Publisher(clientID=self.user_id, topic=topic, broker='139.59.148.149')
         pub.publish(feeling)
 
         return self.START_RETURN
