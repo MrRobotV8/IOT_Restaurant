@@ -10,6 +10,7 @@ import pytz
 import json
 import collections
 from pprint import pprint
+import paho.mqtt.client as mqtt
 
 #Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
 config = {
@@ -114,6 +115,15 @@ def postSignUp(request):
         msg = "Something goes wrong, try again"
         print("except 3")
         return render(request, 'rpanel/register.html', {'messg': msg})
+    # TO DO: 
+    '''
+    mqtt 
+    pub = Publisher(clientID=self.user_id, topic=topic)
+    pub.publish(data)
+    # topic potrebbe essere chiaveid/tables 
+    '''
+    #mqtt.Client(self.client, clean_session=False)
+
     return render(request, 'rpanel/signIn.html')
   
 def menu(request): 

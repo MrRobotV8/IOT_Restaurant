@@ -158,7 +158,7 @@ def menu(request):
     a = a[0]
     a = a['localId']
     name = database.child('users').child(a).child('details').child('name').get().val() # 
-
+    request.session['rest_id'] = selected
     context = {'data':data,
             'user':name}
     return render(request, 'food/menu.html', context)
