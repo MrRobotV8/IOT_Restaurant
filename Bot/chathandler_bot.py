@@ -26,7 +26,7 @@ class SmartRestaurant:
         self.restaurants_mapper = {self.restaurants_names[i]: list(self.restaurants.keys())[i]
                                    for i in range(len(self.restaurants_names))}
 
-        self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Wait', 'CheckOut']]
+        self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Join', 'CheckOut']]
         self.time_booking = [['19:00', '19:30', '20:00'], ['20:30', '21:00', '21:30']]
 
         self.email_filter = EmailFilter()
@@ -37,7 +37,7 @@ class SmartRestaurant:
         n_states = 16
         self.START, self.START_RETURN, self.COND_1, self.EMAIL, self.PASSWORD, \
         self.PASSWORD_2, self.NICK, self.SIGN_IN, self.CHECK_SIGN, self.CHECK_BOOKING, \
-        self.ORDER, self.FEED, self.WAIT, self.CHECK, \
+        self.ORDER, self.FEED, self.JOIN, self.CHECK, \
         self.PEOPLE, self.TIME = range(n_states)
         self.STATE = self.START
 
@@ -149,6 +149,12 @@ class SmartRestaurant:
         }
         self.fb.db.child('users').child(uid).child('details').set(data)
 
+    def return_user(self, key, value):
+    	users = self.fb.download('users')
+    	for k,v in users.items():
+    		if v[key] == value:
+    			return {k: v}
+
     def sign_in(self):
         try:
             user = self.fb.auth.sign_in_with_email_and_password(self.email, self.password)
@@ -178,8 +184,10 @@ class SmartRestaurant:
                                                resize_keyboard=True)
             bot.message.reply_text(message, reply_markup=reply_markup)
             return self.FEED
-        # elif selection == 'Wait':
-        #     return self.Wait
+        elif selection == 'Join':
+        	message = 'You chose to JOIN a Table. Please insert the relative KEY'
+			bot.message.reply_text(message)
+            return self.JOIN
         elif selection == 'CheckOut':
             return self.CHECK
 
@@ -205,11 +213,41 @@ class SmartRestaurant:
 
         return self.TIME
 
+    def key_creation(self, user, restaurant):
+    	s = f'{user}_{restaurant}'
+    	return s
+
     def time(self, bot, update):
         self.time_selected = bot.message.text
+
+        u = self.return_user('bot_id', self.user_id)
+        nick = u['nickname']
+        self.table_key = self.key_creation(nick, self.restaurant_key)
+        message = 'This Key will be needed if anyone wants to join your table: Share it with your friends!'
+        bot.message.reply_text(message)
+        message = f'{user_key}'
+        bot.message.reply_text(message)
+
         self.post_booking()
 
         return self.START_RETURN
+
+    def check_table(self, key):
+    	users = self.fb.download('users')
+    	for k,v in users.items():
+    		if u['table_key'] == key:
+    			return v
+    	return None
+
+    def join(self, bot, update):
+    	sent_key = bot.message.text
+    	obj = self.check_table(sent_key)
+    	if obj:
+    		message = f"Joined {obj['name']}'s Table"
+    	else:
+    		message = f"KEY not FOUND"
+
+    	bot.message.reply_text(message)
 
     def post_booking(self):
         # add new customer to restaurant's customers
@@ -222,6 +260,8 @@ class SmartRestaurant:
         obj_active = {
             'restaurant_key': self.restaurant_key,
         }
+
+        self.fb.db.child('users').child(self.fb_id).update({'table_key': self.table_key})
 
         # add new booking to user's active
         self.fb.db.child('users').child(self.fb_id).child('active').set(obj_active)
@@ -240,10 +280,18 @@ class SmartRestaurant:
 
     def feedback(self, bot, update):
         feeling = bot.message.text
+        if feeling == 'Raise':
+        	feeling = 1
+    	elif feeling == 'Lower':
+    		feeling = -1
+    	else:
+    		feeling = 0
+
         feedback_key = self.search_user_restaurant()
         # topic = f"Temperature/{feedback_key}"
-        topic = f'{feedback_key}'
-        pub = Publisher(clientID=self.user_id, topic=topic, broker='139.59.148.149')
+        topic = f'v1/devices/me/telemetry'
+        payload = json.dumps({'temperature_feedback': })
+        pub = Publisher(clientID=self.user_id, topic=topic, broker='139.59.148.149', token='pulcinella_device')
         pub.publish(feeling)
 
         return self.START_RETURN

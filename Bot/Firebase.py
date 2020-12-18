@@ -155,5 +155,4 @@ class Firebase:
 if __name__ == '__main__':
     fb = Firebase()
     fb.authenticate()
-    d = fb.download('users')
-    print(d)
+    fb.db.child('users').child('Q4RbTEUSanS2k9ErfXaKFdoy6KQ2').child('details').update({'table_key': 'GIGI'})
