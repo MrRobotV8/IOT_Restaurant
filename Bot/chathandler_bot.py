@@ -66,18 +66,22 @@ class SmartRestaurant:
 
     def start(self, bot, update):
         self.user_id = str(bot.message.from_user.id)
-        if self.check_signin():
-            message = 'Welcome back. Please select one of the following.'
-            reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
-            bot.message.reply_text(message, reply_markup=reply_markup)
-            return self.COND_1
-        else:
-            message = 'Welcome to the StartRestaurantBot. Create an account or insert credentials ' \
-                      'if you already have one'
-            reply_markup = ReplyKeyboardMarkup([['Create Account', 'Sign-In']], one_time_keyboard=True,
-                                               resize_keyboard=True)
-            bot.message.reply_text(message, reply_markup=reply_markup)
-            return self.CHECK_SIGN
+        # if self.check_signin():
+        #     message = 'Welcome back. Please select one of the following.'
+        #     reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
+        #     bot.message.reply_text(message, reply_markup=reply_markup)
+        #     return self.COND_1
+        # else:
+        #     message = 'Welcome to the StartRestaurantBot. Create an account or insert credentials ' \
+        #               'if you already have one'
+        #     reply_markup = ReplyKeyboardMarkup([['Create Account', 'Sign-In']], one_time_keyboard=True,
+        #                                        resize_keyboard=True)
+        #     bot.message.reply_text(message, reply_markup=reply_markup)
+        #     return self.CHECK_SIGN
+        message = 'Welcome back. Please select one of the following.'
+        reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
+        bot.message.reply_text(message, reply_markup=reply_markup)
+        return self.COND_1
 
     def check_sign(self, bot, update):
         if bot.message.text == 'Create Account':
@@ -150,10 +154,13 @@ class SmartRestaurant:
         self.fb.db.child('users').child(uid).child('details').set(data)
 
     def return_user(self, key, value):
-    	users = self.fb.download('users')
-    	for k,v in users.items():
-    		if v[key] == value:
-    			return {k: v}
+        users = self.fb.download('users')
+        for k, v in users.items():
+            try:
+                if v['details'][key] == value:
+                    return v
+            except:
+                pass
 
     def sign_in(self):
         try:
@@ -185,21 +192,28 @@ class SmartRestaurant:
             bot.message.reply_text(message, reply_markup=reply_markup)
             return self.FEED
         elif selection == 'Join':
-        	message = 'You chose to JOIN a Table. Please insert the relative KEY'
-			bot.message.reply_text(message)
+            message = 'You chose to JOIN a Table. Please insert the relative KEY'
+            bot.message.reply_text(message)
             return self.JOIN
         elif selection == 'CheckOut':
             return self.CHECK
 
     def check_booking(self, bot, update):
         restaurant_chosen = bot.message.text
+        self.restaurant_name = restaurant_chosen
         restaurant_key = self.restaurants_mapper[restaurant_chosen]
-        restaurant_ids = self.restaurants[restaurant_key]['customers'].keys()
-        if self.user_id in list(restaurant_ids):
-            message = f'You already have a Booking at {restaurant_chosen}. Do you want to change it?'
-            reply_markup = ReplyKeyboardMarkup(['YES', 'NO'], one_time_keyboard=True, resize_keyboard=True)
-            bot.message.reply_text(message, reply_markup=reply_markup)
-        else:
+        try:
+            restaurant_ids = self.restaurants[restaurant_key]['customers'].keys()
+            if self.user_id in list(restaurant_ids):
+                message = f'You already have a Booking at {restaurant_chosen}. Do you want to change it?'
+                reply_markup = ReplyKeyboardMarkup(['YES', 'NO'], one_time_keyboard=True, resize_keyboard=True)
+                bot.message.reply_text(message, reply_markup=reply_markup)
+            else:
+                self.restaurant_key = restaurant_key
+                message = 'How many People'
+                bot.message.reply_text(message)
+                return self.PEOPLE
+        except:
             self.restaurant_key = restaurant_key
             message = 'How many People'
             bot.message.reply_text(message)
@@ -214,18 +228,21 @@ class SmartRestaurant:
         return self.TIME
 
     def key_creation(self, user, restaurant):
-    	s = f'{user}_{restaurant}'
-    	return s
+        s = f'{user}_{restaurant}'
+        return s
 
     def time(self, bot, update):
         self.time_selected = bot.message.text
 
         u = self.return_user('bot_id', self.user_id)
-        nick = u['nickname']
-        self.table_key = self.key_creation(nick, self.restaurant_key)
+        if 'nickname' in u['details'].keys():
+            nick = u['details']['nickname']
+        else:
+            nick = u['details']['name']
+        self.table_key = self.key_creation(nick, self.restaurant_name)
         message = 'This Key will be needed if anyone wants to join your table: Share it with your friends!'
         bot.message.reply_text(message)
-        message = f'{user_key}'
+        message = f'{self.table_key}'
         bot.message.reply_text(message)
 
         self.post_booking()
@@ -233,21 +250,24 @@ class SmartRestaurant:
         return self.START_RETURN
 
     def check_table(self, key):
-    	users = self.fb.download('users')
-    	for k,v in users.items():
-    		if u['table_key'] == key:
-    			return v
-    	return None
+        users = self.fb.download('users')
+        for k, v in users.items():
+            try:
+                if v['table_key'] == key:
+                    return v
+            except:
+                pass
+        return None
 
     def join(self, bot, update):
-    	sent_key = bot.message.text
-    	obj = self.check_table(sent_key)
-    	if obj:
-    		message = f"Joined {obj['name']}'s Table"
-    	else:
-    		message = f"KEY not FOUND"
+        sent_key = bot.message.text
+        obj = self.check_table(sent_key)
+        if obj:
+            message = f"Joined {obj['details']['name']}'s Table"
+        else:
+            message = f"KEY not FOUND"
 
-    	bot.message.reply_text(message)
+        bot.message.reply_text(message)
 
     def post_booking(self):
         # add new customer to restaurant's customers
@@ -281,18 +301,18 @@ class SmartRestaurant:
     def feedback(self, bot, update):
         feeling = bot.message.text
         if feeling == 'Raise':
-        	feeling = 1
-    	elif feeling == 'Lower':
-    		feeling = -1
-    	else:
-    		feeling = 0
+            feeling = 1
+        elif feeling == 'Lower':
+            feeling = -1
+        else:
+            feeling = 0
 
         feedback_key = self.search_user_restaurant()
         # topic = f"Temperature/{feedback_key}"
         topic = f'v1/devices/me/telemetry'
-        payload = json.dumps({'temperature_feedback': })
+        payload = json.dumps({'temperature_feedback': feeling})
         pub = Publisher(clientID=self.user_id, topic=topic, broker='139.59.148.149', token='pulcinella_device')
-        pub.publish(feeling)
+        pub.publish(payload)
 
         return self.START_RETURN
 
@@ -326,7 +346,8 @@ class SmartRestaurant:
                 self.CHECK_BOOKING: [MessageHandler(self.key_restaurant_filter, self.check_booking)],
                 self.PEOPLE: [MessageHandler(self.people_filter, self.people)],
                 self.TIME: [MessageHandler(Filters.text, self.time)],
-                self.FEED: [MessageHandler(Filters.text, self.feedback)]
+                self.FEED: [MessageHandler(Filters.text, self.feedback)],
+                self.JOIN: [MessageHandler(Filters.text, self.join)]
 
             },
             fallbacks=[CommandHandler('help', self.help_),

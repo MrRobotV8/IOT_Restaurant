@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Publisher:
-    def __init__(self, clientID, broker="mqtt.eclipse.org", port=1883, topic="", qos=1):
+    def __init__(self, clientID, broker="mqtt.eclipse.org", port=1883, topic="", qos=1, token=''):
         self.client = clientID
         self.broker = broker
         self.port = port
@@ -17,10 +17,7 @@ class Publisher:
         self.qos = qos
 
         self.mqtt_client = mqtt.Client(self.client, clean_session=False)
-        # self.mqtt_client.tls_set()
-        # self.mqtt_client.username_pw_set('pulcinella_device', password='')
-        # self.mqtt_client.connect(host=broker, port=port)
-        # self.mqtt_client.loop_forever()
+        self.mqtt_client.username_pw_set(token)
 
     def on_connect(self, mqtt_client, userdata, flags, rc):
         errMsg = ""
@@ -69,42 +66,3 @@ class Publisher:
         logger.info(f"Client {self.client} publishing {msg} on {self.topic}")
         self.mqtt_client.publish(self.topic, msg, self.qos)
 
-
-if __name__ == '__main__':
-    # import json
-    # p = Publisher(broker='139.59.148.149', clientID='0001', topic='v1/devices/me/telemetry', port=1883)
-    # d = {'temperature_feedback': 1}
-    # payload = json.dumps(d)
-    # print(payload)
-    # p.publish(payload)
-    token = 'pulcinella_device'
-    import paho.mqtt.client as paho  # mqtt library
-    import json
-    import time
-
-    broker = "139.59.148.149"  # host name
-    port = 1883  # data listening port
-
-
-    def on_publish(client, userdata, result):  # create function for callback
-        print("data published to thingsboard \n")
-        pass
-
-
-    client1 = paho.Client("control1")  # create client object
-    client1.on_publish = on_publish  # assign function to callback
-    client1.username_pw_set(token)  # access token from thingsboard device
-    client1.connect(broker, port, keepalive=60)  # establish connection
-
-    i = 1
-    while True:
-        # payload = "{"
-        # payload += "\"Humidity\":60,"
-        # payload += "\"Temperature\":25"
-        # payload += "}"
-        payload = {'temperature_feedback': i}
-        i = i*-1
-        payload = json.dumps(payload)
-        ret = client1.publish("v1/devices/me/telemetry", payload)  # topic- v1 / devices / me / telemetry
-        print(payload)
-        time.sleep(3)
