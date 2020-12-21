@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from . import views
 
@@ -7,7 +7,10 @@ app_name = 'food'
 urlpatterns = [
     path('index/', views.index, name='index'),
     path('restaurants/', views.restaurants, name='restaurants'),
-    path('menu/', views.menu, name='menu'),
+    #path('menu/', views.menu, name='menu'),
+    path('store/<str:pk>', views.store, name="store"),
+    path('cart/', views.cart, name="cart"),
+	path('product/<str:pk>/', views.product, name="product"),
     path('signin/', views.signIn, name='signin'),
     path('postsign/', views.postsign, name='postsign'),
     path('logout/', views.logout, name='log'),

@@ -13,9 +13,9 @@ Restaurants List
             <div class="card-body">
             <h4 class="card-title" style='color:black'> {{ value.name }}</h4>
             <p>{{ value.description }}</p>
-            <form action="{% url 'food:menu' %}" method="POST">
+            <form action="{% url 'food:store' key %}" method="POST">
                 {% csrf_token %}
-            <button type="submit" class="btn btn-primary" value="{{ key }}" name="selection">
+            <button type="submit" class="btn btn-primary"> <!-- </button>value="{{ key }}" name="selection"> -->
                 Order
             </button>
         </form>

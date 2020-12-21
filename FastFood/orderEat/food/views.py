@@ -1,10 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import auth
 import pyrebase
 import json
 from collections import OrderedDict
 from pprint import pprint
+from .models import*
+from datetime import date
 
 #Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
 config = {
@@ -23,21 +25,7 @@ firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 #firebase.analytics()
-'''
-all_restaurants=database.child('restaurants').get()
-#uids=[]
-#rest_names=[]
-rest_list = {}
 
-for restaurant in all_restaurants.each():
-    #print(restaurant.val())
-    print('\n\n')
-    rest_list[restaurant.key()]=restaurant.val()['details']['name']
-    #rest_names.append((restaurant.val()['details']['name']))
-    #uids.append(restaurant.key())
-
-print(rest_list)
-'''
 def signIn(request):
     return render(request, 'food/login.html')
 
@@ -50,22 +38,24 @@ def postsign(request): #homepage
         message = "invalid credentials"
         ctx = {'message': message}
         return render(request, "food/login.html", ctx)
+
+    email = user['email']
     session_id = user['idToken']
-    request.session['uid'] = str(session_id)
+    # Creating two session variable to identify the sessionid and the user's email 
+    request.session['uid'] = str(session_id) 
+    request.session['user'] = str(email) # Maybe it's better to use the localID to identify the user. 
     idtoken = request.session['uid']
-    a = authe.get_account_info(idtoken)
-    a = a['users']
-    a = a[0]
-    a = a['localId']
+    user_id = authe.get_account_info(idtoken)
+    user_id = user_id['users'][0]['localId']
+    print(request.session.items())
+    #TODO: REFACTOR THE FOLLOWING LINES USING THE DICTIONARY
     all_restaurants=database.child('restaurants').get()
-    uids=[]
     rest_names=[]
     for restaurant in all_restaurants.each():
         print(type(restaurant))
         rest_names.append((restaurant.val()['details']['name']))
-        uids.append(restaurant.key())
 
-    name = database.child('users').child(a).child('details').child('name').get().val()
+    name = database.child('users').child(user_id).child('details').child('name').get().val()
     ctx={'email':email,
         'rnames': rest_names,
         'user': name,
@@ -74,10 +64,20 @@ def postsign(request): #homepage
     return render(request, 'food/index.html', ctx)
 
 def logout(request):
-    auth.logout(request)
-    return render(request, 'food/signIn.html')
+    try:
+        del request.session['uid']
+        request.session.flush()
+        print(request.session.items())
+    except KeyError:
+        pass
+    message = "You are logged out!"
+    ctx = {
+        'message': message
+    }
+    return render(request, 'food/login.html', ctx)
 
 def signUp(request):
+    #TODO: UPGRADE SIGNUP TEMPLATE
     return render(request, 'food/signUp.html')
 
 def postsignup(request):
@@ -99,43 +99,31 @@ def postsignup(request):
         return render(request, 'food/signUp.html', {'msg': msg})
     if added==1:
         uid = user['localId']
+        #TODO: ADD EMAIL information
         data = {"name":name, "status":"1"}
         database.child("users").child(uid).child("details").set(data)
+        #TODO: aggiungere instance del customer sul django model Customer ? 
+
     return render(request, 'food/signIn.html')
 
+#TODO: REMOVE PANEL SELECTOR FROM HERE! ADD A NEW APP CALLED INDEX AS THE FIRST APP to launch or authentication app. 
 def panelSelector(request):
     return render(request, 'food/zero.html')
     
 def restaurants(request):
     
     idtoken = request.session['uid']
-    a = authe.get_account_info(idtoken)
-    a = a['users']
-    a = a[0]
-    a = a['localId']
+    user_id = authe.get_account_info(idtoken)
+    user_id = user_id['users'][0]['localId']
 
     all_restaurants=database.child('restaurants').get()
-    all_restaurants_val=database.child('restaurants').get().val()
-    chiavi = all_restaurants_val.keys()
-    tmp = [all_restaurants_val[x]['details']['name'] for x in chiavi]
-    print('TMP \n')
-    pprint(tmp)
-    #print('all_restaurant_val: \n')
-    #pprint(dict(all_restaurants_val))
-
-    #print('all_restaurant \n')
-    #print(type(all_restaurants))
-    #print('\n\n')
-
     rest_list = {}
     description = "ristorante stellato"
     for restaurant in all_restaurants.each():
-        #print('single restaurant '+ str(type(restaurant)))
-        #pprint(restaurant.val())
         rest_list[restaurant.key()]={'name': restaurant.val()['details']['name'], 'description': description}
-    #print(rest_list)
 
-    name = database.child('users').child(a).child('details').child('name').get().val()
+
+    name = database.child('users').child(user_id).child('details').child('name').get().val()
 
     ctx={'user': name,
         'rest_list': rest_list,    
@@ -143,31 +131,65 @@ def restaurants(request):
     return render(request, 'food/restaurants.html', ctx)
 
 def index(request):
+    #TODO: WORK ON TEMPLATE INDEX.HTML
     context={}
     return render(request, 'food/index.html', context)
 
-def menu(request):
-    selected = request.POST.get('selection') # IS it possibile to do that without POST/GET method? like session or other things 
-    data = database.child('restaurants').child(selected).child('menu').get().val()
-    '''
-    The following code is always the same to retreive the user ifnromation, i think we should use the session to cover this issue
-    '''
+def store(request, pk): #change name in menu
+    #selected = request.POST.get('selection') # IS it possibile to do that without POST/GET method? like session or other things 
+    data = database.child('restaurants').child(pk).child('menu').get().val()
+    #update variable session to idetify the restaurant selected
+    request.session['rest_id'] = str(pk)
     idtoken = request.session['uid']
-    a = authe.get_account_info(idtoken)
-    a = a['users']
-    a = a[0]
-    a = a['localId']
-    name = database.child('users').child(a).child('details').child('name').get().val() # 
-    request.session['rest_id'] = selected
-    context = {'data':data,
-            'user':name}
+    user_id = authe.get_account_info(idtoken)
+    user_id = user_id['users'][0]['localId']
+    name = database.child('users').child(user_id).child('details').child('name').get().val() # 
+    
+        
+    context = {
+        'data':data,
+        'user':name
+        }
+
     return render(request, 'food/menu.html', context)
 
-def cart(request):
-    context = {}
-    return render(request, 'food/cart.html', context)
-
-def checkout(request):
-    context={}
-    return render(request, 'food/checkout.html', context)
     
+def product(request, pk):
+    rest_id = request.session['rest_id']
+    idtoken = request.session['uid']
+    user_id = authe.get_account_info(idtoken)
+    user_id = user_id['users'][0]['localId']
+
+    if request.method == 'POST':
+        product = database.child('restaurants').child(rest_id).child('menu').child(pk).get()
+        quantity = request.POST.get('quantity')
+        #Get user account information (Telegram or Django):
+        basket_item = {str(product.key()):{'item':product.val()['name'], 'quantity': quantity}}
+        database.child('users').child(user_id).child('last_basket').update(basket_item)
+          
+        message = "You added " + str(quantity) + "of " + str(product.val()['name'])
+    
+    data = database.child('restaurants').child(rest_id).child('menu').get().val()
+    name = database.child('users').child(user_id).child('details').child('name').get().val() # 
+
+    context = {
+        'data':data,
+        'user':name, 
+        'message': message
+        }
+
+    return render(request, 'food/menu.html', context)
+        
+
+
+def cart(request):
+	try:
+		customer = request.user.customer
+	except:
+		device = request.COOKIES['device']
+		customer, created = Customer.objects.get_or_create(device=device)
+
+	order, created = Order.objects.get_or_create(customer=customer, complete=False)
+
+	context = {'order':order}
+	return render(request, 'food/cart.html', context)
