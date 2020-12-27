@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 import pytz
 import json
 import collections
+from pprint import pprint
+import paho.mqtt.client as mqtt
 
 #Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
 config = {
@@ -27,6 +29,7 @@ firebase = pyrebase.initialize_app(config)
 
 database = firebase.database()
 authe = firebase.auth()
+#storage = firebase.storage()
 
 categories = ['starter', 'pizza', 'burger', 'maindish', 'dessert', 'drinks']
 
@@ -44,89 +47,72 @@ def postSignIn(request):
     except:
         message = 'invalid credentials'
         return render(request, 'rpanel/signIn.html', {"messg":message})
-    print(user['idToken'])
+
     session_id = user['idToken']
     request.session['uid'] = str(session_id)
-    idtoken = request.session['uid']
-    print("id" +" " + ' : ' + str(idtoken))
-    a = authe.get_account_info(idtoken)
-    print(a)
-    a = a['users']
-    a = a[0]
-    a = a['localId']
-    name = database.child('restaurants').child(a).child('details').child('name').get().val()
-    timestamps = database.child("restaurants").child(a).child('menu').shallow().get().val()
-    name = database.child("restaurants").child(a).child('details').child('name').get().val()
-   
-    #Converting  the timestamps dictionary into a list   
-    lis_time=[]
-    for i in timestamps:
-        lis_time.append(i)
-    lis_time.sort(reverse=True) # sorted list by addition time
+    rest_id = user['localId']
 
-        
+    restaurant = database.child('restaurants').child(rest_id).get().val()
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
     
-    names=[]
-    descriptions=[]
-    prices=[]
-    sections=[]
-    dates=[]
-    
-   # This is too slow! change approach --> use json 
-
-    for i in lis_time:
-        nam = database.child('restaurants').child(a).child('menu').child(i).child('name').get().val()
-        des = database.child('restaurants').child(a).child('menu').child(i).child('description').get().val()
-        pri = database.child('restaurants').child(a).child('menu').child(i).child('price').get().val()
-        sec = database.child('restaurants').child(a).child('menu').child(i).child('section').get().val()
-        i = float(i)
-        dat = datetime.fromtimestamp(i).strftime('%H:%M %d-%m-%Y')
-        dates.append(dat)
-        names.append(nam)
-        descriptions.append(des)
-        prices.append(pri)
-        sections.append(sec)
-
-    
-    obj = database.child('restaurants').child(a).child('menu').get()
-    print('obj: ' + str(obj))
-    print('type: ' + str(type(obj)))
-    for o in obj.each(): 
-        print(o.val())
- 
-    
-    comb_lis = zip(dates, names, descriptions, prices, sections)
-
-
-    ctx={
+    try:
+        data = database.child('restaurants').child(rest_id).child('menu').get().val()
+        ctx = {
+        'data' : data, 
         'name': name,
-        'comb_lis': comb_lis,
-        #'data': sorted(obj.val().items()),
-        'data': obj.val().items(),
-    }
-    print(ctx)
-    print(type(ctx))
-       
-        
+        }
+        print("TRY \n")
+        return render(request, 'rpanel/home.html', ctx)
+    except:
+        ctx = {
+            'name': name,
+        }
+        print("Excpet \n")
+        return render(request, 'rpanel/index.html', ctx)
     
-
-    return render (request, 'rpanel/home.html', ctx)
 
 
 
 def logout(request):
-    auth.logout(request)
-    return render(request, 'rpanel/signIn.html')
+    
+    try:
+        idtoken = request.session['uid']
+        rest_id = authe.get_account_info(idtoken)
+        rest_id = rest_id['users'][0]['localId']
+        del request.session['uid']
+        request.session.flush()
+        #Azzera Basket 
+        print(request.session.items())
+    except KeyError:
+        pass
+    message = "You are logged out!"
+    ctx = {
+        'message': message
+    }
+    return render(request, 'rpanel/signIn.html', ctx)
+
 
 def signUp(request):
 
-    return render(request, 'rpanel/signUp.html')
+    return render(request, 'rpanel/register.html')
 
 def postSignUp(request):
     name = request.POST.get('name')
     email = request.POST.get('email')
     passw = request.POST.get('psw')
     re_passw = request.POST.get('psw-repeat')
+    description = request.POST.get('description')
+    phone = request.POST.get('phone')
+    address = request.POST.get('address')
+    seats = request.POST.get('seats')
+    tfor2 = request.POST.get('tfor2')
+    tfor4 = request.POST.get('tfor4')
+    tfor6 = request.POST.get('tfor6')
+    list_slot_l = request.POST.getlist('slot-l')
+    list_slot_d = request.POST.getlist('slot-d')
+
+    print(list_slot_d)
+    print(list_slot_l)
     added=0
     if passw == re_passw:
         try:
@@ -134,29 +120,43 @@ def postSignUp(request):
             added=1
         except:
             msg = "Unable to create account, try again"  #weak password
-            return render(request, 'rpanel/signUp.html', {'messg': msg})
+            print('except 1')
+            return render(request, 'rpanel/register.html', {'messg': msg})
     else:
         msg = "The passwords don’t match, please try again" # password matching
-        return render(request, 'rpanel/signUp.html', {'msg': msg})
+        print('except 2')
+        return render(request, 'rpanel/register.html', {'msg': msg})
     uid = user['localId']
-    print("uid:" + uid)
-        
-    data = {"name":name, "status":"1"}
-    database.child("restaurants").child(uid).child("details").set(data) # idtoken
-    mssg = "you may now sign in"
-    return render(request, 'rpanel/signIn.html')
+    if added == 1:
+        data = {"name":name, "status":"1", "address": address, "description": description, "seats":seats, 'phone':phone, 'tables':{'2':tfor2, '4':tfor4, '6':tfor6}, 'lunch-slot':list_slot_l, 'dinner-slot':list_slot_d}
+        database.child("restaurants").child(uid).child("details").set(data) # idtoken
+        print("here")
+    else:
+        msg = "Something goes wrong, try again"
+        print("except 3")
+        return render(request, 'rpanel/register.html', {'messg': msg})
+    # TO DO: 
+    '''
+    mqtt 
+    pub = Publisher(clientID=self.user_id, topic=topic)
+    pub.publish(data)
+    # topic potrebbe essere chiaveid/tables 
+    '''
+    #mqtt.Client(self.client, clean_session=False)
 
-def menu(request):
+    return render(request, 'rpanel/signIn.html')
+  
+def menu(request): 
     idtoken = request.session['uid']
-    a = authe.get_account_info(idtoken)
-    a = a['users']
-    a = a[0]
-    a = a['localId']
-    print(a)
-    return render(request, "rpanel/menu.html", {'uid': a})
+    rest_id = authe.get_account_info(idtoken)
+    rest_id = rest_id['users'][0]['localId']
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+
+    return render(request, "rpanel/menu.html", {'uid': rest_id, 'name':name})
 
 def postmenu(request):
     
+    #TODO: SEARCH FUNCTION
     if request.method == 'GET' and "csrfmiddlewaretoken" in request.GET:
         search = request.GET.get('search')
         search = search.lower()
@@ -182,12 +182,11 @@ def postmenu(request):
         item_description = request.POST.get('item-description')
         item_price = request.POST.get('item-price')
         item_availability = request.POST.get('available')
+        item_url = request.POST.get('url')
         
         idtoken = request.session['uid']
-        a = authe.get_account_info(idtoken)
-        a = a['users']
-        a = a[0]
-        a = a['localId']
+        rest_id = authe.get_account_info(idtoken)
+        rest_id = rest_id['users'][0]['localId']
         
         data = {
             'name': item_name,
@@ -195,23 +194,25 @@ def postmenu(request):
             'description' : item_description,
             'price': item_price,
             'available': item_availability, 
+            'url': item_url,
         }
 
-        database.child('restaurants').child(a).child('menu').child(millis).set(data)
-        name = database.child("restaurants").child(a).child('details').child('name').get().val()
-        return render(request, 'rpanel/home.html', {"name": name, "uid":a})
+
+        database.child('restaurants').child(rest_id).child('menu').child(millis).set(data)
+        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+        return render(request, 'rpanel/menu.html', {"name": name, "uid":rest_id, })
 
 
 def home(request):
     #We need to access the exact id in the database
     idtoken = request.session['uid']
-    a = authe.get_account_info(idtoken)
-    a = a['users']
-    a = a[0]
-    a = a['localId']
-
-    timestamps = database.child("restaurants").child(a).child('menu').shallow().get().val()
-    name = database.child("restaurants").child(a).child('details').child('name').get().val()
+    rest_id = authe.get_account_info(idtoken)
+    rest_id = rest_id['users'][0]['localId']
+   
+    #TODO: COPY MENU CODE FROM FOOD, IT IS SHORTER!!!! 
+    '''
+    timestamps = database.child("restaurants").child(rest_id).child('menu').shallow().get().val()
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
    
     #Converting  the timestamps dictionary into a list   
     lis_time=[]
@@ -225,14 +226,16 @@ def home(request):
     prices=[]
     sections=[]
     dates=[]
+    imgs=[]
     
    # This is too slow! change approach --> use json 
 
     for i in lis_time:
-        nam = database.child('restaurants').child(a).child('menu').child(i).child('name').get().val()
-        des = database.child('restaurants').child(a).child('menu').child(i).child('description').get().val()
-        pri = database.child('restaurants').child(a).child('menu').child(i).child('price').get().val()
-        sec = database.child('restaurants').child(a).child('menu').child(i).child('section').get().val()
+        nam = database.child('restaurants').child(rest_id).child('menu').child(i).child('name').get().val()
+        des = database.child('restaurants').child(rest_id).child('menu').child(i).child('description').get().val()
+        pri = database.child('restaurants').child(rest_id).child('menu').child(i).child('price').get().val()
+        sec = database.child('restaurants').child(rest_id).child('menu').child(i).child('section').get().val()
+        img = database.child('restaurants').child(rest_id).child('menu').child(i).child('url').get().val()
         i = float(i)
         dat = datetime.fromtimestamp(i).strftime('%H:%M %d-%m-%Y')
         dates.append(dat)
@@ -240,27 +243,31 @@ def home(request):
         descriptions.append(des)
         prices.append(pri)
         sections.append(sec)
+        imgs.append(img)
+
 
     
-    obj = database.child('restaurants').child(a).child('menu').get()
+    obj = database.child('restaurants').child(rest_id).child('menu').get()
     print('obj: ' + str(obj))
     print('type: ' + str(type(obj)))
     for o in obj.each(): 
         print(o.val())
  
     
-    comb_lis = zip(dates, names, descriptions, prices, sections)
+    comb_lis = zip(dates, names, descriptions, prices, sections, imgs)
+
+    '''
+    data = database.child('restaurants').child(rest_id).child('menu').get().val()
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
 
 
     ctx={
         'name': name,
-        'comb_lis': comb_lis,
+        #'comb_lis': comb_lis,
         #'data': sorted(obj.val().items()),
-        'data': obj.val().items(),
+        #'data': obj.val().items(),
+        'data': data,
     }
-    print(ctx)
-    print(type(ctx))
-       
         
     
 

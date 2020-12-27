@@ -1,20 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'rpanel/base.html' %}
+{% block title %}
+Restaurant Profile
+{% endblock %}
+
+{% block content %}
 <head>
-	<meta charset="utf-8">
-	<title>Restaurant Profile</title>
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="keywords" content="">
-	<meta name="description" content="">
-	{% load static%}
+	{% load static %}
 	<!-- stylesheet css -->
 	<link rel="stylesheet" href="{% static 'rpanel/profile/css/bootstrap.min.css' %}">
 	<link rel="stylesheet" href="{% static 'rpanel/profile/css/font-awesome.min.css' %}">
 	<link rel="stylesheet" href="{% static 'rpanel/profile/css/templatemo-blue.css' %}">
 </head>
-<body data-spy="scroll" data-target=".navbar-collapse">
-
 <!-- preloader section -->
 <div class="preloader">
 	<div class="sk-spinner sk-spinner-wordpress">
@@ -152,5 +148,4 @@
 <script src="{% static 'rpanel/profile/js/jquery.backstretch.min.js' %}"></script>
 <script src="{% static 'rpanel/profile/js/custom.js' %}"></script>
 
-</body>
-</html>
+{% endblock %}

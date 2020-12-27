@@ -1,0 +1,248 @@
+{% extends 'food/base.html' %}
+{% block title %}
+Menu
+{% endblock %}
+
+{% block content %}
+{% if message %}
+<div class="alert alert-success">
+   <strong>Success!</strong> {{ message }}.
+ </div>
+{% endif %}
+    <section class="menu_list">
+      <h2 class="title" style="text-align: center;">Menu Page </h2>
+        <div class="container-md">
+           <div class="row">
+              <div class="col-xl-12">
+                 <div class="section-title text-center mb-60">
+                    <p>Famous for their good food</p>
+                    <h4>Interactive Menu</h4>
+                 </div>
+              </div>
+           </div>
+           <div class="row">
+              <ul class="nav nav-tabs menu_tab" id="myTab" role="tablist">
+                 <li class="nav-item">
+                    <a class="nav-link" id="starter-tab" data-toggle="tab" href="#starter" role="tab" aria-selected="true">Starters</a>
+                 </li>
+                 <li class="nav-item">
+                    <a class="nav-link" id="pizza-tab" data-toggle="tab" href="#pizza" role="tab" aria-selected="false">Pizzas</a>
+                 </li>
+                 <li class="nav-item">
+                    <a class="nav-link" id="burger-tab" data-toggle="tab" href="#burger" role="tab" aria-selected="false">Burgers</a>
+                 </li>
+                 <li class="nav-item">
+                    <a class="nav-link" id="maindish-tab" data-toggle="tab" href="#maindish" role="tab" aria-selected="false">Main Dishes</a>
+                 </li>
+                 <li class="nav-item">
+                    <a class="nav-link" id="dessert-tab" data-toggle="tab" href="#dessert" role="tab" aria-selected="false">Desserts</a>
+                 </li>
+                 <li class="nav-item">
+                    <a class="nav-link" id="drink-tab" data-toggle="tab" href="#drink" role="tab" aria-selected="false">Drinks</a>
+                 </li>
+              </ul>
+           </div>
+           <div class="row">
+              <div class="tab-content col-xl-12" id="myTabContent">
+                 <div class="tab-pane fade" id="starter" role="tabpanel" aria-labelledby="starter-tab">
+                    <div class="row">
+                       <div class="col-md-6">
+                          {% for key, value in data.items %}
+                             {% if value.section == 'starter' %}
+                          <div class="single_menu_list">
+                             <img src="{{ value.url }}" alt="Not Available">
+                                <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
+
+                                <p> {{ value.description }}</p>
+                                <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
+                                 {% csrf_token %}
+                                 <input value={{value.price}} name="price" type="hidden">
+                                 <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+                                 <input class="btn btn-dark" type="submit" value="Add to Cart">
+                              </form>
+                          </div>
+                             {% endif %}
+                             {% endfor %}
+                       </div>
+                    </div>
+                 </div>
+
+                 <div class="tab-pane fade" id="pizza" role="tabpanel" aria-labelledby="pizza-tab">
+                    <div class="row">
+                       <div class="col-md-6">
+                          {% for key, value in data.items %}
+                             {% if value.section == 'pizza' %}
+                          <div class="single_menu_list">
+                             <img src="{{ value.url }}" alt="Not Available">
+                                <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
+                                <p> {{ value.description }}</p>
+                                <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
+                                 {% csrf_token %}
+                                 <input value={{value.price}} name="price" type="hidden">
+                                 <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+                                 <input class="btn btn-dark" type="submit" value="Add to Cart">
+                              </form>                             
+                          </div>
+                             {% endif %}
+                             {% endfor %}
+                       </div>
+                    </div>
+                 </div>
+
+                 <div class="tab-pane fade" id="burger" role="tabpanel" aria-labelledby="burger-tab">
+                    <div class="row">
+                       <div class="col-md-6">
+                          {% for key, value in data.items %}
+                             {% if value.section == 'burger' %}
+                             <div class="single_menu_list">
+                              <img src="{{ value.url }}" alt="Not Available">
+                                 <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
+                                 <p> {{ value.description }}</p>
+                                 <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
+                                  {% csrf_token %}
+                                  <input value={{value.price}} name="price" type="hidden">
+                                  <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+                                  <input class="btn btn-dark" type="submit" value="Add to Cart">
+                               </form>
+                              </div>
+                             {% endif %}
+                             {% endfor %}
+                          </div>
+                    </div>
+                 </div>
+
+                 <div class="tab-pane fade" id="maindish" role="tabpanel" aria-labelledby="maindish-tab">
+                    <div class="row">
+                       <div class="col-md-6">
+                          {% for key, value in data.items %}
+                             {% if value.section == 'maindish' %}
+                             <div class="single_menu_list">
+                              <img src="{{ value.url }}" alt="Not Available">
+                                 <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
+                                 <p> {{ value.description }}</p>
+                                 <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
+                                  {% csrf_token %}
+                                  <input value={{value.price}} name="price" type="hidden">
+                                  <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+                                  <input class="btn btn-dark" type="submit" value="Add to Cart">
+                               </form>
+                              
+                           </div>
+                             {% endif %}
+                             {% endfor %}
+                          </div>
+                    </div>
+                 </div>
+
+                 <div class="tab-pane fade" id="dessert" role="tabpanel" aria-labelledby="dessert-tab">
+                    <div class="row">
+                       <div class="col-md-6">
+                          {% for key, value in data.items %}
+                             {% if value.section == 'dessert' %}
+                             <div class="single_menu_list">
+                              <img src="{{ value.url }}" alt="Not Available">
+                                 <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
+                                 <p> {{ value.description }}</p>
+                                 <form method="POST" action="{% url 'food:addtocart' rest_id key%}">
+                                  {% csrf_token %}
+                                  <input value={{value.price}} name="price" type="hidden">
+                                  <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+                                  <input class="btn btn-dark" type="submit" value="Add to Cart">
+                               </form>
+                              
+                           </div>
+                             {% endif %}
+                             {% endfor %}
+                          </div>
+                    </div>
+                 </div>
+
+                 <div class="tab-pane fade" id="drink" role="tabpanel" aria-labelledby="drink-tab">
+                    <div class="row">
+                       <div class="col-md-6">
+                          {% for key, value in data.items %}
+                             {% if value.section == 'drink' %}
+                             <div class="single_menu_list">
+                              <img src="{{ value.url }}" alt="Not Available">
+                                 <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
+                                 <p> {{ value.description }}</p>
+                                 <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
+                                  {% csrf_token %}
+                                  <input value={{value.price}} name="price" type="hidden">
+                                  <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+                                  <span><input class="btn btn-dark"type="submit" value="Add to Cart"></span>
+                               </form>
+                              
+                           </div>
+                             {% endif %}
+                             {% endfor %}
+                          </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </section>
+     <section class="cart">
+        <div class="container-md">
+         {% if b_list != None %}
+         <div class="row">
+            <div class="col-lg-12">
+               <div class="box-element">
+      
+                  <a  class="btn btn-outline-dark" href="{% url 'food:store' rest_id %}">&#x2190; Continue Shopping</a>
+      
+                  <br>
+                  <br>
+                  <table class="table">
+                     <tr>
+                        <th><h5>Items: <strong>{% for key, value in b_list.items %}
+                        {% if key != 'total' %}
+                           <br>{{value.item}} x {{value.quantity}}<br>
+                           {%endif%}
+                           {%endfor%}
+                        </strong></h5></th>
+                        <th><h5>Total:<strong> €{{tot|floatformat:2}}</strong></h5></th>
+                        <th>
+                           
+                              <a  style="float:right; margin:5px;" class="btn btn-success" href="">Checkout</a>
+      
+                        </th>
+                     </tr>
+                  </table>
+      
+               </div>
+      
+               <br>
+               <div class="box-element">
+                  <div class="cart-row">
+                     <div style="flex:2"></div>
+                     <div style="flex:2"><strong>Item</strong></div>
+                     <div style="flex:1"><strong>Price</strong></div>
+                     <div style="flex:1"><strong>Quantity</strong></div>
+                     <div style="flex:1"><strong>Remove</strong></div>
+      
+                  </div>
+                  {% for key, value in b_list.items %}
+                  {% if key != 'total' %}
+                  <div class="cart-row">
+                     <div style="flex:2"><img class="row-image" src="{{value.url}}" alt="not Available"></div>
+                     <div style="flex:2"><p>{{value.item}}</p></div>
+                     <div style="flex:1"><p>${{value.price|floatformat:2}}</p></div>
+                     <div style="flex:1"><p>{{value.quantity}}</p></div>
+                     <div style="flex:1">
+                        <a class="btn btn-sm btn-danger" href="{% url 'food:removefromcart' rest_id key %}">Remove</a>
+                     </div>
+                  </div>
+                  {%endif%}
+                  {% endfor %}
+               </div>
+            </div>
+         </div>
+         {% else %}
+         <h1 style="text-align:center;padding: 100px">No Items in cart</h1>
+         {% endif %}
+        </div>
+     </section>
+
+{% endblock %}
