@@ -1,6 +1,6 @@
 {% extends 'food/base.html' %}
 {% block title %}
-menu
+Menu
 {% endblock %}
 
 {% block content %}
@@ -9,15 +9,14 @@ menu
    <strong>Success!</strong> {{ message }}.
  </div>
 {% endif %}
-    <h2 class="title">Menu Page </h2>
-
     <section class="menu_list">
+      <h2 class="title" style="text-align: center;">Menu Page </h2>
         <div class="container-md">
            <div class="row">
               <div class="col-xl-12">
                  <div class="section-title text-center mb-60">
-                    <p>Famous for your good food</p>
-                    <h4>Your menu</h4>
+                    <p>Famous for their good food</p>
+                    <h4>Interactive Menu</h4>
                  </div>
               </div>
            </div>
@@ -51,15 +50,16 @@ menu
                           {% for key, value in data.items %}
                              {% if value.section == 'starter' %}
                           <div class="single_menu_list">
-                             <img src="" alt="Not Available">
-                                <h4> {{ value.name }}</h4>
+                             <img src="{{ value.url }}" alt="Not Available">
+                                <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
+
                                 <p> {{ value.description }}</p>
-                                <form method="POST" action="{% url 'food:product' key %}">
+                                <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
                                  {% csrf_token %}
-                                 <input min="1" value=1 type="number" name="quantity">
+                                 <input value={{value.price}} name="price" type="hidden">
+                                 <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
                                  <input class="btn btn-dark" type="submit" value="Add to Cart">
                               </form>
-				                     <h4 style="display: inline-block; float: right"><strong>${{value.price}}</strong></h4>
                           </div>
                              {% endif %}
                              {% endfor %}
@@ -73,16 +73,15 @@ menu
                           {% for key, value in data.items %}
                              {% if value.section == 'pizza' %}
                           <div class="single_menu_list">
-                             <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">
-                                <h4> {{ value.name }}</h4>
+                             <img src="{{ value.url }}" alt="Not Available">
+                                <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
                                 <p> {{ value.description }}</p>
-                                <form method="POST" action="{% url 'food:product' key %}">
+                                <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
                                  {% csrf_token %}
-                                 <input min="1" value=1 type="number" name="quantity">
+                                 <input value={{value.price}} name="price" type="hidden">
+                                 <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
                                  <input class="btn btn-dark" type="submit" value="Add to Cart">
-                              </form>
-				                     <h4 style="display: inline-block; float: right"><strong>${{value.price}}</strong></h4>
-                             
+                              </form>                             
                           </div>
                              {% endif %}
                              {% endfor %}
@@ -96,17 +95,16 @@ menu
                           {% for key, value in data.items %}
                              {% if value.section == 'burger' %}
                              <div class="single_menu_list">
-                              <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">
-                                 <h4> {{ value.name }}</h4>
+                              <img src="{{ value.url }}" alt="Not Available">
+                                 <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
                                  <p> {{ value.description }}</p>
-                                 <form method="POST" action="{% url 'food:product' key %}">
+                                 <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
                                   {% csrf_token %}
-                                  <input min="1" value=1 type="number" name="quantity">
+                                  <input value={{value.price}} name="price" type="hidden">
+                                  <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
                                   <input class="btn btn-dark" type="submit" value="Add to Cart">
                                </form>
-                                  <h4 style="display: inline-block; float: right"><strong>${{value.price}}</strong></h4>
-                              
-                           </div>
+                              </div>
                              {% endif %}
                              {% endfor %}
                           </div>
@@ -119,15 +117,15 @@ menu
                           {% for key, value in data.items %}
                              {% if value.section == 'maindish' %}
                              <div class="single_menu_list">
-                              <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">
-                                 <h4> {{ value.name }}</h4>
+                              <img src="{{ value.url }}" alt="Not Available">
+                                 <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
                                  <p> {{ value.description }}</p>
-                                 <form method="POST" action="{% url 'food:product' key %}">
+                                 <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
                                   {% csrf_token %}
-                                  <input min="1" value=1 type="number" name="quantity">
+                                  <input value={{value.price}} name="price" type="hidden">
+                                  <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
                                   <input class="btn btn-dark" type="submit" value="Add to Cart">
                                </form>
-                                  <h4 style="display: inline-block; float: right"><strong>${{value.price}}</strong></h4>
                               
                            </div>
                              {% endif %}
@@ -142,15 +140,15 @@ menu
                           {% for key, value in data.items %}
                              {% if value.section == 'dessert' %}
                              <div class="single_menu_list">
-                              <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">
-                                 <h4> {{ value.name }}</h4>
+                              <img src="{{ value.url }}" alt="Not Available">
+                                 <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
                                  <p> {{ value.description }}</p>
-                                 <form method="POST" action="{% url 'food:product' key %}">
+                                 <form method="POST" action="{% url 'food:addtocart' rest_id key%}">
                                   {% csrf_token %}
-                                  <input min="1" value=1 type="number" name="quantity">
+                                  <input value={{value.price}} name="price" type="hidden">
+                                  <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
                                   <input class="btn btn-dark" type="submit" value="Add to Cart">
                                </form>
-                                  <h4 style="display: inline-block; float: right"><strong>${{value.price}}</strong></h4>
                               
                            </div>
                              {% endif %}
@@ -165,15 +163,15 @@ menu
                           {% for key, value in data.items %}
                              {% if value.section == 'drink' %}
                              <div class="single_menu_list">
-                              <img src="http://infinityflamesoft.com/html/restarunt-preview/assets/img/menu/menu-5.jpg" alt="Not Available">
-                                 <h4> {{ value.name }}</h4>
+                              <img src="{{ value.url }}" alt="Not Available">
+                                 <h4> {{ value.name }}<span><strong>{{ value.price }}€</strong></span></h4>
                                  <p> {{ value.description }}</p>
-                                 <form method="POST" action="{% url 'food:product' key %}">
+                                 <form method="POST" action="{% url 'food:addtocart' rest_id key %}">
                                   {% csrf_token %}
-                                  <input min="1" value=1 type="number" name="quantity">
-                                  <input class="btn btn-dark" type="submit" value="Add to Cart">
+                                  <input value={{value.price}} name="price" type="hidden">
+                                  <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+                                  <span><input class="btn btn-dark"type="submit" value="Add to Cart"></span>
                                </form>
-                                  <h4 style="display: inline-block; float: right"><strong>${{value.price}}</strong></h4>
                               
                            </div>
                              {% endif %}
@@ -183,15 +181,68 @@ menu
                  </div>
               </div>
            </div>
-           <div class="row">
-              <div class="col-xl-12 text-center">
-                 <div class="box_btn">
-                    <a href="">Edit Menu</a>
-                 </div>
-              </div>
-           </div>
         </div>
      </section>
-
+     <section class="cart">
+        <div class="container-md">
+         {% if b_list != None %}
+         <div class="row">
+            <div class="col-lg-12">
+               <div class="box-element">
+      
+                  <a  class="btn btn-outline-dark" href="{% url 'food:store' rest_id %}">&#x2190; Continue Shopping</a>
+      
+                  <br>
+                  <br>
+                  <table class="table">
+                     <tr>
+                        <th><h5>Items: <strong>{% for key, value in b_list.items %}
+                        {% if key != 'total' %}
+                           <br>{{value.item}} x {{value.quantity}}<br>
+                           {%endif%}
+                           {%endfor%}
+                        </strong></h5></th>
+                        <th><h5>Total:<strong> €{{tot|floatformat:2}}</strong></h5></th>
+                        <th>
+                           
+                              <a  style="float:right; margin:5px;" class="btn btn-success" href="">Checkout</a>
+      
+                        </th>
+                     </tr>
+                  </table>
+      
+               </div>
+      
+               <br>
+               <div class="box-element">
+                  <div class="cart-row">
+                     <div style="flex:2"></div>
+                     <div style="flex:2"><strong>Item</strong></div>
+                     <div style="flex:1"><strong>Price</strong></div>
+                     <div style="flex:1"><strong>Quantity</strong></div>
+                     <div style="flex:1"><strong>Remove</strong></div>
+      
+                  </div>
+                  {% for key, value in b_list.items %}
+                  {% if key != 'total' %}
+                  <div class="cart-row">
+                     <div style="flex:2"><img class="row-image" src="{{value.url}}" alt="not Available"></div>
+                     <div style="flex:2"><p>{{value.item}}</p></div>
+                     <div style="flex:1"><p>${{value.price|floatformat:2}}</p></div>
+                     <div style="flex:1"><p>{{value.quantity}}</p></div>
+                     <div style="flex:1">
+                        <a class="btn btn-sm btn-danger" href="{% url 'food:removefromcart' rest_id key %}">Remove</a>
+                     </div>
+                  </div>
+                  {%endif%}
+                  {% endfor %}
+               </div>
+            </div>
+         </div>
+         {% else %}
+         <h1 style="text-align:center;padding: 100px">No Items in cart</h1>
+         {% endif %}
+        </div>
+     </section>
 
 {% endblock %}

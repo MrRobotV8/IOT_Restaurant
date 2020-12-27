@@ -1,7 +1,7 @@
 {% if messg %}
 <script>
 
-    alert('{{ msg }}');
+    alert('{{ messg }}');
 
 </script>
 
@@ -106,6 +106,55 @@ button:hover {
   text-align: center;
   margin: 24px 0 12px 0;
 }
+
+.column {
+  float: left;
+  width: 50%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+
+input[type='checkbox']{
+  width: 20px !important;
+  height: 20px !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+  appearance:none;
+  outline: 2px solid lightblue;
+  box-shadow: none;
+}
+input[type='checkbox']:checked {
+  background-color: #a632f9;
+} 
+
+input[type='checkbox']:checked:after {
+  content: '\2713';
+  color: white;
+  position: absolute;}
+
+
+/* Responsive layout - makes a two column-layout instead of four columns */
+@media screen and (max-width: 900px) {
+ .column {
+ width: 50%;
+ }
+}
+
+
+/* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+ .column {
+ width: 100%;
+ }
+}
+
 </style>
 <body>
 
@@ -137,6 +186,29 @@ button:hover {
     <p><input type="text" placeholder="Number of table for 6" oninput="this.className = ''" name="tfor6"></p>
   </div>
   <div class="tab">
+    <label style="color:white;"><b>Openinh Hours: </b></label>
+    <div class=row>
+    <div class="column">
+    <p style="color:white"><strong>LUNCH</strong></p>
+    <p style="color:white"><input type="checkbox" name="slot-l" value="09-10" oninput="this.className = ''"> 09:00 - 10:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-l" value="10-11" oninput="this.className = ''"> 10:00 - 11:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-l" value="11-12" oninput="this.className = ''"> 11:00 - 12:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-l" value="12-13" oninput="this.className = ''"> 12:00 - 13:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-l" value="13-14" oninput="this.className = ''" checked> 13:00 - 14:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-l" value="14-15" oninput="this.className = ''"> 14:00 - 15:00</p>
+  </div>
+  <div class="column">
+    <p style="color:white"><strong>DINNER</strong></p>
+    <p style="color:white"><input type="checkbox" name="slot-d" value="18-19" oninput="this.className = ''"> 18:00 - 19:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-d" value="19-20" oninput="this.className = ''"> 19:00 - 20:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-d" value="20-21" oninput="this.className = ''" checked> 20:00 - 21:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-d" value="21-22" oninput="this.className = ''" checked> 21:00 - 22:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-d" value="22-23" oninput="this.className = ''"> 22:00 - 23:00</p>
+    <p style="color:white"><input type="checkbox" name="slot-d" value="23-00" oninput="this.className = ''"> 23:00 - 00:00</p>
+  </div>
+  </div>
+  </div>
+  <div class="tab">
     <label style="color:white;"><b>Login info: We already have your email</b></label>
     <p><input type="password" placeholder="Password" oninput="this.className = ''" name="psw" required></p>
     <p><input type="password" placeholder="Repeat Password" oninput="this.className = ''" name="psw-repeat" required ></p>
@@ -149,6 +221,7 @@ button:hover {
   </div>
   <!-- Circles which indicates the steps of the form: -->
   <div style="text-align:center;margin-top:40px;">
+    <span class="step"></span>
     <span class="step"></span>
     <span class="step"></span>
     <span class="step"></span>

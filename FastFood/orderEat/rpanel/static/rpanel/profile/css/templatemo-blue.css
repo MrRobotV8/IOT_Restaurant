@@ -5,6 +5,7 @@ html, body {
   overflow-x:hidden;
   position: relative;
   vertical-align: baseline;
+  background-color: #a632f956;
 }
 
 html {

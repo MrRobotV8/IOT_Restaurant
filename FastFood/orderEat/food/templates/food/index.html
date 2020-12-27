@@ -1,23 +1,109 @@
-{% extends 'food/base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width-device-width, initial-scale=1.0">
+      <link rel="icon" type="image/png" href="https://img.icons8.com/nolan/64/restaurant.png">
+      <title> Home {{ user }}</title>
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+      <link rel="stylesheet" type="text/css" href="{% static 'food/css/home.css' %}">
+      <link rel="stylesheet" type="text/css" href="{% static 'food/css/responsive.css' %}">
+      <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 
-{% block title %}
-Home
-{% endblock %}
 
-{% block content %}
-<div class="container">
-    <h1>Welcome {{ email }}</h1> <hr>
-    <div class="container">
-        <h1>Here we will show something about our System</h1>
-    </div>
-    <div class="container">
-        <h1>Would you like to order something to eat?</h1>
-        <a class="btn btn-primary" href="{% url 'food:restaurants' %}"> See Restaurants List</a>
+  </head>
 
-    </div>    
+  <body>
+      <!-- preloader section 
+      <div class="preloader">
+      <div class="sk-spinner sk-spinner-wordpress">
+      <span class="sk-inner-circle"></span>
+      </div>
+</div> -->
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    <!-- Brand/logo -->
+    <a class="navbar-brand" href="#">
+      <img src="https://img.icons8.com/nolan/40/restaurant.png" class="logo"/>
+    </a>
+    <!-- Links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'food:index' %}">Home</a> 
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'food:restaurants' %}">Restaurants</a> 
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Order</a> 
+      </li>     
+    </ul>
+    <nav class="navbar ml-auto" role="navigation"></nav>
+    <ul class=navbar-nav>
+      <li class="nav-item" style="color:white"><a class="nav-link" href="#">{{user}}</a></li>
+    </ul>
+      <a class="btn navbar-btn btn-danger navbar-right" type="button" href="{% url 'food:log' %}">Logout</a>
+      </nav> 
+  </nav> 
     
-</div>
+    <div id="banner" class="banner full-screen-mode parallax">
+      <div class="container" style="margin-left: 0%;">
+          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+              <div class="banner-static">
+                  <div class="banner-text">
+                      <div class="banner-cell">
+                          <h1>Order with us  <span class="typer" id="some-id" data-delay="200" data-delim=":" data-words="OrderEat" data-colors="#22E0FF"></span><span class="cursor" data-cursorDisplay="_" data-owner="some-id"></span></h1>
+                          <h2>A new way to order your food at home and at restaurant </h2>
+                          <p>Exploit the power of IOT, Telegram Bot and Web Platform to maximize your experience</p>
+                          <div class="btn">
+                              <a href="{% url 'food:restaurants' %}" class="btn" style="background-color:#231C65; color:white;">See Restaurants List</a>
+                          </div>
+                          <br>
+                          <div class="btn">
+                            <a href="#" class="btn" style="background-color:#231C65; color:white;">Contact Us</a>
+                        </div>                       
+                      </div>
+                      <!-- end banner-cell -->
+                  </div>
+                  <!-- end banner-text -->
+              </div>
+              <!-- end banner-static -->
+          </div>
+          <!-- end col -->
+      </div>
+      <!-- end container -->
+    </div>
+   <!-- end banner -->
+   <!-- Copyright -->
+   <div class="footer-copyright text-center py-3" style="background-color: #231C65; margin:0;">
+      <h3 style="color:white">Socials and Contacts</h3>
+       <hr>
+           <div class="text-center center-block">
+               <p class="txt-railway" style="color:white">- OrderEat -</p>
+               <br style="background-color: white;"/>
+                   <a href="https://www.facebook.com/"><i id="social-fb" class="fa fa-facebook-square fa-3x social"></i></a>
+                  <a href="https://twitter.com/"><i id="social-tw" class="fa fa-twitter-square fa-3x social"></i></a>
+                  <a href="https://plus.google.com/"><i id="social-gp" class="fa fa-google-plus-square fa-3x social"></i></a>
+                  <a href="mailto:#"><i id="social-em" class="fa fa-envelope-square fa-3x social"></i></a>
+   </div>
+       <hr>
+      <p style="color:white">© 2020 Copyright: <a href="#"> GSMR IOT </a></p> 
+   </div>
 
-
-
-{% endblock%}
+ 
+ <!-- Footer -->
+  </body>
+   <!-- jQuery library -->
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+   <!-- Popper JS -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+   <!-- Latest compiled JavaScript -->
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+   <script src="{% static 'food/js/main.js' %}"></script>
+   <!-- The core Firebase JS SDK is always required and must be listed first -->
+   <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-app.js"></script>
+   <!-- TODO: Add SDKs for Firebase products that you want to use
+   https://firebase.google.com/docs/web/setup#available-libraries -->
+   <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-analytics.js"></script>
+</html>

@@ -29,6 +29,7 @@ firebase = pyrebase.initialize_app(config)
 
 database = firebase.database()
 authe = firebase.auth()
+#storage = firebase.storage()
 
 categories = ['starter', 'pizza', 'burger', 'maindish', 'dessert', 'drinks']
 
@@ -49,22 +50,22 @@ def postSignIn(request):
 
     session_id = user['idToken']
     request.session['uid'] = str(session_id)
-    a = user['localId']
+    rest_id = user['localId']
 
-    restaurant = database.child('restaurants').child(a).get().val()
+    restaurant = database.child('restaurants').child(rest_id).get().val()
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
     
-    details = dict(restaurant['details'])
     try:
-        menu = dict(restaurant['menu'])
+        data = database.child('restaurants').child(rest_id).child('menu').get().val()
         ctx = {
-        'menu' : menu , 
-        'details': details
+        'data' : data, 
+        'name': name,
         }
         print("TRY \n")
         return render(request, 'rpanel/home.html', ctx)
     except:
         ctx = {
-            'details': details 
+            'name': name,
         }
         print("Excpet \n")
         return render(request, 'rpanel/index.html', ctx)
@@ -74,7 +75,22 @@ def postSignIn(request):
 
 def logout(request):
     
-    return render(request, 'rpanel/signIn.html')
+    try:
+        idtoken = request.session['uid']
+        rest_id = authe.get_account_info(idtoken)
+        rest_id = rest_id['users'][0]['localId']
+        del request.session['uid']
+        request.session.flush()
+        #Azzera Basket 
+        print(request.session.items())
+    except KeyError:
+        pass
+    message = "You are logged out!"
+    ctx = {
+        'message': message
+    }
+    return render(request, 'rpanel/signIn.html', ctx)
+
 
 def signUp(request):
 
@@ -92,7 +108,11 @@ def postSignUp(request):
     tfor2 = request.POST.get('tfor2')
     tfor4 = request.POST.get('tfor4')
     tfor6 = request.POST.get('tfor6')
-    
+    list_slot_l = request.POST.getlist('slot-l')
+    list_slot_d = request.POST.getlist('slot-d')
+
+    print(list_slot_d)
+    print(list_slot_l)
     added=0
     if passw == re_passw:
         try:
@@ -108,7 +128,7 @@ def postSignUp(request):
         return render(request, 'rpanel/register.html', {'msg': msg})
     uid = user['localId']
     if added == 1:
-        data = {"name":name, "status":"1", "address": address, "description": description, "seats":seats, 'phone':phone, 'tables':{'2':tfor2, '4':tfor4, '6':tfor6}}
+        data = {"name":name, "status":"1", "address": address, "description": description, "seats":seats, 'phone':phone, 'tables':{'2':tfor2, '4':tfor4, '6':tfor6}, 'lunch-slot':list_slot_l, 'dinner-slot':list_slot_d}
         database.child("restaurants").child(uid).child("details").set(data) # idtoken
         print("here")
     else:
@@ -128,15 +148,15 @@ def postSignUp(request):
   
 def menu(request): 
     idtoken = request.session['uid']
-    a = authe.get_account_info(idtoken)
-    a = a['users']
-    a = a[0]
-    a = a['localId']
-    print(a)
-    return render(request, "rpanel/menu.html", {'uid': a})
+    rest_id = authe.get_account_info(idtoken)
+    rest_id = rest_id['users'][0]['localId']
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+
+    return render(request, "rpanel/menu.html", {'uid': rest_id, 'name':name})
 
 def postmenu(request):
     
+    #TODO: SEARCH FUNCTION
     if request.method == 'GET' and "csrfmiddlewaretoken" in request.GET:
         search = request.GET.get('search')
         search = search.lower()
@@ -162,12 +182,11 @@ def postmenu(request):
         item_description = request.POST.get('item-description')
         item_price = request.POST.get('item-price')
         item_availability = request.POST.get('available')
+        item_url = request.POST.get('url')
         
         idtoken = request.session['uid']
-        a = authe.get_account_info(idtoken)
-        a = a['users']
-        a = a[0]
-        a = a['localId']
+        rest_id = authe.get_account_info(idtoken)
+        rest_id = rest_id['users'][0]['localId']
         
         data = {
             'name': item_name,
@@ -175,23 +194,25 @@ def postmenu(request):
             'description' : item_description,
             'price': item_price,
             'available': item_availability, 
+            'url': item_url,
         }
 
-        database.child('restaurants').child(a).child('menu').child(millis).set(data)
-        name = database.child("restaurants").child(a).child('details').child('name').get().val()
-        return render(request, 'rpanel/home.html', {"name": name, "uid":a})
+
+        database.child('restaurants').child(rest_id).child('menu').child(millis).set(data)
+        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+        return render(request, 'rpanel/menu.html', {"name": name, "uid":rest_id, })
 
 
 def home(request):
     #We need to access the exact id in the database
     idtoken = request.session['uid']
-    a = authe.get_account_info(idtoken)
-    a = a['users']
-    a = a[0]
-    a = a['localId']
-
-    timestamps = database.child("restaurants").child(a).child('menu').shallow().get().val()
-    name = database.child("restaurants").child(a).child('details').child('name').get().val()
+    rest_id = authe.get_account_info(idtoken)
+    rest_id = rest_id['users'][0]['localId']
+   
+    #TODO: COPY MENU CODE FROM FOOD, IT IS SHORTER!!!! 
+    '''
+    timestamps = database.child("restaurants").child(rest_id).child('menu').shallow().get().val()
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
    
     #Converting  the timestamps dictionary into a list   
     lis_time=[]
@@ -205,14 +226,16 @@ def home(request):
     prices=[]
     sections=[]
     dates=[]
+    imgs=[]
     
    # This is too slow! change approach --> use json 
 
     for i in lis_time:
-        nam = database.child('restaurants').child(a).child('menu').child(i).child('name').get().val()
-        des = database.child('restaurants').child(a).child('menu').child(i).child('description').get().val()
-        pri = database.child('restaurants').child(a).child('menu').child(i).child('price').get().val()
-        sec = database.child('restaurants').child(a).child('menu').child(i).child('section').get().val()
+        nam = database.child('restaurants').child(rest_id).child('menu').child(i).child('name').get().val()
+        des = database.child('restaurants').child(rest_id).child('menu').child(i).child('description').get().val()
+        pri = database.child('restaurants').child(rest_id).child('menu').child(i).child('price').get().val()
+        sec = database.child('restaurants').child(rest_id).child('menu').child(i).child('section').get().val()
+        img = database.child('restaurants').child(rest_id).child('menu').child(i).child('url').get().val()
         i = float(i)
         dat = datetime.fromtimestamp(i).strftime('%H:%M %d-%m-%Y')
         dates.append(dat)
@@ -220,27 +243,31 @@ def home(request):
         descriptions.append(des)
         prices.append(pri)
         sections.append(sec)
+        imgs.append(img)
+
 
     
-    obj = database.child('restaurants').child(a).child('menu').get()
+    obj = database.child('restaurants').child(rest_id).child('menu').get()
     print('obj: ' + str(obj))
     print('type: ' + str(type(obj)))
     for o in obj.each(): 
         print(o.val())
  
     
-    comb_lis = zip(dates, names, descriptions, prices, sections)
+    comb_lis = zip(dates, names, descriptions, prices, sections, imgs)
+
+    '''
+    data = database.child('restaurants').child(rest_id).child('menu').get().val()
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
 
 
     ctx={
         'name': name,
-        'comb_lis': comb_lis,
+        #'comb_lis': comb_lis,
         #'data': sorted(obj.val().items()),
-        'data': obj.val().items(),
+        #'data': obj.val().items(),
+        'data': data,
     }
-    print(ctx)
-    print(type(ctx))
-       
         
     
 

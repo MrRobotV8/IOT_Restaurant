@@ -26,6 +26,10 @@ authe = firebase.auth()
 database = firebase.database()
 #firebase.analytics()
 
+#TODO: REMOVE PANEL SELECTOR FROM HERE! ADD A NEW APP CALLED INDEX AS THE FIRST APP to launch or authentication app. 
+def panelSelector(request):
+    return render(request, 'food/zero.html')
+
 def signIn(request):
     return render(request, 'food/login.html')
 
@@ -59,22 +63,8 @@ def postsign(request): #homepage
     ctx={'email':email,
         'rnames': rest_names,
         'user': name,
-    
     }
     return render(request, 'food/index.html', ctx)
-
-def logout(request):
-    try:
-        del request.session['uid']
-        request.session.flush()
-        print(request.session.items())
-    except KeyError:
-        pass
-    message = "You are logged out!"
-    ctx = {
-        'message': message
-    }
-    return render(request, 'food/login.html', ctx)
 
 def signUp(request):
     #TODO: UPGRADE SIGNUP TEMPLATE
@@ -106,10 +96,37 @@ def postsignup(request):
 
     return render(request, 'food/signIn.html')
 
-#TODO: REMOVE PANEL SELECTOR FROM HERE! ADD A NEW APP CALLED INDEX AS THE FIRST APP to launch or authentication app. 
-def panelSelector(request):
-    return render(request, 'food/zero.html')
-    
+def logout(request):
+    idtoken = request.session['uid']
+    user_id = authe.get_account_info(idtoken)
+    user_id = user_id['users'][0]['localId']
+    try:
+        database.child('users').child(user_id).child('last_basket').remove()
+        del request.session['uid']
+        request.session.flush()
+        #Azzera Basket 
+        database.child('users').child(user_id).child('last_basket').remove()
+        print(request.session.items())
+    except KeyError:
+        pass
+    message = "You are logged out!"
+    ctx = {
+        'message': message
+    }
+    return render(request, 'food/login.html', ctx)
+ 
+
+def index(request):
+    #TODO: WORK ON TEMPLATE INDEX.HTML
+    idtoken = request.session['uid']
+    user_id = authe.get_account_info(idtoken)
+    user_id = user_id['users'][0]['localId']
+    name = database.child('users').child(user_id).child('details').child('name').get().val()
+    context={
+        'user':name,
+    }
+    return render(request, 'food/index.html', context)   
+
 def restaurants(request):
     
     idtoken = request.session['uid']
@@ -120,7 +137,7 @@ def restaurants(request):
     rest_list = {}
     description = "ristorante stellato"
     for restaurant in all_restaurants.each():
-        rest_list[restaurant.key()]={'name': restaurant.val()['details']['name'], 'description': description}
+        rest_list[restaurant.key()]={'name': restaurant.val()['details']['name'], 'description': restaurant.val()['details']['description']}
 
 
     name = database.child('users').child(user_id).child('details').child('name').get().val()
@@ -130,66 +147,118 @@ def restaurants(request):
     }
     return render(request, 'food/restaurants.html', ctx)
 
-def index(request):
-    #TODO: WORK ON TEMPLATE INDEX.HTML
-    context={}
-    return render(request, 'food/index.html', context)
 
-def store(request, pk): #change name in menu
+def store(request, rest_id): #change name in menu
+
     #selected = request.POST.get('selection') # IS it possibile to do that without POST/GET method? like session or other things 
-    data = database.child('restaurants').child(pk).child('menu').get().val()
-    #update variable session to idetify the restaurant selected
-    request.session['rest_id'] = str(pk)
+    data = database.child('restaurants').child(rest_id).child('menu').get().val()
+    #Update variable session to idetify the restaurant selected
+    request.session['rest_id'] = str(rest_id)
     idtoken = request.session['uid']
     user_id = authe.get_account_info(idtoken)
     user_id = user_id['users'][0]['localId']
+    rest_id = str(rest_id)
     name = database.child('users').child(user_id).child('details').child('name').get().val() # 
+
+    #Azzera Basket 
+    database.child('users').child(user_id).child('last_basket').remove()
     
-        
+         
     context = {
         'data':data,
-        'user':name
+        'user':name,
+        'rest_id': rest_id
         }
 
     return render(request, 'food/menu.html', context)
 
     
-def product(request, pk):
-    rest_id = request.session['rest_id']
+def add_to_cart(request, rest_id, pk):
+
+    #rest_id = request.session['rest_id']
     idtoken = request.session['uid']
     user_id = authe.get_account_info(idtoken)
     user_id = user_id['users'][0]['localId']
+    product = database.child('restaurants').child(rest_id).child('menu').child(pk).get()
+    quantity = request.POST.get('quantity')
+    price = request.POST.get('price')
+    increase = float(quantity) * float(price)
+    basket_item = {str(product.key()):{'item':product.val()['name'], 'quantity': quantity, 'price':price}}
+    database.child('users').child(user_id).child('last_basket').update(basket_item)
+    total = database.child('users').child(user_id).child('last_basket').child('total').get().val()
 
-    if request.method == 'POST':
-        product = database.child('restaurants').child(rest_id).child('menu').child(pk).get()
-        quantity = request.POST.get('quantity')
-        #Get user account information (Telegram or Django):
-        basket_item = {str(product.key()):{'item':product.val()['name'], 'quantity': quantity}}
-        database.child('users').child(user_id).child('last_basket').update(basket_item)
-          
-        message = "You added " + str(quantity) + "of " + str(product.val()['name'])
+    # TODO: FOR FUNCTIONALITY TO COUNT THE TOTAL_AMOUNT
+
+    
+    if total is None:
+        database.child('users').child(user_id).child('last_basket').child('total').set(increase)
+    else:
+        actual = database.child('users').child(user_id).child('last_basket').child('total').get().val()
+        total = float(actual) + increase
+        database.child('users').child(user_id).child('last_basket').child('total').set(total)
+        
+
+
+
+    message = "You added " + str(quantity) + " of " + str(product.val()['name'])
     
     data = database.child('restaurants').child(rest_id).child('menu').get().val()
     name = database.child('users').child(user_id).child('details').child('name').get().val() # 
-
+    basket_list = dict(database.child('users').child(user_id).child('last_basket').get().val())
+    total = database.child('users').child(user_id).child('last_basket').child('total').get().val()
+    pprint(basket_list)
     context = {
         'data':data,
+        'b_list': basket_list,
         'user':name, 
-        'message': message
+        'message': message,
+        'rest_id': rest_id,
+        'tot':total
         }
 
     return render(request, 'food/menu.html', context)
         
+def remove_from_cart(request, rest_id, pk):
+    idtoken = request.session['uid']
+    rest_id = str(rest_id)
+    user_id = authe.get_account_info(idtoken)
+    user_id = user_id['users'][0]['localId']
+
+    try:
+        to_delete = database.child('users').child(user_id).child('last_basket').child(pk).get().val()
+        print("To delete \n\n")
+        print(to_delete)
+        database.child('users').child(user_id).child('last_basket').child(pk).remove()
+        message = "You deleted all the " + str(to_delete['item'])
+
+    except:
+        message = "You have tried to delete a product: the item is already deleted from your cart, check in the bottom cart section"
+    
+    
+    data = database.child('restaurants').child(rest_id).child('menu').get().val()
+    name = database.child('users').child(user_id).child('details').child('name').get().val()
+    
+    total = database.child('users').child(user_id).child('last_basket').child('total').get().val() # 
+    basket_list = database.child('users').child(user_id).child('last_basket').get()
 
 
-def cart(request):
-	try:
-		customer = request.user.customer
-	except:
-		device = request.COOKIES['device']
-		customer, created = Customer.objects.get_or_create(device=device)
+    #total = sum([value for value in basket_list.values()['price']])
+    print (total)
+        
 
-	order, created = Order.objects.get_or_create(customer=customer, complete=False)
 
-	context = {'order':order}
-	return render(request, 'food/cart.html', context)
+    context = {
+        'data':data,
+        'b_list': basket_list,
+        'user':name, 
+        'message': message,
+        'rest_id': rest_id,
+        'tot':total
+    }
+
+    return render(request, 'food/menu.html', context)
+
+
+
+
+#TODO: DEFINE ORDER VIEW

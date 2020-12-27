@@ -6,7 +6,9 @@ Restaurants List
 
 {% block content %}
 <div class="container">
-    <h1>Welcome {{ email }}</h1>
+    <h1 style="text-align: center;">Dear {{user}},</h1>
+    <h2 style="text-align: center;">select one of the following restaurants to see their menu and make an order</h2>
+    <h3 style="text-align: center;">If you would like to make a reservation --> Use our <b>Telegram Bot!</b></h2>
 
     {% for key, value in rest_list.items %}
         <div class="card">
