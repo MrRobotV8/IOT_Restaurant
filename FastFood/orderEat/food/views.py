@@ -183,12 +183,13 @@ def add_to_cart(request, rest_id, pk):
     quantity = request.POST.get('quantity')
     price = request.POST.get('price')
     increase = float(quantity) * float(price)
-    basket_item = {str(product.key()):{'item':product.val()['name'], 'quantity': quantity, 'price':price}}
+    basket_item = {str(product.key()):{'item':product.val()['name'], 'quantity': quantity, 'price':price, 'url':product.val()['url']}}
     database.child('users').child(user_id).child('last_basket').update(basket_item)
+    basket_items = database.child('users').child(user_id).child('last_basket').get()
+    
     total = database.child('users').child(user_id).child('last_basket').child('total').get().val()
 
-    # TODO: FOR FUNCTIONALITY TO COUNT THE TOTAL_AMOUNT
-
+    # TODO: FOR FUNCTIONALITY TO COUNT THE TOTAL_AMOUNt
     
     if total is None:
         database.child('users').child(user_id).child('last_basket').child('total').set(increase)
@@ -196,8 +197,7 @@ def add_to_cart(request, rest_id, pk):
         actual = database.child('users').child(user_id).child('last_basket').child('total').get().val()
         total = float(actual) + increase
         database.child('users').child(user_id).child('last_basket').child('total').set(total)
-        
-
+    
 
 
     message = "You added " + str(quantity) + " of " + str(product.val()['name'])
@@ -225,10 +225,16 @@ def remove_from_cart(request, rest_id, pk):
     user_id = user_id['users'][0]['localId']
 
     try:
+        actual = database.child('users').child(user_id).child('last_basket').child('total').get().val()
         to_delete = database.child('users').child(user_id).child('last_basket').child(pk).get().val()
         print("To delete \n\n")
         print(to_delete)
+        price = float(database.child('users').child(user_id).child('last_basket').child(pk).child('price').get().val())
+        quantity = float(database.child('users').child(user_id).child('last_basket').child(pk).child('quantity').get().val())
+        decrease = price * quantity
         database.child('users').child(user_id).child('last_basket').child(pk).remove()
+        total = float(actual) - decrease
+        database.child('users').child(user_id).child('last_basket').child('total').set(total)
         message = "You deleted all the " + str(to_delete['item'])
 
     except:
@@ -239,7 +245,7 @@ def remove_from_cart(request, rest_id, pk):
     name = database.child('users').child(user_id).child('details').child('name').get().val()
     
     total = database.child('users').child(user_id).child('last_basket').child('total').get().val() # 
-    basket_list = database.child('users').child(user_id).child('last_basket').get()
+    basket_list = dict(database.child('users').child(user_id).child('last_basket').get().val())
 
 
     #total = sum([value for value in basket_list.values()['price']])

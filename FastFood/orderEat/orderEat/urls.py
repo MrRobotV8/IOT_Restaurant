@@ -22,5 +22,6 @@ urlpatterns = [
     path('', views.panelSelector, name='panelSelector'),
     path('food/', include('food.urls', namespace='food')),
     path('rpanel/', include('rpanel.urls', namespace='rpanel')),
+    path('tg-menu/', include('menu_tg.urls', namespace='menu_tg')),
 
     ]

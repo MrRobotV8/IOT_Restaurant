@@ -280,13 +280,17 @@ Menu Section
 	margin-bottom: 20px;
 	background-color:#75b2e4;
 	border-radius: 5px;
-	box-shadow: 5px 5px 5px #dedede;
+   box-shadow: 5px 5px 5px #dedede;
+   overflow: hidden;
 	
 }
 
-
+.single_menu_list form{
+   text-align: right;
+}
 .single_menu_list img {
-	max-width: 30%;
+   max-width: 30%;
+   max-height: 20%;
 	float: left;
 	margin:5px;
 	border: 1px solid #ddd;

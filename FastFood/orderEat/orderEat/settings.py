@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'food',     # this could be named cpanel as customer panel 
     'rpanel',
+    'menu_tg',
 ]
 
 MIDDLEWARE = [
