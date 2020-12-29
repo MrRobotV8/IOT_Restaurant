@@ -1,0 +1,62 @@
+{% if messg %}
+<script>
+
+    alert('{{ message }}');
+
+</script>
+
+{% endif %}
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="icon" type="image/png" href="https://img.icons8.com/nolan/64/restaurant.png">
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'rpanel/css/signin.css' %}">
+<style>
+  #logForm {
+  background-color: #231C65;
+  margin: 100px auto;
+  font-family: Raleway;
+  padding:40px;
+  width:30%;
+}
+</style>
+</head>
+
+<body>
+
+<form id="logForm" action="{% url 'rpanel:Postsignin' %}" method="POST">
+    {% csrf_token %}
+ 
+    
+    <div class="imgcontainer">
+      <img src="{% static 'rpanel/img/icons8-ristorante-100.png'%}" alt="icon" class="icon">
+    </div>
+    <h1 style="text-align: center; color: white;">Login</h1>
+    <hr style="border: 1px solid #32AFE2;">
+  
+    <label for="email" style="color:white;" >Email:</label>
+    <input type="text" placeholder="Enter Username" name="email" required>
+
+    <label for="pass" style="color:white;">Password:</label>
+    <input type="password" placeholder="Enter Password" name="pass" required>
+        
+    <button type="submit">Login</button>
+    <button><a class="button" href="{% url 'rpanel:Signup' %}" role="button">Sign Up</a></button>  
+
+    <button type="button" class="cancelbtn"><a href="javascript:history.go(-1)" 
+      onMouseOver="self.status=document.referrer;return true" style="color: white;">Cancel</a></button>
+    <span class="psw" style="color:white;">Forgot <a href="#">password?</a></span>
+</form>
+ <!-- jQuery library -->
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+ <!-- Popper JS -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+ <!-- Latest compiled JavaScript -->
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+ <script src="{% static 'rpanel/js/main.js' %}"></script>
+</body>
+</html>

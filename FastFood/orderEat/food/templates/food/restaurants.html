@@ -1,0 +1,33 @@
+{% extends 'food/base.html' %}
+
+{% block title %}
+Restaurants List
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style="text-align: center;">Dear {{user}},</h1>
+    <h2 style="text-align: center;">select one of the following restaurants to see their menu and make an order</h2>
+    <h3 style="text-align: center;">If you would like to make a reservation --> Use our <b>Telegram Bot!</b></h2>
+
+    {% for key, value in rest_list.items %}
+        <div class="card">
+            <div class="card-body">
+            <h4 class="card-title" style='color:black'> {{ value.name }}</h4>
+            <p>{{ value.description }}</p>
+            <form action="{% url 'food:store' key %}" method="POST">
+                {% csrf_token %}
+            <button type="submit" class="btn btn-primary"> <!-- </button>value="{{ key }}" name="selection"> -->
+                Order
+            </button>
+        </form>
+        </div>
+        </div>
+        <br>
+    {% endfor %}
+    
+</div>
+
+
+
+{% endblock%}
