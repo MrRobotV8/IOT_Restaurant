@@ -4,6 +4,7 @@ from telegram.ext import ConversationHandler, Filters
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import logging
 import json
+import os
 from functions import *
 from BotFilters import *
 from RestaurantPublisher import Publisher
@@ -16,6 +17,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+PORT = int(os.environ.get('PORT', '8443'))
 
 class SmartRestaurant:
     def __init__(self):
@@ -42,19 +44,15 @@ class SmartRestaurant:
         self.STATE = self.START
 
     def check_signin(self):
-        try:
-            users = self.fb.download('users')
-            bot_ids = [u['details']['bot_id'] for u in users.values()]
-            index = 0
-            for b in bot_ids:
-                print(b)
-                if b == self.user_id:
-                    self.fb_id = list(users.keys())[index]
+        users = self.fb.download('users')
+        for k, v in users.items():
+            try:
+                if v['details']['bot_id'] == self.user_id:
+                    self.fb_id = k
                     return True
-                index = index + 1
-            else:
-                return False
-        except:
+            except:
+                pass
+        else:
             return False
 
     def start_return(self, bot, update):
@@ -66,22 +64,22 @@ class SmartRestaurant:
 
     def start(self, bot, update):
         self.user_id = str(bot.message.from_user.id)
-        # if self.check_signin():
-        #     message = 'Welcome back. Please select one of the following.'
-        #     reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
-        #     bot.message.reply_text(message, reply_markup=reply_markup)
-        #     return self.COND_1
-        # else:
-        #     message = 'Welcome to the StartRestaurantBot. Create an account or insert credentials ' \
-        #               'if you already have one'
-        #     reply_markup = ReplyKeyboardMarkup([['Create Account', 'Sign-In']], one_time_keyboard=True,
-        #                                        resize_keyboard=True)
-        #     bot.message.reply_text(message, reply_markup=reply_markup)
-        #     return self.CHECK_SIGN
-        message = 'Welcome back. Please select one of the following.'
-        reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
-        bot.message.reply_text(message, reply_markup=reply_markup)
-        return self.COND_1
+        if self.check_signin():
+            message = 'Welcome back. Please select one of the following.'
+            reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
+            bot.message.reply_text(message, reply_markup=reply_markup)
+            return self.COND_1
+        else:
+            message = 'Welcome to the StartRestaurantBot. Create an account or insert credentials ' \
+                      'if you already have one'
+            reply_markup = ReplyKeyboardMarkup([['Create Account', 'Sign-In']], one_time_keyboard=True,
+                                               resize_keyboard=True)
+            bot.message.reply_text(message, reply_markup=reply_markup)
+            return self.CHECK_SIGN
+        # message = 'Welcome back. Please select one of the following.'
+        # reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
+        # bot.message.reply_text(message, reply_markup=reply_markup)
+        # return self.COND_1
 
     def check_sign(self, bot, update):
         if bot.message.text == 'Create Account':
@@ -178,7 +176,8 @@ class SmartRestaurant:
         if selection == 'Book':
             message = 'At which Restaurant do you want to book a table?'
             bot.message.reply_text(message)
-            for i in self.restaurants_names:
+            sorted_restaurants = sorted(self.restaurants_names)
+            for i in sorted_restaurants:
                 new_restaurant = i
                 bot.message.reply_text(new_restaurant)
             return self.CHECK_BOOKING
@@ -253,16 +252,23 @@ class SmartRestaurant:
         users = self.fb.download('users')
         for k, v in users.items():
             try:
-                if v['table_key'] == key:
-                    return v
+                if v['active']['table_key'] == key:
+                    return k, v
             except:
                 pass
         return None
 
+    def join_table(self, user_key, restaurant_key):
+        self.fb.db.child('users').child(user_key).child('active').child('friends').update({self.fb_id: self.user_id})
+        self.fb.db.child('users').child(self.fb_id).child('active').set({
+            'restaurant_key': restaurant_key
+        })
+
     def join(self, bot, update):
         sent_key = bot.message.text
-        obj = self.check_table(sent_key)
-        if obj:
+        key, obj = self.check_table(sent_key)
+        if key:
+            self.join_table(key, obj['active']['restaurant_key'])
             message = f"Joined {obj['details']['name']}'s Table"
         else:
             message = f"KEY not FOUND"
@@ -330,7 +336,9 @@ class SmartRestaurant:
         print('AAA')
 
     def main(self):
-        updater = Updater('892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw', use_context=True)
+        TOKEN = '892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw'
+        APP_NAME = 'order-eat2021'
+        updater = Updater(TOKEN, use_context=True)
 
         # Get the dispatcher to register handlers:
         dp = updater.dispatcher
@@ -357,6 +365,8 @@ class SmartRestaurant:
         )
 
         dp.add_handler(conv_handler)
+        updater.start_webhook(listen='0.0.0.0', port=6969, url_path=TOKEN)
+        updater.bot.set_webhook(APP_NAME + TOKEN)
         updater.start_polling()
         updater.idle()
 

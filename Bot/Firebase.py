@@ -93,30 +93,47 @@ class Firebase:
         for k in bookings_keys:
             date, hour, people, user = self.unhash(k)
             if hour == u_hour:
-                p = str(int(people))
-                if p in tables.keys():
-                    tables[p] = tables[p] - 1
+                p = int(people)
+                assigned = self.assign_table(p, tables)
+                for t in assigned:
+                    tables[t] -= 1
         p = str(int(u_people))
         if tables[p] > 0:
             return True
         else:
             return False
 
+    @staticmethod
+    def assign_table(people, tables):
+        for k, v in tables.items():
+            for kk, vv in tables.items():
+                if int(k) == people and int(v) > 0:
+                    return [k]
+                if int(kk) == people and int(vv) > 0:
+                    return [kk]
+                if (int(v) > 0) and (int(vv) > 0) and (int(kk + k) <= people + 1):
+                    return [k, kk]
+        return None
+
     def get_available_tables(self, restaurant_key):
         tables = self.download(f'restaurants/{restaurant_key}/details/tables')
         bookings = self.download(f'restaurants/{restaurant_key}/bookings').keys()
         for b in bookings:
             date, hour, people, user = self.unhash(b)
+            assigned = self.assign_table(int(people), tables)
+            for t in assigned:
+                tables[t] -= 1
+        return tables
 
-
-
-    def hash_creator(self, user, hour, n_people):
+    @staticmethod
+    def hash_creator(user, hour, n_people):
         date = datetime.date.today()
         string = str(date.strftime('%d%m%Y')) + str(hour)
         string = string + str(n_people).zfill(2) + user
         return string
 
-    def unhash(self, key):
+    @staticmethod
+    def unhash(key):
         date = "%s/%s/%s" % (key[:2], key[2:4], key[4:8])
         hour = "%s" % (key[8:13])
         n_people = key[13:15]
@@ -155,4 +172,5 @@ class Firebase:
 if __name__ == '__main__':
     fb = Firebase()
     fb.authenticate()
-    fb.db.child('users').child('Q4RbTEUSanS2k9ErfXaKFdoy6KQ2').child('details').update({'table_key': 'GIGI'})
+    # fb.db.child('users').child('Q4RbTEUSanS2k9ErfXaKFdoy6KQ2').child('details').update({'table_key': 'GIGI'})
+    fb.get_available_tables('WVqxkU2XXuQ988euCmqbcUvrQfp1')
