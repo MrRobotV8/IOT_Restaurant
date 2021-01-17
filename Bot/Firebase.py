@@ -96,9 +96,9 @@ class Firebase:
                 p = int(people)
                 assigned = self.assign_table(p, tables)
                 for t in assigned:
-                    tables[t] -= 1
+                    tables[t] = int(tables[t]) - 1
         p = str(int(u_people))
-        if tables[p] > 0:
+        if int(tables[p]) > 0:
             return True
         else:
             return False
