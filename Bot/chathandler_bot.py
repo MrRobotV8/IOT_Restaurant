@@ -8,7 +8,9 @@ import os
 from functions import *
 from BotFilters import *
 from RestaurantPublisher import Publisher
+from RestaurantSubscriber import Subscriber
 from Firebase import Firebase
+import datetime
 
 # Enable logging
 logging.basicConfig(
@@ -18,6 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 PORT = int(os.environ.get('PORT', '8443'))
+
 
 class SmartRestaurant:
     def __init__(self):
@@ -64,7 +67,13 @@ class SmartRestaurant:
 
     def start(self, bot, update):
         self.user_id = str(bot.message.from_user.id)
+        logger.info(f'Bot Started - {self.user_id}')
         if self.check_signin():
+            if self.fb.db.child('users').child('active').child('restaurant_key').get():
+                self.restaurant_key = self.fb.db.child('users').child('active').child('restaurant_key').get().val()
+            # if hasattr(self, 'restaurant_key'):
+            #     if self.fb.db.child('orders').child(self.restaurant_key).child(self.fb_id).get():
+            #         self.link = self.
             message = 'Welcome back. Please select one of the following.'
             reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
             bot.message.reply_text(message, reply_markup=reply_markup)
@@ -145,9 +154,11 @@ class SmartRestaurant:
         user = self.fb.auth.create_user_with_email_and_password(self.email, self.password)
         uid = user['localId']
         data = {
+            'mail': self.email,
             'name': self.nickname,
-            'status': 1,
-            'bot_id': self.user_id
+            'is_bot': 1,
+            'bot_id': self.user_id,
+            'timestamp': datetime.datetime.now()
         }
         self.fb.db.child('users').child(uid).child('details').set(data)
 
@@ -183,7 +194,23 @@ class SmartRestaurant:
             return self.CHECK_BOOKING
 
         elif selection == 'Order':
-            return self.ORDER
+            if hasattr(self, 'restaurant_key'):
+            # if self.restaurant_key:
+                # restaurant = self.fb.db.child('users').child(self.fb_id).child('active').child('restaurant_key').get()
+                # restaurant_key = restaurant.val()
+
+                message = 'Click on the link to begin the ordering phase'
+                link = f'https://order-eat2021-django.herokuapp.com/tg-menu/{self.fb_id}/{self.restaurant_key}'
+                self.link = link
+                bot.message.reply_text(message)
+                bot.message.reply_text(link)
+                return self.START_RETURN
+            else:
+                traceback.print_exc()
+                message = 'You do not have any active bookings. First create a booking'
+                bot.message.reply_text(message)
+                return self.START_RETURN
+
         elif selection == 'Feedback':
             message = 'Tap if you want to change the room_temperature'
             reply_markup = ReplyKeyboardMarkup([['Lower', 'Raise', 'Good']], one_time_keyboard=True,
@@ -194,7 +221,31 @@ class SmartRestaurant:
             message = 'You chose to JOIN a Table. Please insert the relative KEY'
             bot.message.reply_text(message)
             return self.JOIN
+
+        elif selection == 'Wait':
+            if self.fb.db.child('orders').child(self.restaurant_key).child(self.fb_id).get():
+            # if hasattr(self, 'link'):
+            # if self.link:
+                customers_before = self.fb.db.child('restaurants').child(self.restaurant_key).child('customers').get()
+                customers_before = len(customers_before.val())
+                message = f'We have {customers_before} before you! Your order will be starting in ~ ' \
+                          f'{customers_before / 10} Minutes'
+
+                bot.message.reply_text(message)
+
+                return self.START_RETURN
+
+            else:
+                message = 'You do not have placed an order yet. Please select ORDER from the keyboard menu'
+                bot.message.reply_text(message)
+
+                return self.START_RETURN
+
         elif selection == 'CheckOut':
+            history_order, check = self.checkout()
+            message = f'Your History Order: {history_order}\nYour Total: {check}\nThanks and return soon!'
+            bot.message.reply_text(message)
+
             return self.CHECK
 
     def check_booking(self, bot, update):
@@ -221,7 +272,23 @@ class SmartRestaurant:
     def people(self, bot, update):
         self.people = int(bot.message.text)
         message = 'Let us now know the time. Select form the keyboard'
-        reply_markup = ReplyKeyboardMarkup(self.time_booking, one_time_keyboard=True, resize_keyboard=True)
+        try:
+            dinner_slots = self.fb.db.child('restaurants').child(self.restaurant_key).child('details').child('dinner-slot')
+            dinner_slots = dinner_slots.get().val()
+            n = len(dinner_slots)
+            time_booking = []
+            for i in range(n // 3 + 1):
+                if i*3+3 < n:
+                    new = dinner_slots[i*3:i*3+3]
+                    time_booking.append(new)
+                else:
+                    new = dinner_slots[i*3:]
+                    time_booking.append(new)
+
+        except:
+            traceback.print_exc()
+            time_booking = self.time_booking
+        reply_markup = ReplyKeyboardMarkup(time_booking, one_time_keyboard=True, resize_keyboard=True)
         bot.message.reply_text(message, reply_markup=reply_markup)
 
         return self.TIME
@@ -232,7 +299,6 @@ class SmartRestaurant:
 
     def time(self, bot, update):
         self.time_selected = bot.message.text
-
         u = self.return_user('bot_id', self.user_id)
         if 'nickname' in u['details'].keys():
             nick = u['details']['nickname']
@@ -285,6 +351,7 @@ class SmartRestaurant:
         self.fb.db.child('restaurants').child(self.restaurant_key).child('customers').child(self.user_id).set(obj)
         obj_active = {
             'restaurant_key': self.restaurant_key,
+            'details': obj
         }
 
         self.fb.db.child('users').child(self.fb_id).update({'table_key': self.table_key})
@@ -313,7 +380,7 @@ class SmartRestaurant:
         else:
             feeling = 0
 
-        feedback_key = self.search_user_restaurant()
+        # feedback_key = self.search_user_restaurant()
         # topic = f"Temperature/{feedback_key}"
         topic = f'v1/devices/me/telemetry'
         payload = json.dumps({'temperature_feedback': feeling})
@@ -322,15 +389,65 @@ class SmartRestaurant:
 
         return self.START_RETURN
 
-    def checkout(self, bot, update):
+    def checkout(self):
         restaurant = self.search_user_restaurant()
-        user_info = restaurant[self.user_id]
-        history_new = {
-            restaurant: user_info
+        # get bill
+        # get order history
+        # TODO: check date of order how to handle it
+        order_obj = self.fb.db.child('orders').child(self.fb_id).child(restaurant).get().val()
+        last_order = order_obj[-1]
+        total = last_order['total']
+        last_order_history = {v.pop('url', None) for k, v in last_order.pop('total', None)}
+
+        # add to restaurant history
+
+
+        # remove from active customers of restaurant
+        restaurant_obj = self.fb.db.child('restaurants').child(restaurant).child('customers').child(self.user_id).get()
+        restaurant_obj = restaurant_obj.val()
+        self.fb.db.child('restaurants').child(restaurant).child('customers').child(self.user_id).remove()
+
+        # remove from user active bookings
+        self.fb.db.child('users').child(self.fb_id).child('active').remove()
+
+        # add to user history
+        history_object = {
+            'restaurant': restaurant,
+            'details': {
+                'people': restaurant_obj['people'],
+                'time': restaurant_obj['time'],
+                'order': last_order_history,
+                'total': total
+            }
         }
-        to_remove = self.fb.db.child('users').child(user_info['firebase_id']).child('active')
-        to_remove.remove()
-        self.fb.db.child('users').child(user_info['firebase_id']).child('history').push(history_new)
+        self.fb.db.child('users').child(self.fb_id).child('history').update(history_object)
+
+        # remove table key
+        self.fb.db.child('users').child(self.fb_id).child('table_key').remove()
+
+        return last_order_history, total
+
+    def others(self, bot, update):
+        others = """
+            /start: Restart Bot from the Beginning\n
+            /sensor: Check information about the Temperature, Humidity... if you are booked to a Restaurant\n
+            /ask: Ask for help to an Human Being\n
+            
+        """
+        bot.message.reply_text(others)
+        return self.START_RETURN
+
+    def sensor(self):
+        if self.fb.db.child('users').child(self.fb_id).child('active'):
+            restaurant_key = self.fb.db.child('users').child(self.fb_id).child('active').child('restaurant_key')
+            restaurant_key = restaurant_key.get().val()
+            sub = Subscriber(clientID=self.user_id, broker='139.59.148.149', token='pulcinella_device')
+            sub.subscribe()
+            message = sub.msg_body
+            return message
+
+        else:
+            return None
 
     def help_(self):
         print('AAA')
@@ -338,6 +455,7 @@ class SmartRestaurant:
     def main(self):
         TOKEN = '892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw'
         APP_NAME = 'order-eat2021'
+        APP_URL = f'https://{APP_NAME}.herokuapp.com'
         updater = Updater(TOKEN, use_context=True)
 
         # Get the dispatcher to register handlers:
@@ -365,8 +483,8 @@ class SmartRestaurant:
         )
 
         dp.add_handler(conv_handler)
-        updater.start_webhook(listen='0.0.0.0', port=6969, url_path=TOKEN)
-        updater.bot.set_webhook(APP_NAME + TOKEN)
+        # updater.start_webhook(listen='0.0.0.0', port=6969, url_path=TOKEN)
+        # updater.bot.set_webhook(APP_URL)
         updater.start_polling()
         updater.idle()
 

@@ -3,7 +3,7 @@ from telegram.ext import BaseFilter
 
 class KeyboardFilter(BaseFilter):
     def filter(self, message):
-        if message.text in ['Book', 'Feedback', 'Join']:
+        if message.text in ['Book', 'Feedback', 'Join', 'Order', 'Checkout']:
             return True
         else:
             return False
