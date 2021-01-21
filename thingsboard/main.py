@@ -215,6 +215,20 @@ def assign_dashboard_to_public_customer(url, bearer, dashboard_id):
         dashboard_url = f"{url}/dashboard/{dashboard_id}?publicId={public_client_id}"
         return dashboard_id, public_client_id, dashboard_url
 
+def create_togo_order(url, bearer, device_access_token, payload):
+    url_api = f"{url}/api/v1/{device_access_token}/telemetry"
+    headers = {"X-Authorization": "Bearer " + bearer, "Content-Type": "application/json", "Accept": "application/json"}
+    x = requests.post(url_api, data=json.dumps(payload), headers=headers)
+    if x.status_code==200:
+        return True
+
+def create_table_order(url, bearer, device_access_token, payload):
+    url_api = f"{url}/api/v1/{device_access_token}/telemetry"
+    headers = {"X-Authorization": "Bearer " + bearer, "Content-Type": "application/json", "Accept": "application/json"}
+    x = requests.post(url_api, data=json.dumps(payload), headers=headers)
+    if x.status_code==200:
+        return True
+
 # rnd = random.randint(0, 999)
 # ThingsBoard REST API URL
 url = "http://139.59.148.149"
@@ -229,10 +243,10 @@ jwt_token = tenant_login(url_all, username="tenant@thingsboard.org", password="t
 
 
 # create customer
-customer_id = create_customer(url_all, jwt_token, title="joao", address="av coscovado")
+customer_id = create_customer(url_all, jwt_token, title="Dan", address="Corso Carlo e Nello Rosselli, 82, 10129 Torino TO, Italia")
 
 # create restaurant asset
-restaurant_name = "churrascaria boi gordo"
+restaurant_name = "A Casa Di Pulcinella"
 asset_id = create_restaurant_asset(url_all, jwt_token, name=restaurant_name)
 
 # assign asset to customer
@@ -244,7 +258,7 @@ assign_asset_to_customer(url_all, jwt_token, customer_id, asset_id)
 restaurant_device_id = save_restaurant_device(url_all, jwt_token, restaurant_name, "custom_access_token")
 # set restaurant attributes
 restaurant_token = f"{asset_id}_1"
-set_device_attributes(url_all, jwt_token, restaurant_token, {"address": "via boi gordo", "description": "", "name": "", "phone": "", "seats": "", "status":"", "dinner_slot": "", "lunch_slot": ""})
+set_device_attributes(url_all, jwt_token, restaurant_token, {"address": "Corso Carlo e Nello Rosselli, 82, 10129 Torino TO, Italia", "description": "", "name": "", "phone": "", "seats": "", "status":"", "dinner_slot": "", "lunch_slot": ""})
 # assign device to asset
 relation_asset_contains_device(url_all, jwt_token, asset_id, restaurant_device_id)
 # assign device to customer
@@ -283,3 +297,9 @@ assign_dashboard_to_customer(url_all, jwt_token, customer_id, dashboard_id)
 # make the dashboard public and get its url
 dashboard_id, public_client_id, dashboard_url = assign_dashboard_to_public_customer(url_all, jwt_token, dashboard_id)
 print(dashboard_url)
+
+# create an order to go
+create_togo_order(url_all, jwt_token, togo_token, {"client": "Ciccio", "order": "1;2", "obs": "canolo grosso siciliano prego"})
+create_togo_order(url_all, jwt_token, togo_token, {"client": "Ricca", "order": "7;5", "obs": "sono amico del padrono"})
+create_togo_order(url_all, jwt_token, togo_token, {"client": "Victor", "order": "8;23", "obs": "lo stesso di Ciccio"})
+create_togo_order(url_all, jwt_token, togo_token, {"client": "Dan", "order": "23;7;19", "obs": "sono il padrono"})
