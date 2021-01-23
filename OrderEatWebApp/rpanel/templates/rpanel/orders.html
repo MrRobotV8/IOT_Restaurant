@@ -28,12 +28,11 @@ Orders
 
         <div class="card">
             <div class="card-body">
-            <h4 class="card-title" style='color:black'> Customer: {{ key }}</h4>
-            {%for ke, va in value.items%}
-            <p style="margin-right:5rem;">When: {{ke}} (dd/mm/yyyy/h/m/s)</p>
+            <h4 class="card-title" style='color:black'> Customer: <strong>{{ value.name }}</strong></h4>
+            <p style="margin-right:5rem;">When: {{value.day}}</p>
             <hr />
             <p>Dishes:</p>
-            {%for k, v in va.items%}
+            {%for k, v in value.order.items %}
             {% if k == "address" %}
             <p style="text-align:right"><strong>Address: </strong>{{v}}</p>
             {% elif k == "is_bot"%}
@@ -44,7 +43,7 @@ Orders
             {{v.item}}x{{v.quantity}}
             {%endif%}
             {% endfor %}
-            <form method='POST' action="{% url 'rpanel:updatestatus' ke %}">
+            <form method='POST' action="{% url 'rpanel:updatestatus' value.ts %}">
             {% csrf_token %}
             <!-- Rounded switch -->
             <label>Accepted</label>
@@ -65,8 +64,7 @@ Orders
             <label>
             <button class="btn btn-success" type="submit">Update Status</button>
             </label>
-            </form> 
-            {% endfor %}   
+            </form>    
              
         </div>
         </div>

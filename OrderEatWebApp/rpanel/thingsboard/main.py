@@ -154,12 +154,12 @@ class ThingsDash:
         if x.status_code==200:
             return True
 
-    def save_table_device(self, table_number, custom_access_token):
+    def save_table_device(self, table_number, custom_access_token, restaurant_id):
         url_api = f"{self.url_all}/api/device?accessToken={custom_access_token}"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
 
         payload = {
-            "name": f"Table {table_number}",
+            "name": f"{restaurant_id} - Table {table_number}",
             "type": "table_device_profile",
             "label": "table device"
             }
@@ -169,12 +169,12 @@ class ThingsDash:
             self.device_id = json.loads(x.text)["id"]["id"]
             return self.device_id
 
-    def save_togo_device(self, custom_access_token):
+    def save_togo_device(self,  custom_access_token, restaurant_id):
         url_api = f"{self.url_all}/api/device?accessToken={custom_access_token}"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
 
         payload = {
-            "name": f"To Go",
+            "name": f"To Go {restaurant_id}",
             "type": "togo_device_profile",
             "label": "togo device"
             }
@@ -238,7 +238,7 @@ class ThingsDash:
         if x.status_code==200:
             return True
 
-if _name_ == "__main__":
+if __name__ == "__main__":
 
     td = ThingsDash()
 
@@ -281,7 +281,8 @@ if _name_ == "__main__":
             td.assign_device_to_customer(customer_id, table_device_id)
 
     # create the togo device
-    togo_token = f"{restaurant_device_id}_togo"
+    togo_token = f"{restaurant_device_id}_togo" #TODO: STORE IN FIREBASE FOR EACH RESTAURANT 
+    
     togo_device_id = td.save_togo_device(togo_token)
     # assign device to asset
     td.relation_asset_contains_device(asset_id, togo_device_id)
@@ -306,5 +307,10 @@ if _name_ == "__main__":
 
     # create an order in table 1
     td.create_table_order(f"{restaurant_device_id}_1", {"client": "Pietro", "order": "3"})
+
+    
+
+
+
 
     print("end")
