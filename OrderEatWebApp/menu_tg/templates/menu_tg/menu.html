@@ -1,0 +1,254 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<title>Telegram Menu</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amatic+SC">
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'menu_tg/css/style.css' %}">
+
+
+
+<body>
+
+<!-- Navbar (sit on top) -->
+<div class="w3-top w3-hide-small">
+  <div class="w3-bar w3-xlarge w3-black w3-opacity w3-hover-opacity-off" id="myNavbar">
+    <a href="#" class="w3-bar-item w3-button">HOME</a>
+    <a href="#menu" class="w3-bar-item w3-button">MENU</a>
+    <a href="#cart" class="w3-bar-item w3-button">CART</a>
+    <a href="#about" class="w3-bar-item w3-button">ABOUT</a>
+  </div>
+</div>
+  
+<!-- Header with image -->
+<header class="bgimg w3-display-container w3-grayscale-min" id="home">
+  <div class="w3-display-bottomleft w3-padding">
+    <span class="w3-tag w3-xlarge">check bot telegram</span>
+  </div>
+  <div class="w3-display-middle w3-center" style="top:30%">
+    <span class="w3-text-black w3-hide-small" style="font-size:60px">Welcome<br>{{rest_name}}</span>
+    <span class="w3-text-black w3-hide-large w3-hide-medium" style="font-size:35px"><b>Welcome<br>{{rest_name}}</b></span>
+    <p><a href="#menu" class="w3-button w3-xxlarge w3-black">Let me see the menu</a></p>
+  </div>
+</header>
+
+<!-- Menu Container -->
+<div class="w3-container w3-black w3-padding-64 w3-xxlarge" id="menu">
+  <div class="w3-content">
+  
+    <h1 class="w3-center w3-jumbo" style="margin-bottom:64px">THE MENU</h1>
+    <div class="w3-row w3-center w3-border w3-border-dark-grey">
+      <a href="javascript:void(0)" onclick="openMenu(event, 'starter');" id="myLink">
+        <div class="w3-col s4 tablink w3-padding-large w3-hover-red">Starter</div>
+      </a>
+      <a href="javascript:void(0)" onclick="openMenu(event, 'pizza');">
+        <div class="w3-col s4 tablink w3-padding-large w3-hover-red">Pizza</div>
+      </a>
+      <a href="javascript:void(0)" onclick="openMenu(event, 'burger');">
+        <div class="w3-col s4 tablink w3-padding-large w3-hover-red">Burgers</div>
+      </a>
+      <a href="javascript:void(0)" onclick="openMenu(event, 'maindish');">
+        <div class="w3-col s4 tablink w3-padding-large w3-hover-red">Main Dishes</div>
+      </a>
+      <a href="javascript:void(0)" onclick="openMenu(event, 'dessert');">
+        <div class="w3-col s4 tablink w3-padding-large w3-hover-red">Dessert</div>
+      </a>
+      <a href="javascript:void(0)" onclick="openMenu(event, 'drink');">
+        <div class="w3-col s4 tablink w3-padding-large w3-hover-red">Drinks</div>
+      </a>
+    </div>
+    <div id="starter" class="w3-container menu w3-padding-32 w3-white">
+        {% for key, value in data.items %}
+        {% if value.section == 'starter' %}
+        <h1><b>{{ value.name }}</b> <span class="w3-right w3-tag w3-dark-grey w3-round">{{ value.price }}</span></h1>
+        <p class="w3-text-grey">{{ value.description }}</p>
+        <form method="POST" action="{% url 'menu_tg:addtocart' idtoken rest_id key %}">
+            {% csrf_token %}
+            <input value={{value.price}} name="price" type="hidden">
+            <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+            <input class="btn btn-dark" type="submit" value="Add to Cart">
+         </form>
+        {% endif %}
+        {% endfor %}
+        <hr>
+        
+    </div>
+    <div id="pizza" class="w3-container menu w3-padding-32 w3-white">
+        {% for key, value in data.items %}
+        {% if value.section == 'pizza' %}
+        <h1><b>{{ value.name }}</b> <span class="w3-right w3-tag w3-dark-grey w3-round">{{ value.price }}</span></h1>
+        <p class="w3-text-grey">{{ value.description }}</p>
+        <form method="POST" action="{% url 'menu_tg:addtocart' idtoken rest_id key %}">
+            {% csrf_token %}
+            <input value={{value.price}} name="price" type="hidden">
+            <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+            <input class="btn btn-dark" type="submit" value="Add to Cart">
+         </form>
+         {% endif %}
+         {% endfor %}
+         <hr>
+    </div>
+    <div id="burger" class="w3-container menu w3-padding-32 w3-white">
+        {% for key, value in data.items %}
+        {% if value.section == 'burger' %}
+        <h1><b>{{ value.name }}</b> <span class="w3-right w3-tag w3-dark-grey w3-round">{{ value.price }}</span></h1>
+        <p class="w3-text-grey">{{ value.description }}</p>
+        <form method="POST" action="{% url 'menu_tg:addtocart' idtoken rest_id key %}">
+            {% csrf_token %}
+            <input value={{value.price}} name="price" type="hidden">
+            <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+            <input class="btn btn-dark" type="submit" value="Add to Cart">
+         </form>
+         {% endif %}
+         {% endfor %}
+         <hr>
+    </div>
+    <div id="maindish" class="w3-container menu w3-padding-32 w3-white">
+        {% for key, value in data.items %}
+        {% if value.section == 'maindish' %}
+        <h1><b>{{ value.name }}</b> <span class="w3-right w3-tag w3-dark-grey w3-round">{{ value.price }}</span></h1>
+        <p class="w3-text-grey">{{ value.description }}</p>
+        <form method="POST" action="{% url 'menu_tg:addtocart' idtoken rest_id key %}">
+            {% csrf_token %}
+            <input value={{value.price}} name="price" type="hidden">
+            <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+            <input class="btn btn-dark" type="submit" value="Add to Cart">
+         </form>
+         {% endif %}
+         {% endfor %}
+         <hr>
+    </div>
+    <div id="dessert" class="w3-container menu w3-padding-32 w3-white">
+        {% for key, value in data.items %}
+        {% if value.section == 'dessert' %}
+        <h1><b>{{ value.name }}</b> <span class="w3-right w3-tag w3-dark-grey w3-round">{{ value.price }}</span></h1>
+        <p class="w3-text-grey">{{ value.description }}</p>
+        <form method="POST" action="{% url 'menu_tg:addtocart' idtoken rest_id key %}">
+            {% csrf_token %}
+            <input value={{value.price}} name="price" type="hidden">
+            <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+            <input class="btn btn-dark" type="submit" value="Add to Cart">
+         </form>
+         {% endif %}
+         {% endfor %}
+         <hr>
+    </div>
+    <div id="drink" class="w3-container menu w3-padding-32 w3-white">
+        {% for key, value in data.items %}
+        {% if value.section == 'drink' %}
+        <h1><b>{{ value.name }}</b> <span class="w3-right w3-tag w3-dark-grey w3-round">{{ value.price }}</span></h1>
+        <p class="w3-text-grey">{{ value.description }}</p>
+        <form method="POST" action="{% url 'menu_tg:addtocart' idtoken rest_id key %}">
+            {% csrf_token %}
+            <input value={{value.price}} name="price" type="hidden">
+            <input min="1" value=1 type="number" name="quantity" style="width: 5em;">
+            <input class="btn btn-dark" type="submit" value="Add to Cart">
+         </form>
+         {% endif %}
+         {% endfor %}
+         <hr>
+    </div>
+     <br>
+
+  </div>
+</div>
+<!-- Cart Container -->
+<div class="w3-container w3-padding-64 w3-red w3-grayscale w3-xlarge" id="cart">
+    <div class="w3-content">
+      <h1 class="w3-center w3-jumbo" style="margin-bottom:64px">Cart</h1>
+      {% if b_list != None %}
+      <div class="row">
+         <div class="col-lg-12">
+            <div class="box-element">
+   
+   
+               <br>
+               <br>
+               <table class="w3-table">
+                  <tr>
+                     <th><h5>Items: <strong>{% for key, value in b_list.items %}
+                     {% if key != 'total' %}
+                        <br>{{value.item}} x {{value.quantity}}<br>
+                        {%endif%}
+                        {%endfor%}
+                     </strong></h5></th>
+                     <th><h5>Total:<strong> €{{tot|floatformat:2}}</strong></h5></th>
+                     <th>
+                        
+                           <a  style="float:right; margin:5px;" class="btn btn-success" href="{% url 'menu_tg:checkout' idtoken rest_id%}">Checkout</a>
+   
+                     </th>
+                  </tr>
+               </table>
+   
+            </div>
+   
+            <br>
+            <div class="box-element">
+               
+               {% for key, value in b_list.items %}
+               {% if key != 'total' %}
+               <div class="card">
+               <div class="card-body">
+               <img class="card-image" src="{{value.url}}"></img>
+               <div class="card-title"> {{value.item}}</div>
+               <div class="card-description">{{value.price|floatformat:2}} x {{value.quantity}}</div>
+               <div class="card-remove"><a class="btn btn-sm btn-danger" href="{% url 'menu_tg:removefromcart' idtoken rest_id key %}">Remove</a></div>
+               
+               </div></div>
+               {%endif%}
+               {% endfor %}
+            </div>
+         </div>
+      </div>
+      {% else %}
+      <h1 style="text-align:center;padding: 100px">No Items in cart</h1>
+      {% endif %}
+     </div>
+      
+    </div>
+  </div>
+
+
+<!-- Footer -->
+<footer class="w3-center w3-black w3-padding-48 w3-xxlarge">
+        <h3 style="color:white">Socials and Contacts</h3>
+         <hr>
+             <div class="text-center center-block">
+                 <p class="txt-railway" style="color:white">- OrderEat -</p>
+                 <br style="background-color: white;"/>
+                     <a href="https://www.facebook.com/"><i id="social-fb" class="fa fa-facebook-square fa-3x social"></i></a>
+                    <a href="https://twitter.com/"><i id="social-tw" class="fa fa-twitter-square fa-3x social"></i></a>
+                    <a href="https://plus.google.com/"><i id="social-gp" class="fa fa-google-plus-square fa-3x social"></i></a>
+                    <a href="mailto:#"><i id="social-em" class="fa fa-envelope-square fa-3x social"></i></a>
+     </div>
+         <hr>
+        <p style="color:white">© 2020 Copyright: <a href="#"> GSMR IOT </a></p> 
+  <!--<p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-text-green">w3.css</a></p> -->
+</footer>
+
+<script src="{% static 'menu_tg/js/main.js' %}"></script>
+
+<script>
+// Tabbed Menu
+function openMenu(evt, menuName) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("menu");
+  for (i = 0; i < x.length; i++) {
+     x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+     tablinks[i].className = tablinks[i].className.replace(" w3-red", "");
+  }
+  document.getElementById(menuName).style.display = "block";
+  evt.currentTarget.firstElementChild.className += " w3-red";
+}
+document.getElementById("myLink").click();
+</script>
+
+</body>
+</html>
