@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://img.icons8.com/nolan/64/restaurant.png"
+    />
+    <title>Make your Choice</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'food/css/style.css' %}"
+    />
+    <link
+      href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div class="context text-center">
+      <img src=" {%static 'food/img/OrderEat.svg' %}" style="max-width:700px;"/>
+      <!--<img src=" {%static 'food/img/orderEat60%.gif' %}" /> -->
+      <h1>
+        Enjoy our platform:
+        <span
+          class="typer"
+          id="some-id"
+          data-delay="200"
+          data-delim=":"
+          data-words="OrderEat"
+          data-colors="#231C65"
+        ></span
+        ><span
+          class="cursor"
+          data-cursorDisplay="_"
+          data-owner="some-id"
+        ></span>
+      </h1>
+      <h2>The perfect platform to manage food orders</h2>
+      <p>Programming for Internet of Things Project by GSMR team</p>
+    </div>
+    <div class="area">
+      <ul class="circles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row text-center">
+        <div class="col-sm">
+          <div class="card3" style="background-color: #231c65">
+            <div class="card-body">
+              <img
+                class="card-image"
+                src="{% static 'food/img/restaurant.svg' %}"
+              />
+              <h4 class="card-title">Restaurant Platform</h4>
+              <p class="card-text">
+                Thanks to our system, you will easily manage orders and
+                reservations for your restaurant and guarantee a better service
+                to your customers<br />
+              </p>
+              <a
+                href="{% url 'rpanel:Signin' %}"
+                class="btn btn-primary stretched-link"
+                >SignIn or SignUp</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="col-sm">
+          <div class="card3" style="background-color: #a632f9">
+            <div class="card-body">
+              <img
+                class="card-image"
+                src="{% static 'food/img/customer.svg' %}"
+              />
+              <h4 class="card-title">Customer Platform</h4>
+              <p class="card-text">
+                Enter the platform to easily order your favorite dishes from
+                home. Alternatively use our telegram bot to manage your
+                reservations<br />
+              </p>
+              <a
+                href="{% url 'food:signin' %}"
+                class="btn btn-info stretched-link"
+                >SignIn or SignUp</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Copyright -->
+    <div
+      class="footer-copyright text-center py-3"
+      style="background-color: #231c65; margin: 0"
+    >
+      <h3 style="color: white">Socials and Contacts</h3>
+      <hr />
+      <div class="text-center center-block">
+        <p class="txt-railway" style="color: white">- OrderEat -</p>
+        <br style="background-color: white" />
+        <a href="https://www.facebook.com/"
+          ><i id="social-fb" class="fa fa-facebook-square fa-3x social"></i
+        ></a>
+        <a href="https://twitter.com/"
+          ><i id="social-tw" class="fa fa-twitter-square fa-3x social"></i
+        ></a>
+        <a href="https://plus.google.com/"
+          ><i id="social-gp" class="fa fa-google-plus-square fa-3x social"></i
+        ></a>
+        <a href="mailto:#"
+          ><i id="social-em" class="fa fa-envelope-square fa-3x social"></i
+        ></a>
+      </div>
+      <hr />
+      <p style="color: white">© 2020 Copyright: <a href="#"> GSMR IOT </a></p>
+    </div>
+    <!-- Copyright -->
+  </body>
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="{% static 'food/js/main.js' %}"></script>
+</html>

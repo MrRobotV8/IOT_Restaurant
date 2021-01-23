@@ -1,0 +1,59 @@
+{% extends 'food/base.html' %} {% load static %} {% block content %}
+<section class="cart">
+  <div class="container-md">
+  <img src="{% static 'food/img/confirmed.svg' %}" class="ill2" />
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="box-element">
+          <h4 style="text-align: center">
+            Dear {{user}}, the following one is your last accepted order
+          </h4>
+
+          <br />
+          <br />
+          <table class="table">
+            <tr>
+              <th>
+                <h5>
+                  Items:
+                  <strong
+                    >{% for key, value in order.items %} <br />{{value.item}} x
+                    {{value.quantity}}<br />
+                    {%endfor%}
+                  </strong>
+                </h5>
+              </th>
+              <th>
+                <h5>Total:<strong> €{{tot|floatformat:2}}</strong></h5>
+              </th>
+              <th>
+                <h5>Address:<strong> {{address}}</strong></h5>
+              </th>
+            </tr>
+          </table>
+        </div>
+
+        <br />
+        <div class="box-element">
+          <div class="cart-row">
+            <div style="flex: 2"></div>
+            <div style="flex: 2"><strong>Item</strong></div>
+            <div style="flex: 1"><strong>Price</strong></div>
+            <div style="flex: 1"><strong>Quantity</strong></div>
+          </div>
+          {% for key, value in order.items %}
+          <div class="cart-row">
+            <div style="flex: 2">
+              <img class="row-image" src="{{value.url}}" alt="not Available" />
+            </div>
+            <div style="flex: 2"><p>{{value.item}}</p></div>
+            <div style="flex: 1"><p>${{value.price|floatformat:2}}</p></div>
+            <div style="flex: 1"><p>{{value.quantity}}</p></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}

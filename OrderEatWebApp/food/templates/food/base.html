@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width-device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/nolan/64/restaurant.png">
+    <title>{% block title %} {% endblock %} </title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="{% static 'food/css/bootstrap.css' %} ">
+    <link rel="stylesheet" href="{% static 'food/css/bootstrap-grid.css' %} ">
+    <link rel="stylesheet" href="{% static 'food/css/bootstrap-reboot.css' %} ">
+    <link rel="stylesheet" href="{% static 'food/css/bootstrap-utilities.css' %} ">
+    <link rel="stylesheet" type="text/css" href="{% static 'food/css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'food/css/style.css' %}">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+      <!-- Brand/logo -->
+      <a class="navbar-brand" href="#">
+        <img src="{% static 'food/img/customer.svg' %}" class="logo" />
+      </a>
+      <!-- Links -->
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'food:index' %}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'food:restaurants' %}"
+            >Restaurants</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'food:orders' %}">Orders</a>
+        </li>
+      </ul>
+      <nav class="navbar ml-auto" role="navigation"></nav>
+      <ul class="navbar-nav">
+        <li class="nav-item" style="color: white">
+          <a class="nav-link" href="#">{{user}}</a>
+        </li>
+      </ul>
+      <a
+        class="btn navbar-btn btn-danger navbar-right"
+        type="button"
+        style="margin-right: 5px"
+        href="{% url 'food:log' %}"
+        >Logout</a
+      >
+    </nav>
+    
+    {% block content %} {% endblock %}
+  </div> 
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="{% static 'food/js/bootstrap.js' %}"></script>
+    <script src="{% static 'rpanel/js/main.js' %}"></script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-app.js"></script>
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-analytics.js"></script>
+  </body>
+</html>

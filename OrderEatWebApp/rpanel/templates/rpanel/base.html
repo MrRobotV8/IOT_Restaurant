@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width-device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/nolan/64/restaurant.png">
+    <title>{% block title %} {% endblock %} </title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'rpanel/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'rpanel/css/responsive.css' %}">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-sm" style="background-color:#231C65; opacity: 0.95;">
+    <!-- Brand/logo -->
+    <a class="navbar-brand" href="#">
+      <img src="https://img.icons8.com/nolan/40/restaurant.png" class="logo"/>
+    </a>
+    <!-- Links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'rpanel:home' %}">Home</a> 
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'rpanel:menu' %}">Menu</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'rpanel:profile' %}">Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'rpanel:orders' %}">Orders</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="https://demo.thingsboard.io/dashboard/a01d1e00-818f-11e9-9232-99753840ce43?publicId=5c6454f0-3186-11eb-a085-efede83fb1ce">Control Panel</a>
+      </li>     
+    </ul>
+      <nav class="navbar ml-auto" role="navigation">
+      <div class="container">
+        <span class="navbar-brand" style="color:white">{{ name }}</span>
+      <a class="btn navbar-btn btn-primary navbar-right pull-right" type="button" href="{% url 'rpanel:log' %}">Logout</a>
+      </div>
+      </nav> 
+  </nav>
+    {% block content %} {% endblock %}
+  <!-- Copyright -->
+  <div class="footer-copyright text-center py-3" style="background-color: #231C65; margin:0;">
+    <h3 style="color:white">Socials and Contacts</h3>
+     <hr>
+         <div class="text-center center-block">
+             <p class="txt-railway" style="color:white">- OrderEat -</p>
+             <br style="background-color: white;"/>
+                 <a href="https://www.facebook.com/"><i id="social-fb" class="fa fa-facebook-square fa-3x social"></i></a>
+                <a href="https://twitter.com/"><i id="social-tw" class="fa fa-twitter-square fa-3x social"></i></a>
+                <a href="https://plus.google.com/"><i id="social-gp" class="fa fa-google-plus-square fa-3x social"></i></a>
+                <a href="mailto:#"><i id="social-em" class="fa fa-envelope-square fa-3x social"></i></a>
+ </div>
+     <hr>
+    <p style="color:white">© 2020 Copyright: <a href="#"> GSMR IOT </a></p> 
+ </div>
+ <!-- Copyright -->
+
+<!-- Footer -->
+    <!-- jQuery library -->
+    <!-- The core Firebase JS SDK is always required and must be listed first 
+    <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-app.js"></script>
+     TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries 
+    <script src="https://www.gstatic.com/firebasejs/8.0.2/firebase-analytics.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{% static 'rpanel/js/main.js' %}"></script>
+    
+
+  </body>
+
+</html>

@@ -1,0 +1,151 @@
+{% if messg %}
+<script>
+
+    alert('{{ msg }}');
+
+</script>
+
+{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" href="https://img.icons8.com/nolan/64/restaurant.png">
+        <title> Sign Up Restaurant</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'rpanel/css/signin.css' %}">
+        <style>
+          body {font-family: Exo, sans-serif;}
+          
+          /* The Modal (background) */
+          .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+          }
+          
+          /* Modal Content */
+          .modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 80%;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+            -webkit-animation-name: animatetop;
+            -webkit-animation-duration: 0.4s;
+            animation-name: animatetop;
+            animation-duration: 0.4s
+          }
+          
+          /* Add Animation */
+          @-webkit-keyframes animatetop {
+            from {top:-300px; opacity:0} 
+            to {top:0; opacity:1}
+          }
+          
+          @keyframes animatetop {
+            from {top:-300px; opacity:0}
+            to {top:0; opacity:1}
+          }
+          
+          /* The Close Button */
+          .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+          }
+          
+          .close:hover,
+          .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+          }
+          
+          .modal-header {
+            padding: 2px 16px;
+            background-color: #5cb85c;
+            color: white;
+          }
+          
+          .modal-body {padding: 2px 16px;}
+          
+          .modal-footer {
+            padding: 2px 16px;
+            background-color: #5cb85c;
+            color: white;
+          }
+          </style>
+    </head>
+
+    <body>
+        <form action="{% url 'rpanel:Postsignup' %}" method="POST">
+            {% csrf_token %}
+            <div class="container" style="width: 30%; background-color: #231C65; padding: 50px; ">
+              <h1 style="text-align: center; color: white;">Sign Up</h1>
+              <p style="text-align: center; color: white;">Please fill in this form to create an account.</p>
+              <hr style="border: 1px solid #32AFE2;">
+
+              <label for="name" style="color:white;"><b>Restaurant Name</b></label>
+              <input type="text" placeholder="Enter Restaurant Name" name="name" required>
+
+              <label for="email" style="color:white;"><b>Email</b></label>
+              <input type="text" placeholder="Enter Email" name="email" required>
+          
+              <label for="psw" style="color:white;"><b>Password</b></label>
+              <input type="password" placeholder="Enter Password" name="psw" required>
+          
+              <label for="psw-repeat" style="color:white;"><b>Repeat Password</b></label>
+              <input type="password" placeholder="Repeat Password" name="psw-repeat" required>
+
+              <label for="description" style="color:white;"><b>Restuarant Description</b></label>
+              <textarea rows="4" cols="47" name="description" placeholder="Describe your Restaurant (max 500 char)"  required></textarea>
+
+              <label for="address" style="color:white;"><b>Restuarant Address</b></label>
+              <input type="text" placeholder="Ex: Via Caraglio, 56" name="address" required>
+
+              <label for="seats" style="color:white;"><b>How many seats are in your restaurant? </b></label>
+              <input type="number" placeholder="Number of seats" name="seats" required>
+              <br><br>
+              <label>
+                <input type="checkbox" checked="checked" name="remember" style="margin-bottom:15px"> <a style="color:white;"> Remember Me</a>
+              </label>
+          
+              <p style="color:white;">By creating an account you agree to our <a href="#" style="color:dodgerblue">Terms & Privacy</a>.</p>
+          
+              <div class="clearfix">
+                <button type="button" class="cancelbtn" style="width: 100%;" ><a href="javascript:history.go(-1)" 
+                  onMouseOver="self.status=document.referrer;return true" style="color: white;">Cancel</a></button>
+                <button type="submit"class="signupbtn">Sign Up</button>
+                
+
+
+
+              </div>
+            </div>
+          </form>
+
+</div> 
+     <!-- jQuery library -->
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+     <!-- Popper JS -->
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+     <!-- Latest compiled JavaScript -->
+     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <script src="{% static 'rpanel/js/main.js' %}"></script>
+    </body>
+</html>

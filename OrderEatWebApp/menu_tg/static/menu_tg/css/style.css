@@ -1,0 +1,69 @@
+
+body, html {height: 100%}
+body,h1,h2,h3,h4,h5,h6 {font-family: "Amatic SC", sans-serif}
+.menu {display: none}
+.bgimg {
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-image: url("../img/placeit.png");
+  height: 70%;
+  background-position: center;
+}
+.bgimg2 {
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-image: url("../img/confirmed.svg");
+	height: 70%;
+	background-position: center;
+  }
+
+
+/* CART */
+
+
+
+
+.product{
+	border-radius: 0 0 4px 4px;
+}
+
+.bg-dark{
+	background-color: #4f868c!important;
+}
+
+#cart-icon{
+	width:25px;
+	display: inline-block;
+	margin-left: 15px;
+}
+
+.card{
+	background-color:#eedddd;
+	border-style: dotted;
+	border-color:black;
+}
+.card-image{
+	margin-left:5px;
+	max-width: 70px;
+	position: absolute;
+	margin-top:5px;
+	
+}
+.card-title {
+	position: relative;
+	text-align:right;
+	margin-right: 5px;
+	color:black;
+}
+.card-description {
+	position: relative;
+	text-align:right;
+	margin-right: 5px;
+	color:black;
+	
+}
+.card-remove {
+	position: relative;
+	text-align: center;
+	color:black;
+}

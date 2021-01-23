@@ -1,0 +1,40 @@
+{% extends 'food/base.html' %}
+{%load static%}
+
+{% block title %}
+Restaurants List
+{% endblock %}
+
+{% block content %}
+
+<div class="container-rest">
+    <h1>Dear {{user}},</h1>
+    <h2>select one of the following restaurants to see their menu and make an order</h2>
+    <h3>If you would like to make a reservation --> Use our <b>Telegram Bot!</b></h2>
+</div>
+<div class="container-list" >
+<!-- <img src="{% static 'food/img/delievry.png' %}" class='ill' /> -->
+<img src="{% static 'food/img/chef.svg'%}" class='ill' />
+    {% for key, value in rest_list.items %}
+        <div class="card">
+            <div class="card-body">
+            <img class="card-image" src="{% static 'food/img/free-delivery.svg' %}" style="position:absolute; right:15px; bottom:10px">
+            <h4 class="card-title" style='color:black'> {{ value.name }}</h4>
+            <p style="margin-right:5rem;">{{ value.description }}</p>
+            <form action="{% url 'food:store' key %}" method="POST">
+                {% csrf_token %}
+            <button type="submit" class="btn btn-primary"> <!-- </button>value="{{ key }}" name="selection"> -->
+                Order
+            </button>
+            </form>
+            
+        </div>
+        </div>
+        <br>
+    {% endfor %}
+    
+</div>
+
+
+
+{% endblock%}
