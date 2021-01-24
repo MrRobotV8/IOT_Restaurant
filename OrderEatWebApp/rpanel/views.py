@@ -387,6 +387,7 @@ def orders(request):
                         'order': order,
                         'day': d,
                         'ts':ts,
+                        'customer_id': customer,
                     }
 
     my_orders = OrderedDict(sorted(my_orders.items(),key=lambda x:x[0], reverse=True))
@@ -436,8 +437,62 @@ def orders(request):
         return render(request, 'rpanel/signIn.html', ctx)
 '''
 
-def updatestatus(request, id):
+def updatestatus(request, cust, id):
+    accepted = request.POST.get('accepted')
+    ready = request.POST.get('ready')
+    expired = request.POST.get('expired')
+    print(accepted)
+    print(ready)
+    print(expired)
+    idtoken = request.session['uid']
+    rest_id = authe.get_account_info(idtoken)
+    rest_id = rest_id['users'][0]['localId']
+
+    order_details = {
+        'accepted': accepted,
+        'ready': ready,
+        'expired': expired,
+    }
+
+    database.child('orders').child(cust).child(rest_id).child(id).child('details').set(order_details) #or update?
+
+    orders = database.child('orders').get().val()
+    my_orders={}
+    for customer, value in orders.items():
+        for rest, val in value.items():
+            if rest == rest_id:
+                for ts, order in val.items():
+                    print(customer)
+                    print(rest)
+                    print(ts)
+                    d = datetime(
+                        day=int(ts[:2]),
+                        month=int(ts[2:4]),
+                        year=int(ts[4:8]),
+                        hour=int(ts[8:10]),
+                        minute=int(ts[10:12]),
+                        second=int(ts[12:14]),
+                        )
+                    timestamp = datetime.timestamp(d)
+                    print(d)
+                    print(timestamp)
+                    my_orders[timestamp] = {
+                        'name':database.child('users').child(customer).child('details').child('name').get().val(),
+                        'order': order,
+                        'day': d,
+                        'ts':ts,
+                        'customer_id':customer,
+                    }
+    
+    my_orders = OrderedDict(sorted(my_orders.items(),key=lambda x:x[0], reverse=True))
+
+    info = dict(database.child("restaurants").child(rest_id).child('details').get().val())
+    context ={
+        'my_orders': my_orders,
+        'info': info,
+    }
     return render(request, "rpanel/orders.html", context)
+
 
 '''
 import os

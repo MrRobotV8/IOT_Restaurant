@@ -39,32 +39,26 @@ Orders
             <p style="text-align:right"><strong>Table Service: </strong> {{v}}</p>
             {% elif k == "total" %}
             <p style="text-align:right"><strong>Total:</strong> {{v}} </p>
+            {% elif k == "details" %}
+            <form method='POST' action="{% url 'rpanel:updatestatus' value.customer_id value.ts %}">
+            {% csrf_token %}
+            <label for="title"><b>Stutus Order</b>
+            <select class="select dark" name="item-section">
+            <option value="accepted">Accepted</option>
+            <option value="preparing">Preparing</option>
+            <option value="delivering">Delivering</option>
+            <option value="completed">Completed</option>
+          </select>
+        </label>
+            <button class="btn btn-success" type="submit">Update Status</button>
+            </label>
+            </form>    
+            
             {%else%}
             {{v.item}}x{{v.quantity}}
             {%endif%}
             {% endfor %}
-            <form method='POST' action="{% url 'rpanel:updatestatus' value.ts %}">
-            {% csrf_token %}
-            <!-- Rounded switch -->
-            <label>Accepted</label>
-            <label class="switch"> 
-            <input type="checkbox" name="accepted" checked>
-            <span class="slider round"></span>
-            </label>
-            <label>Ready</label>
-            <label class="switch"> 
-            <input type="checkbox" name="ready"> 
-            <span class="slider round"></span>
-            </label>
-            <label>Expired</label>
-            <label class="switch"> 
-            <input type="checkbox" name="expired"> 
-            <span class="slider round"></span>
-            </label>
-            <label>
-            <button class="btn btn-success" type="submit">Update Status</button>
-            </label>
-            </form>    
+            
              
         </div>
         </div>

@@ -73,7 +73,7 @@
     <div style="flex: 1"><strong>Quantity</strong></div>
   </div>
   {% for dkey, v in val.items%}
-  {% if dkey != 'is_bot' and dkey != 'address' and dkey != 'total' %}
+  {% if dkey != 'is_bot' and dkey != 'address' and dkey != 'total' and dkey != 'details' %}
   <div class="cart-row">
     <div style="flex: 2">
       <img class="row-image" src="{{v.url}}" alt="not Available" />

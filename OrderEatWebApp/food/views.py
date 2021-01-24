@@ -367,6 +367,13 @@ def checkout(request, rest_id):
         del order['address']
         total = database.child('orders').child(idtoken).child(
             rest_id).child(dt_string).child('total').get().val()
+        order_details = {
+            'accepted': 'on',
+            'ready': 'off',
+            'expired': 'off',
+        }
+        database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('details').set(order_details)
+
 
         context = {
             'message': message,

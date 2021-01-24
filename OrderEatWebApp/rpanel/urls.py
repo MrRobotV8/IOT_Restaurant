@@ -17,7 +17,7 @@ urlpatterns = [
     path('home/', views.home, name='home'),
     path('profile/', views.profile, name='profile'), 
     path('orders/', views.orders, name='orders'),
-    path('orders/updatestatus/<str:id>', views.updatestatus, name="updatestatus"),
+    path('orders/updatestatus/<str:cust>/<str:id>', views.updatestatus, name="updatestatus"),
 ]
 """
 path('signin/', views.signIn, name='Signin'),
