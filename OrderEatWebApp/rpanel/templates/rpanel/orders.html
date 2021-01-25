@@ -36,7 +36,14 @@ Orders
             {% if k == "address" %}
             <p style="text-align:right"><strong>Address: </strong>{{v}}</p>
             {% elif k == "is_bot"%}
-            <p style="text-align:right"><strong>Table Service: </strong> {{v}}</p>
+            <p style="text-align:right"><strong>Table Service: 
+            </strong> 
+            {% if v == 1 %}
+            YES
+            {% else %}
+            NO
+            {% endif %}           
+            </p>
             {% elif k == "total" %}
             <p style="text-align:right"><strong>Total:</strong> {{v}} </p>
             {% elif k == "order_status" %}
@@ -44,10 +51,10 @@ Orders
             {% csrf_token %}
             <label for="title">Order status:<b>{{value.status}}</b> -- Change --> 
             <select class="select dark" name="orderstatus">
-            <option value="accepted">Accepted</option>
-            <option value="preparing">Preparing</option>
-            <option value="delivering">Delivering</option>
-            <option value="completed">Completed</option>
+            <option value="ACCEPTED">Accepted</option>
+            <option value="PREPARING">Preparing</option>
+            <option value="DELIVERING">Delivering</option>
+            <option value="COMPLETED">Completed</option>
           </select>
         </label>
             <button class="btn btn-success" type="submit">Update Status</button>

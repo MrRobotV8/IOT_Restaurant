@@ -108,8 +108,8 @@ def postsignup(request):
         return render(request, 'food/signUp.html', {'msg': msg})
     if added == 1:
         uid = user['localId']
-        data = {"name": name, "email": email,
-                 "is_bot": "0"}
+        data = {"name": name, "mail": email,
+                 "is_bot": 0}
                  #"address": address,
         database.child("users").child(uid).child("details").set(data)
 
@@ -342,7 +342,7 @@ def checkout(request, rest_id):
             idtoken).child('details').child('name').get().val()
         #client_address = database.child('users').child(idtoken).child('details').child('address').get().val()
         client_address = request.POST.get('address')
-        is_bot = False
+        is_bot = 0   #False
         delivery = {
             'address': client_address,
             'is_bot': is_bot,
@@ -369,7 +369,7 @@ def checkout(request, rest_id):
         total = database.child('orders').child(idtoken).child(
             rest_id).child(dt_string).child('total').get().val()
         #######################
-        order_status = "accepted"
+        order_status = "ACCEPTED"
         database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('order_status').set(order_status)
 
         #Create delivery order on Thingsboard
@@ -400,75 +400,62 @@ def checkout(request, rest_id):
 
 
 def orders(request):
-    user_id = request.session['user_id']
-    client_name = database.child('users').child(
-        user_id).child('details').child('name').get().val()
     try:
-
-        last_order = dict(database.child('users').child(user_id).child('last_basket').get().val())
-        del last_order['total']
-        pprint(last_order)
-        last_order_total = database.child('users').child(
-            user_id).child('last_basket').child('total').get().val()
-        pprint(last_order_total)
-    except:
-        last_order = None
-        last_order_total = None
-
-    orders = database.child('orders').child(user_id).get().val()
-    pprint(orders)
-    '''
-    rest_keys = []
-    for rest in orders.keys():
-        rest_keys.append(rest)
-    my_orders = {}
-    for rest in rest_keys:
-        rest_name = database.child('restaurants').child(rest).child('details').child('name').get().val()
+        user_id = request.session['user_id']
+        client_name = database.child('users').child(
+            user_id).child('details').child('name').get().val()
         try:
-            my_orders[rest_name] = dict(database.child('orders').child(user_id).child(rest).get().val())
+
+            last_order = dict(database.child('users').child(user_id).child('last_basket').get().val())
+            del last_order['total']
+            pprint(last_order)
+            last_order_total = database.child('users').child(
+                user_id).child('last_basket').child('total').get().val()
+            pprint(last_order_total)
         except:
-            pass
-    pprint(my_orders)
-    '''
-    my_orders = {}
-    for rest, values in orders.items():
-        for ts, order in values.items():
-            print(rest)
-            print(ts)
-            d = datetime(
-                day=int(ts[:2]),
-                month=int(ts[2:4]),
-                year=int(ts[4:8]),
-                hour=int(ts[8:10]),
-                minute=int(ts[10:12]),
-                second=int(ts[12:14]),
-                )
-            timestamp = datetime.timestamp(d)
-            print(d)
-            print(timestamp)
-            my_orders[timestamp]={
-                'rest_name': database.child('restaurants').child(rest).child('details').child('name').get().val(),
-                'ts': d,
-                'order': order,
-            }
+            last_order = None
+            last_order_total = None
 
-    my_orders = OrderedDict(sorted(my_orders.items(),key=lambda x:x[0], reverse=True))
+        orders = database.child('orders').child(user_id).get().val()
+        pprint(orders)
+        my_orders = {}
+        for rest, values in orders.items():
+            for ts, order in values.items():
+                print(rest)
+                print(ts)
+                d = datetime(
+                    day=int(ts[:2]),
+                    month=int(ts[2:4]),
+                    year=int(ts[4:8]),
+                    hour=int(ts[8:10]),
+                    minute=int(ts[10:12]),
+                    second=int(ts[12:14]),
+                    )
+                timestamp = datetime.timestamp(d)
+                print(d)
+                print(timestamp)
+                my_orders[timestamp]={
+                    'rest_name': database.child('restaurants').child(rest).child('details').child('name').get().val(),
+                    'ts': d,
+                    'order': order,
+                }
+
+        my_orders = OrderedDict(sorted(my_orders.items(),key=lambda x:x[0], reverse=True))
 
 
-    context = {
-        # 'history': history,
-        'my_orders': my_orders,
-        'user': client_name,
-        'last_order': last_order,
-        'tot': last_order_total,
-    }
+        context = {
+            'my_orders': my_orders,
+            'user': client_name,
+            'last_order': last_order,
+            'tot': last_order_total,
+        }
 
-    return render(request, 'food/order.html', context)
-'''
+        return render(request, 'food/order.html', context)
+
     except:
         msg = "Something goes wrong! Please Try again :)"
         ctx = {
         'messg': msg
         }
         return render(request, 'food/login.html', ctx)
-'''
+
