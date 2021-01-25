@@ -97,13 +97,13 @@ class ThingsDash:
         if x.status_code==200:
             return True
 
-    def assign_device_to_public(self, asset_id):
-        url_api = f"{self.url_all}/api/customer/public/asset/{asset_id}"
-        headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json"}
-        payload={}
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            return True
+    # def assign_device_to_public(self, asset_id):
+    #     url_api = f"{self.url_all}/api/customer/public/asset/{asset_id}"
+    #     headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json"}
+    #     payload={}
+    #     x = requests.post(url_api, data=json.dumps(payload), headers=headers)
+    #     if x.status_code==200:
+    #         return True
 
     def provision_restaurant_device(self, restaurant_name):
         url_api = f"{self.url_all}/api/v1/provision"

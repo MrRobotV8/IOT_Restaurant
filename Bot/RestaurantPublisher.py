@@ -66,3 +66,11 @@ class Publisher:
         logger.info(f"Client {self.client} publishing {msg} on {self.topic}")
         self.mqtt_client.publish(self.topic, msg, self.qos)
 
+
+if __name__ == '__main__':
+    import sys
+    sys.path.insert(0, "C:/Users/Riccardo/Desktop/IOT_Restaurant/OrderEatWebApp/rpanel/thingsboard")
+    from main import ThingsDash
+    td = ThingsDash()
+    token = "de30f6e0-5e69-11eb-bcf2-5f53f5d253b9"
+    td.create_table_order(device_access_token=f"{token}_item:table:1", payload={"order": "1;99"})

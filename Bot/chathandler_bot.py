@@ -198,7 +198,6 @@ class SmartRestaurant:
             # if self.restaurant_key:
                 # restaurant = self.fb.db.child('users').child(self.fb_id).child('active').child('restaurant_key').get()
                 # restaurant_key = restaurant.val()
-
                 message = 'Click on the link to begin the ordering phase'
                 link = f'https://order-eat2021-django.herokuapp.com/tg-menu/{self.fb_id}/{self.restaurant_key}'
                 self.link = link
@@ -284,7 +283,6 @@ class SmartRestaurant:
                 else:
                     new = dinner_slots[i*3:]
                     time_booking.append(new)
-
         except:
             traceback.print_exc()
             time_booking = self.time_booking
