@@ -374,7 +374,7 @@ def checkout(request, rest_id):
 
         #Create delivery order on Thingsboard
         td = ThingsDash()
-        token = database.child('restaurants').child(rest_id).child('details').child('token').get().val()
+        token = database.child('restaurants').child(rest_id).child('details').child('token_order').get().val()
         togo_token = f"{token}_togo"
         x = ""
         for dish in order.values():

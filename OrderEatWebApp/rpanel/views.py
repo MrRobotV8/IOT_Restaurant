@@ -155,6 +155,7 @@ def postSignUp(request):
     building_name = f"{owner_id}_building:1"
     building_label = address  # Indirizzo del ristorante
     building_id = td.create_restaurant_asset(asset_name=building_name, asset_label=building_label)
+    #TOKEN_TELEMETRY
     database.child('restaurants').child(uid).child('details').child('token_telemetry').set(building_id)
     # assign asset/building to customer
     td.relation_customer_contains_asset(owner_id, building_id)
@@ -163,11 +164,13 @@ def postSignUp(request):
     else:
         td.assign_asset_to_customer(owner_id, building_id)
 
+    #create restaurant device
     restaurant_name = f"{building_id}_business:1"
     restaurant_token = restaurant_name
     restaurant_label = name  # Nome del ristorante
     restaurant_device_id = td.save_restaurant_device(device_name=restaurant_name, device_label=restaurant_label,
                                                      device_token=restaurant_name)
+    #TOKEN_ORDER
     database.child('restaurants').child(uid).child('details').child('token_order').set(restaurant_device_id)
     # set restaurant attributes
     td.set_device_attributes(restaurant_token, {"customer_owner": owner_id,
