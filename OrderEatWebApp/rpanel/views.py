@@ -11,7 +11,7 @@ import json
 import collections
 from collections import OrderedDict
 from pprint import pprint
-from rpanel.thingsboard.main import ThingsDash
+from thingsboard.main import ThingsDash
 import os
 
 
@@ -152,22 +152,37 @@ def postSignUp(request):
         print("except 3")
         return render(request, 'rpanel/register.html', {'messg': msg})
 
-    # TODO: ADD VICTOR'S CODE TO CREATE ENTITY RESTAURANT 
+
+    # TODO: ADD VICTOR'S CODE TO CREATE ENTITY RESTAURANT
+    public = True
     td = ThingsDash()
     owner_id = td.create_customer(title=email, address=address)  #customer_id
-    building_id = td.create_restaurant_asset(name=name)     #asset_id
-    # assign asset to owner
+    building_name = f"{owner_id}_building:1"
+    building_label = address    # Indirizzo del ristorante 
+    building_id = td.create_restaurant_asset(asset_name=building_name, asset_label=building_label)
+    # assign asset/building to customer
     td.relation_customer_contains_asset(owner_id, building_id)
-    td.assign_asset_to_customer(owner_id, building_id)
-    # create restaurant device
-    restaurant_device_id = td.save_restaurant_device(name, uid)  # uid -- custom access token
-    #set devices attributes
-    restaurant_token = f"{building_id}_1"
-    td.set_device_attributes(restaurant_token, {"address": address , "description": description, "name": name, "phone": phone, "seats": seats, "status": "1", "dinner_slot": "", "lunch_slot": ""})
+    if public:
+        td.assign_device_to_public(building_id)
+    else:
+        td.assign_asset_to_customer(owner_id, building_id)
+
+    restaurant_name = f"{building_id}_business:1"
+    restaurant_token = restaurant_name
+    restaurant_label = name # Nome del ristorante
+    restaurant_device_id = td.save_restaurant_device(device_name=restaurant_name, device_label=restaurant_label, device_token=restaurant_name)
+    database.child('restaurants').child(uid).child('details').child('token').set(restaurant_device_id)
+    # set restaurant attributes
+    td.set_device_attributes(restaurant_token, {"customer_owner": owner_id,
+     "address": address, "description": description, "name": name, "phone": phone, "seats": seats, "status":"1", "dinner_slot": "", "lunch_slot": ""})
     # assign device to asset
     td.relation_asset_contains_device(building_id, restaurant_device_id)
-    # assign device to owner
-    td.assign_device_to_customer(owner_id, restaurant_device_id)
+    # assign device to customer
+    if public:
+        td.assign_device_to_public(restaurant_device_id)
+    else:
+        td.assign_device_to_customer(owner_id, restaurant_device_id)
+
 
     # create the tables
     dict_tables = {2:int(tfor2), 4:int(tfor4), 6:int(tfor6)}  # this should be given by ciccio
@@ -176,37 +191,50 @@ def postSignUp(request):
         for i in range(n_tables):
             table_number += 1
             # create device table
-            table_token = f"{restaurant_device_id}_{table_number}"
-            table_device_id = td.save_table_device(table_number, table_token, restaurant_device_id)
+            table_token = f"{restaurant_device_id}_item:table:{table_number}"
+            table_device_id = td.save_table_device(table_number=table_number, device_token=table_token, device_restaurant_id=restaurant_device_id)
             # set table attributes
-            td.set_device_attributes(table_token, {"seats": n_seats})
+            td.set_device_attributes(table_token, {"customer_owner": owner_id, "seats": n_seats})
+            # assign device to customer
+            if public:
+                td.assign_device_to_public(table_device_id)
+            else:
+                td.assign_device_to_customer(owner_id, table_device_id)
             # assign device to asset
             td.relation_asset_contains_device(building_id, table_device_id)
-            # assign device to customer
-            td.assign_device_to_customer(owner_id, table_device_id)
-    
+            # assign device to restaurant device
+            td.relation_device_contains_device(restaurant_device_id, table_device_id)
+
     # create the togo device
     togo_token = f"{restaurant_device_id}_togo"
     togo_device_id = td.save_togo_device(togo_token, restaurant_device_id)
     # assign device to asset
     td.relation_asset_contains_device(building_id, togo_device_id)
-    # assign device to customer
-    td.assign_device_to_customer(owner_id, togo_device_id)
-    # creates a dashboard and assigns it to the owner
-    print(os.listdir())
-    f = open("rpanel/thingsboard/template_restaurant.json")
-    dash_json = json.load(f)
-    dash_json['title'] = name.upper()
-    dashboard_id = td.save_dashboard(dash_json)
-    td.assign_dashboard_to_customer(owner_id, dashboard_id)
+    #assign device to owner
+    if public:
+        td.assign_device_to_public(togo_device_id)
+    else:
+        td.assign_device_to_customer(owner_id, togo_device_id)
+    # set togo attributes
+    td.set_device_attributes(togo_token, {"customer_owner": owner_id})
 
-    # make the dashboard public and get its url
-    dashboard_id, public_client_id, dashboard_url = td.assign_dashboard_to_public_customer(dashboard_id)
-    print(dashboard_id)
-    print(public_client_id)
-    print(dashboard_url)
+    # creates a dashboard and assigns it to the owner
+    custom_dash = td.customize_dashboard(restaurant_dashboard_path="thingsboard/restaurant_default.json", restaurant_label=restaurant_label, customer_id=owner_id)
+    dashboard_id = td.save_dashboard(custom_dash)
+    if public:
+        # make the dashboard public and get its url
+        dashboard_id, public_client_id, dashboard_url = td.assign_dashboard_to_public_customer(dashboard_id)
+        print(f"Customer dashboard URL: {dashboard_url}")
+    else:
+        td.assign_dashboard_to_customer(owner_id, dashboard_id)
 
     database.child('restaurants').child(uid).child('details').child('thingsboard').set(dashboard_url)
+    
+    # create empty menu
+
+    database.child('restaurants').child(uid).child('menu').set({'item': 'first'})
+
+
     
 
 
@@ -219,21 +247,15 @@ def postSignUp(request):
 
 
 def menu(request):
-    try:
-        idtoken = request.session['uid']
-        rest_id = authe.get_account_info(idtoken)
-        rest_id = rest_id['users'][0]['localId']
-        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
-        menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
-        pprint(menu)
 
-        return render(request, "rpanel/menu.html", {'uid': rest_id, 'name': name, 'menu':menu})
-    except:
-        msg = "Session expired! Please login again!"
-        ctx = {
-            'messg' : msg,
-        }
-        return render(request, 'rpanel/signIn.html', ctx)
+    idtoken = request.session['uid']
+    rest_id = authe.get_account_info(idtoken)
+    rest_id = rest_id['users'][0]['localId']
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+    menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
+    pprint(menu)
+
+    return render(request, "rpanel/menu.html", {'uid': rest_id, 'name': name, 'menu':menu})
 
 
 def postmenu(request):
@@ -388,6 +410,8 @@ def orders(request):
                         'day': d,
                         'ts':ts,
                         'customer_id': customer,
+                        'status': database.child('orders').child(customer).child(rest_id).child(ts).child('order_status').get().val(),
+
                     }
 
     my_orders = OrderedDict(sorted(my_orders.items(),key=lambda x:x[0], reverse=True))
@@ -437,24 +461,14 @@ def orders(request):
         return render(request, 'rpanel/signIn.html', ctx)
 '''
 
-def updatestatus(request, cust, id):
-    accepted = request.POST.get('accepted')
-    ready = request.POST.get('ready')
-    expired = request.POST.get('expired')
-    print(accepted)
-    print(ready)
-    print(expired)
+def updatestatus(request, cust, pk):
+    order_status = request.POST.get('orderstatus')
     idtoken = request.session['uid']
     rest_id = authe.get_account_info(idtoken)
     rest_id = rest_id['users'][0]['localId']
 
-    order_details = {
-        'accepted': accepted,
-        'ready': ready,
-        'expired': expired,
-    }
 
-    database.child('orders').child(cust).child(rest_id).child(id).child('details').set(order_details) #or update?
+    database.child('orders').child(cust).child(rest_id).child(pk).child('order_status').set(order_status) #or update?
 
     orders = database.child('orders').get().val()
     my_orders={}
@@ -482,6 +496,7 @@ def updatestatus(request, cust, id):
                         'day': d,
                         'ts':ts,
                         'customer_id':customer,
+                        'status': database.child('orders').child(cust).child(rest_id).child(pk).child('order_status').get().val(),
                     }
     
     my_orders = OrderedDict(sorted(my_orders.items(),key=lambda x:x[0], reverse=True))

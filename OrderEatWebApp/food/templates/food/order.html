@@ -1,94 +1,56 @@
-{% extends 'food/base.html' %} {% load static %} {% block content %}
-{% if last_order != Null %}
-<section class="cart">
-  <div class="container-md">
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="box-element">
-          <h4 style="text-align: center">
-            Dear {{user}}, the following one is your last accepted order
-            followed by your history orders
-          </h4>
-
-          <br />
-          <br />
-
-          <table class="table">
-            <tr>
-              <th>
-                <h5>
-                  Items:
-                  <strong
-                    >{% for key, value in last_order.items %}
-                    <br />{{value.item}} x {{value.quantity}}<br />
-                    {%endfor%}
-                  </strong>
-                </h5>
-              </th>
-              <th>
-                <h5>Total:<strong> €{{tot|floatformat:2}}</strong></h5>
-              </th>
-            </tr>
-          </table>
-        </div>
-
-        <br />
-        <div class="box-element">
-          <div class="cart-row">
-            <div style="flex: 2"></div>
-            <div style="flex: 2"><strong>Item</strong></div>
-            <div style="flex: 1"><strong>Price</strong></div>
-            <div style="flex: 1"><strong>Quantity</strong></div>
-          </div>
-          {% for key, value in last_order.items %}
-          <div class="cart-row">
-            <div style="flex: 2">
-              <img class="row-image" src="{{value.url}}" alt="not Available" />
-            </div>
-            <div style="flex: 2"><p>{{value.item}}</p></div>
-            <div style="flex: 1"><p>${{value.price|floatformat:2}}</p></div>
-            <div style="flex: 1"><p>{{value.quantity}}</p></div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
+{% extends 'food/base.html' %} {% load static %} 
+{%block title%}
+Orders
+{% endblock %}
+{% block content %}
+<style>
+body {
+  background: #02053b;
+}
+</style>
+<div class="container-md" style="background-color: #02053b; padding:20px">
+{% for timestamp, value in my_orders.items %}
+<div class="card" style="margin:auto">
+  <div class="card-body">
+            <h4 class="card-title" style='color:black'> Restaurant: <strong>{{ value.rest_name }}</strong></h4>
+            <p style="margin-right:5rem;">When: {{value.ts}}</p>
+            <hr />
+            <section class="cart">
+              <div class="container">
+                  <div class="row">      
+                      {%for k, v in value.order.items %}
+                      {% if k != 'is_bot' and k != 'address' and k != 'total' and k != 'order_status' %}
+                              <div class="cart-row">
+                                <div style="flex: 2"></div>
+                                <div style="flex: 2"><strong>Item</strong></div>
+                                <div style="flex: 1"><strong>Price</strong></div>
+                                <div style="flex: 1"><strong>Quantity</strong></div>
+                              </div>
+                              <div class="cart-row">
+                                    <div style="flex: 2">
+                                      <img class="row-image" src="{{v.url}}" alt="not Available" />
+                                    </div>
+                                <div style="flex: 2"><p>{{v.item}}</p></div>
+                                <div style="flex: 1"><p>${{v.price|floatformat:2}}</p></div>
+                                <div style="flex: 1"><p>{{v.quantity}}</p></div>
+                              </div>
+                      {%elif k == 'order_status' %}
+                      <p style="text-align:right">STATUS: <b>{{v}}</b>
+                      {%elif k == 'address' %}
+                      <p>Address: {{v}}
+                      {%elif k == 'total' %}
+                      <p>Total: € <b>{{v}}</b>
+                      {% endif %} 
+                      {% endfor %}
+                </div>
+              </div>
+            </section>
   </div>
-</section>
-{%endif%}
-<section class="cart">
-<div class="container-md">
-<div class="row">
-      <div class="col-lg-12">
-{%for rkey, value in orders.items %}
-<p>{{rkey}} </p>
-<p>{% for day,val in value.items%}</p>
-
-<p>{{day}} - TIME (dd/mm/yyyy/h/m/s)</p>
-
-  <div class="cart-row">
-    <div style="flex: 2"></div>
-    <div style="flex: 2"><strong>Item</strong></div>
-    <div style="flex: 1"><strong>Price</strong></div>
-    <div style="flex: 1"><strong>Quantity</strong></div>
-  </div>
-  {% for dkey, v in val.items%}
-  {% if dkey != 'is_bot' and dkey != 'address' and dkey != 'total' and dkey != 'details' %}
-  <div class="cart-row">
-    <div style="flex: 2">
-      <img class="row-image" src="{{v.url}}" alt="not Available" />
-    </div>
-    <div style="flex: 2"><p>{{v.item}}</p></div>
-    <div style="flex: 1"><p>${{v.price|floatformat:2}}</p></div>
-    <div style="flex: 1"><p>{{v.quantity}}</p></div>
-  </div>
-      {% endif %} {% endfor %} {% endfor %}
-    {% endfor %}
-    </div>
-    </div>
+  
 </div>
-</section>
-    <div class="container-fluid"></div>
-    {% endblock content %}
-  </div>
+<hr>
+{%endfor%}
 </div>
+
+
+{% endblock content %}

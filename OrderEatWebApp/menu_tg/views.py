@@ -9,6 +9,7 @@ from .models import *
 from datetime import datetime
 from django.core.mail import send_mail
 
+#TODO: ADD IS_BOT=1
 # Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
 config = {
     'apiKey': "AIzaSyCNUQyDSE8LglsRzQGpk8OJGvTj2IyicT4",
@@ -58,10 +59,7 @@ import traceback
 
 
 def add_to_cart(request, idtoken, rest_id, pk):
-    # rest_id = request.session['rest_id']
-    # idtoken = request.session['uid']
-    # user_id = authe.get_account_info(idtoken)
-    # user_id = user_id['users'][0]['localId']
+
     product = database.child('restaurants').child(rest_id).child('menu').child(pk).get()
     quantity = request.POST.get('quantity')
     price = request.POST.get('price')
@@ -113,10 +111,6 @@ def add_to_cart(request, idtoken, rest_id, pk):
 
 
 def remove_from_cart(request, idtoken, rest_id, pk):
-    # idtoken = request.session['uid']
-    # rest_id = str(rest_id)
-    # user_id = authe.get_account_info(idtoken)
-    # user_id = user_id['users'][0]['localId']
 
     try:
         actual = database.child('users').child(idtoken).child('last_basket').child('total').get().val()
@@ -166,12 +160,9 @@ def checkout(request, idtoken, rest_id):
     try:
         last_basket = database.child('users').child(idtoken).child('last_basket').get().val()
         database.child('orders').child(idtoken).child(rest_id).child(dt_string).set(last_basket)
-        order_details = {
-            'accepted': 'on',
-            'ready': 'off',
-            'expired': 'off',
-        }
-        database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('details').set(order_details)
+        order_status = "ACCEPTED"
+        database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('order_status').set(order_status)
+        database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('is_bot').set(1)
         message = "Your order has been accepted by OrderEat"
     except:
         message = "Something goes wrong, please try again"
