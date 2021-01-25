@@ -39,11 +39,11 @@ Orders
             <p style="text-align:right"><strong>Table Service: </strong> {{v}}</p>
             {% elif k == "total" %}
             <p style="text-align:right"><strong>Total:</strong> {{v}} </p>
-            {% elif k == "details" %}
+            {% elif k == "order_status" %}
             <form method='POST' action="{% url 'rpanel:updatestatus' value.customer_id value.ts %}">
             {% csrf_token %}
-            <label for="title"><b>Stutus Order</b>
-            <select class="select dark" name="item-section">
+            <label for="title">Order status:<b>{{value.status}}</b> -- Change --> 
+            <select class="select dark" name="orderstatus">
             <option value="accepted">Accepted</option>
             <option value="preparing">Preparing</option>
             <option value="delivering">Delivering</option>

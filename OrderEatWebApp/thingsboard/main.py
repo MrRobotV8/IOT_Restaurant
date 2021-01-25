@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 
 class ThingsDash:
     def __init__(self):
@@ -275,6 +276,7 @@ class ThingsDash:
             return True
 
     def customize_dashboard(self, restaurant_dashboard_path, restaurant_label, customer_id):
+        print(os.listdir())
         with open(restaurant_dashboard_path, "r") as f:
             dash_custom = json.load(f)
             dash_custom["title"] = dash_custom["title"] + " - " + restaurant_label
