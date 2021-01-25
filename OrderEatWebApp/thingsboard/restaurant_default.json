@@ -18,21 +18,21 @@
               "timewindowMs": 60000
             }
           },
-          "showTitle": true,
+          "showTitle": false,
           "backgroundColor": "rgb(255, 255, 255)",
           "color": "rgba(0, 0, 0, 0.87)",
           "padding": "8px",
           "settings": {
-            "cardCss": ".card {\n    font-weight: bold;\n    font-size: 32px;\n    color: #999;\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n}",
-            "cardHtml": "<div class='card'><img src=\"https://lh3.googleusercontent.com/duIsx4Nxm1tmXG1KQPhnPXrCZ0IbpuEHPCyt-1iNa8mu77XU05xrCx1woIdOo4To629DUDWKbnjFOR1GsxFV39D_-zusbnpazf-X0-p6oGFoJHdkhtI_zTrNfZymkM2YO-K5MLeBpg=w2400\" width=\"40\" height=\"40\" alt=\"W3Schools.com\">\r\n</div>\r\n\r\n"
+            "cardCss": ".card {\n    font-weight: bold;\n    font-size: 32px;\n    color: #999;\n    width: 100%;\n    height: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    margin: 0px;\n}",
+            "cardHtml": "<div class='card'><img src=\"https://iheartvirginiawine.com/wp-content/uploads/2014/03/restaurant-4.jpg\">\r\n</div>\r\n\r\n"
           },
           "title": "Control Panel",
-          "dropShadow": true,
+          "dropShadow": false,
           "showTitleIcon": false,
           "iconColor": "rgba(0, 0, 0, 0.87)",
           "iconSize": "24px",
           "titleTooltip": "",
-          "enableFullscreen": true,
+          "enableFullscreen": false,
           "widgetStyle": {},
           "titleStyle": {
             "fontSize": "16px",
@@ -367,8 +367,8 @@
             "customLegendEnabled": false
           },
           "title": "Temperature Feedback",
-          "dropShadow": true,
-          "enableFullscreen": true,
+          "dropShadow": false,
+          "enableFullscreen": false,
           "titleStyle": {
             "fontSize": "16px",
             "fontWeight": 400
@@ -379,7 +379,7 @@
           "iconSize": "24px",
           "titleTooltip": "",
           "widgetStyle": {},
-          "showLegend": true,
+          "showLegend": false,
           "legendConfig": {
             "direction": "column",
             "position": "bottom",
@@ -415,41 +415,50 @@
                 {
                   "name": "client",
                   "type": "timeseries",
-                  "label": "client",
+                  "label": "Client",
                   "color": "#2196f3",
                   "settings": {
                     "useCellStyleFunction": false,
-                    "cellStyleFunction": "",
-                    "useCellContentFunction": false,
-                    "cellContentFunction": ""
+                    "useCellContentFunction": false
                   },
-                  "_hash": 0.9888742597288278
+                  "_hash": 0.9888742597288278,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
                 },
                 {
                   "name": "order",
                   "type": "timeseries",
-                  "label": "order",
+                  "label": "Order",
                   "color": "#4caf50",
                   "settings": {
                     "useCellStyleFunction": false,
-                    "cellStyleFunction": "",
-                    "useCellContentFunction": false,
-                    "cellContentFunction": ""
+                    "useCellContentFunction": false
                   },
-                  "_hash": 0.42876868529398693
+                  "_hash": 0.42876868529398693,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
                 },
                 {
-                  "name": "obs",
+                  "name": "address",
                   "type": "timeseries",
-                  "label": "obs",
+                  "label": "Address",
                   "color": "#f44336",
                   "settings": {
                     "useCellStyleFunction": false,
-                    "cellStyleFunction": "",
-                    "useCellContentFunction": false,
-                    "cellContentFunction": ""
+                    "useCellContentFunction": false
                   },
-                  "_hash": 0.4306133980170461
+                  "_hash": 0.18468617450326397,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
                 }
               ]
             }
@@ -692,11 +701,149 @@
         "row": 0,
         "col": 0,
         "id": "46fd2b38-d668-adb8-1476-fde96f4a6246"
+      },
+      "19ffc50c-e73c-a9e4-02b8-3c9ff65b4d0d": {
+        "isSystemType": true,
+        "bundleAlias": "cards",
+        "typeAlias": "timeseries_table",
+        "type": "timeseries",
+        "title": "New widget",
+        "sizeX": 8,
+        "sizeY": 6.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "0e9c7ddb-4c21-792f-23e4-9840107ae22a",
+              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
+              "dataKeys": [
+                {
+                  "name": "humitidy",
+                  "type": "timeseries",
+                  "label": "humitidy",
+                  "color": "#2196f3",
+                  "settings": {
+                    "useCellStyleFunction": false,
+                    "cellStyleFunction": "",
+                    "useCellContentFunction": false,
+                    "cellContentFunction": ""
+                  },
+                  "_hash": 0.4996748987542423
+                },
+                {
+                  "name": "temperature#",
+                  "type": "timeseries",
+                  "label": "temperature#",
+                  "color": "#4caf50",
+                  "settings": {
+                    "useCellStyleFunction": false,
+                    "cellStyleFunction": "",
+                    "useCellContentFunction": false,
+                    "cellContentFunction": ""
+                  },
+                  "_hash": 0.959720252734372
+                }
+              ]
+            }
+          ],
+          "timewindow": {
+            "realtime": {
+              "interval": 1000,
+              "timewindowMs": 60000
+            },
+            "aggregation": {
+              "type": "NONE",
+              "limit": 200
+            }
+          },
+          "showTitle": true,
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "showTimestamp": true,
+            "displayPagination": true,
+            "defaultPageSize": 10
+          },
+          "title": "Environment",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400,
+            "padding": "5px 10px 5px 10px"
+          },
+          "useDashboardTimewindow": false,
+          "showLegend": false,
+          "widgetStyle": {},
+          "actions": {},
+          "showTitleIcon": true,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "displayTimewindow": true,
+          "titleTooltip": "",
+          "titleIcon": "timeline"
+        },
+        "row": 0,
+        "col": 0,
+        "id": "19ffc50c-e73c-a9e4-02b8-3c9ff65b4d0d"
+      },
+      "7cc9370f-7e65-4f3d-d3dd-ac1feab65b7e": {
+        "isSystemType": true,
+        "bundleAlias": "control_widgets",
+        "typeAlias": "led_indicator",
+        "type": "rpc",
+        "title": "New widget",
+        "sizeX": 2.5,
+        "sizeY": 2.5,
+        "config": {
+          "targetDeviceAliases": [],
+          "showTitle": false,
+          "backgroundColor": "#e6e7e8",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0px",
+          "settings": {
+            "requestTimeout": 500,
+            "initialValue": false,
+            "ledColor": "#ff0000",
+            "valueAttribute": "bathroom_busy",
+            "retrieveValueMethod": "attribute",
+            "performCheckStatus": false,
+            "checkStatusMethod": "checkStatus",
+            "parseValueFunction": "return data === 1 ? true:false;",
+            "title": "Bathroom"
+          },
+          "title": "",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "useDashboardTimewindow": true,
+          "showLegend": false,
+          "actions": {},
+          "decimals": 2,
+          "datasources": [],
+          "targetDeviceAliasIds": [
+            "0e9c7ddb-4c21-792f-23e4-9840107ae22a"
+          ],
+          "showTitleIcon": true,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "titleIcon": "airline_seat_legroom_normal"
+        },
+        "row": 0,
+        "col": 0,
+        "id": "7cc9370f-7e65-4f3d-d3dd-ac1feab65b7e"
       }
     },
     "states": {
       "default": {
-        "name": "Pulcinella",
+        "name": "restaurant_name",
         "root": true,
         "layouts": {
           "main": {
@@ -743,8 +890,26 @@
           "main": {
             "widgets": {
               "879cfcb1-b309-90b5-5301-c555c8cd17fe": {
+                "sizeX": 9,
+                "sizeY": 6,
+                "row": 2,
+                "col": 0
+              },
+              "19ffc50c-e73c-a9e4-02b8-3c9ff65b4d0d": {
                 "sizeX": 8,
-                "sizeY": 5,
+                "sizeY": 6,
+                "row": 2,
+                "col": 9
+              },
+              "7cc9370f-7e65-4f3d-d3dd-ac1feab65b7e": {
+                "sizeX": 2,
+                "sizeY": 2,
+                "row": 2,
+                "col": 17
+              },
+              "b4f6b498-e87e-17e3-095f-8ae43889f23c": {
+                "sizeX": 24,
+                "sizeY": 2,
                 "row": 0,
                 "col": 0
               }
@@ -773,6 +938,12 @@
               },
               "46fd2b38-d668-adb8-1476-fde96f4a6246": {
                 "sizeX": 11,
+                "sizeY": 2,
+                "row": 2,
+                "col": 11
+              },
+              "b4f6b498-e87e-17e3-095f-8ae43889f23c": {
+                "sizeX": 25,
                 "sizeY": 2,
                 "row": 0,
                 "col": 0
@@ -961,7 +1132,7 @@
       "showTitle": false,
       "showDashboardsSelect": false,
       "showEntitiesSelect": false,
-      "showDashboardTimewindow": true,
+      "showDashboardTimewindow": false,
       "showDashboardExport": true,
       "toolbarAlwaysOpen": true,
       "titleColor": "rgba(0,0,0,0.870588)",
