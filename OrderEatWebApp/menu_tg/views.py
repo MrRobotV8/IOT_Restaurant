@@ -159,10 +159,9 @@ def checkout(request, idtoken, rest_id):
 
     try:
         last_basket = database.child('users').child(idtoken).child('last_basket').get().val()
+        last_basket['order_status'] = "ACCEPTED"
+        last_basket['is_bot'] = 1
         database.child('orders').child(idtoken).child(rest_id).child(dt_string).set(last_basket)
-        order_status = "ACCEPTED"
-        database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('order_status').set(order_status)
-        database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('is_bot').set(1)
         message = "Your order has been accepted by OrderEat"
     except:
         message = "Something goes wrong, please try again"
