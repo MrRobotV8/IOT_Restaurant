@@ -1,3 +1,5 @@
+import traceback
+
 import pandas as pd
 import os
 import pyrebase
@@ -98,18 +100,20 @@ class Firebase:
     def check_table_availability(self, restaurant_key, hash_key):
         tables = self.download(f'restaurants/{restaurant_key}/details/tables')
         t_new = tables
-        bookings = self.download(f'restaurants/{restaurant_key}/bookings')
-        bookings_keys = bookings.keys()
         u_date, u_hour, u_people, u_user = self.unhash(hash_key)
-        for k in bookings_keys:
-            date, hour, people, user = self.unhash(k)
-            if hour == u_hour:
-                p = int(people)
-                assigned = self.assign_table(p, t_new)
-                for t in assigned:
-                    t_new[t] = int(t_new[t]) - 1
-
-        p = str(int(u_people))
+        try:
+            bookings = self.download(f'restaurants/{restaurant_key}/bookings')
+            bookings_keys = bookings.keys()
+            for k in bookings_keys:
+                date, hour, people, user = self.unhash(k)
+                if hour == u_hour:
+                    p = int(people)
+                    assigned = self.assign_table(p, t_new)
+                    for t in assigned:
+                        t_new[t] = int(t_new[t]) - 1
+        except:
+            print('No bookings')
+        p = int(u_people)
         assigned = self.assign_table(p, t_new)
         table_key = self.assign_key_table(tables, t_new, assigned)
         if len(assigned) > 0:
@@ -119,24 +123,29 @@ class Firebase:
 
     @staticmethod
     def assign_key_table(t_old, t_new, assigned):
+        print(f'ASSIGNED: {assigned}')
+        print(f'TNEW: {t_new}')
+        print(f'TOLD: {t_old}')
         if len(assigned) == 1:
             to_add = 0
             for k, v in t_old.items():
+                v = int(v)
                 if k == assigned[0]:
                     break
                 else:
                     to_add += v
-            table_key = [t_new[assigned[0]] + to_add]
+            table_key = [int(t_new[assigned[0]]) + to_add]
         else:
             table_key = []
             for a in assigned:
                 to_add = 0
                 for k, v in t_old.items():
+                    v = int(v)
                     if k == a:
                         break
                     else:
                         to_add += v
-                table_key.append(t_new[a] + to_add)
+                table_key.append(int(t_new[a]) + to_add)
         return table_key
 
     @staticmethod
@@ -208,31 +217,33 @@ class Firebase:
         if self.start_stream:
             pass
         else:
-            event = message['event']
-            if event == 'put':
-                path = message['path']
-                data = message['data']
-                path = path[1:].split('/')
-                if len(path) == 1:
-                    user_key = path[0]
-                    rest_key = list(data.keys())[0]
-                    ts = list(data.values())[0]
-                else:
-                    user_key = path[0]
-                    rest_key = path[1]
-                    ts = data
-                token = self.db.child('restaurants').child(rest_key).child('details').child('token').get().val()
-                user = self.db.child('users').child(user_key).child('details').child('name').get().val()
-                user_details = self.db.child('users').child(user_key).child('details').get().val()
-                booking_details = self.db.child('users').child(user_key).child('active').child('details').get().val()
-                hash = self.hash_creator(user_details['bot_id'], booking_details['time'], booking_details['people'])
-                table_key = self.db.child('restaurants').child(rest_key).child('bookings').child(hash).child(
-                    'table_key').get().val()
-
-                order = ts[list(ts.keys())[0]]
-                for t in table_key:
-                    self.td.create_table_order(device_access_token=f"{token}_item:table:{t}",
-                                               payload={"order": order, "user": user})
+            try:
+                event = message['event']
+                if event == 'put':
+                    path = message['path']
+                    data = message['data']
+                    path = path[1:].split('/')
+                    if len(path) == 1:
+                        user_key = path[0]
+                        rest_key = list(data.keys())[0]
+                        ts = list(data.values())[0]
+                    else:
+                        user_key = path[0]
+                        rest_key = path[1]
+                        ts = data
+                    token = self.db.child('restaurants').child(rest_key).child('details').child('token').get().val()
+                    user = self.db.child('users').child(user_key).child('details').child('name').get().val()
+                    user_details = self.db.child('users').child(user_key).child('details').get().val()
+                    booking_details = self.db.child('users').child(user_key).child('active').child('details').get().val()
+                    hash = self.hash_creator(user_details['bot_id'], booking_details['time'], booking_details['people'])
+                    table_key = self.db.child('restaurants').child(rest_key).child('bookings').child(hash).child(
+                        'table_id').get().val()
+                    order = ts[list(ts.keys())[0]]
+                    for t in table_key:
+                        self.td.create_table_order(device_access_token=f"{token}_item:table:{t}",
+                                                   payload={"order": order, "user": user})
+            except:
+                traceback.print_exc()
 
         self.start_stream = False
 

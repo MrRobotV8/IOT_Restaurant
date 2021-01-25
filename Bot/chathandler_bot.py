@@ -11,6 +11,8 @@ from RestaurantPublisher import Publisher
 from RestaurantSubscriber import Subscriber
 from Firebase import Firebase
 import datetime
+from FeedbackSender import Sender
+
 
 # Enable logging
 logging.basicConfig(
@@ -25,6 +27,7 @@ PORT = int(os.environ.get('PORT', '8443'))
 class SmartRestaurant:
     def __init__(self):
         self.fb = Firebase()
+        self.sender = Sender()
         self.fb.authenticate()
         self.restaurants = self.fb.download('restaurants')
         self.restaurants_names = [r['details']['name'] for r in self.restaurants.values()]
@@ -194,12 +197,14 @@ class SmartRestaurant:
             return self.CHECK_BOOKING
 
         elif selection == 'Order':
-            if hasattr(self, 'restaurant_key'):
-            # if self.restaurant_key:
-                # restaurant = self.fb.db.child('users').child(self.fb_id).child('active').child('restaurant_key').get()
+            # if hasattr(self, 'restaurant_key'):
+            if self.fb.db.child('users').child(self.fb_id).child('active').get().val() is not None:
+                restaurant = self.fb.db.child('users').child(self.fb_id).child(
+                    'active').child('restaurant_key').get().val()
+                # print(restaurant.get().val())
                 # restaurant_key = restaurant.val()
                 message = 'Click on the link to begin the ordering phase'
-                link = f'https://order-eat2021-django.herokuapp.com/tg-menu/{self.fb_id}/{self.restaurant_key}'
+                link = f'https://order-eat2021-django.herokuapp.com/tg-menu/{self.fb_id}/{restaurant}'
                 self.link = link
                 bot.message.reply_text(message)
                 bot.message.reply_text(link)
@@ -378,13 +383,16 @@ class SmartRestaurant:
         else:
             feeling = 0
 
-        # feedback_key = self.search_user_restaurant()
-        # topic = f"Temperature/{feedback_key}"
-        topic = f'v1/devices/me/telemetry'
-        payload = json.dumps({'temperature_feedback': feeling})
-        pub = Publisher(clientID=self.user_id, topic=topic, broker='139.59.148.149', token='pulcinella_device')
-        pub.publish(payload)
+        restaurant_key = self.fb.db.child('users').child(self.fb_id).child('active').child('restaurant_key').get().val()
+        if restaurant_key is None:
+            message = 'You are not booked in any restaurant'
+            bot.message.reply_text(message)
+            return self.START_RETURN
 
+        token = self.fb.db.child('restaurants').child(restaurant_key).child('details').child('token').get().val()
+        print(token)
+        self.sender.send(f'{token}_business:1', {'temperature_feedback': feeling})
+        bot.message.reply_text('Thanks for the feedback')
         return self.START_RETURN
 
     def checkout(self):
