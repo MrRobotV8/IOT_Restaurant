@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import pyrebase
 import sys
-sys.path.insert(0, "C:/Users/Riccardo/Desktop/IOT_Restaurant/OrderEatWebApp/rpanel/thingsboard")
+sys.path.insert(0, "C:/Users/Riccardo/Desktop/IOT_Restaurant/OrderEatWebApp/thingsboard")
 from main import ThingsDash
 
 td = ThingsDash()
@@ -123,9 +123,6 @@ class Firebase:
 
     @staticmethod
     def assign_key_table(t_old, t_new, assigned):
-        print(f'ASSIGNED: {assigned}')
-        print(f'TNEW: {t_new}')
-        print(f'TOLD: {t_old}')
         if len(assigned) == 1:
             to_add = 0
             for k, v in t_old.items():
@@ -183,7 +180,6 @@ class Firebase:
         hour = "%s" % (key[8:13])
         n_people = key[13:15]
         user = key[15:]
-        print(date, hour, n_people, user)
         return date, hour, n_people, user
 
     # def specific_download(self, field, reference, n=1):
@@ -231,17 +227,27 @@ class Firebase:
                         user_key = path[0]
                         rest_key = path[1]
                         ts = data
-                    token = self.db.child('restaurants').child(rest_key).child('details').child('token').get().val()
+                    token = self.db.child('restaurants').child(rest_key).child('details').child('token_order').get().val()
                     user = self.db.child('users').child(user_key).child('details').child('name').get().val()
                     user_details = self.db.child('users').child(user_key).child('details').get().val()
                     booking_details = self.db.child('users').child(user_key).child('active').child('details').get().val()
                     hash = self.hash_creator(user_details['bot_id'], booking_details['time'], booking_details['people'])
                     table_key = self.db.child('restaurants').child(rest_key).child('bookings').child(hash).child(
                         'table_id').get().val()
-                    order = ts[list(ts.keys())[0]]
+                    ts.pop('address', None)
+                    ts.pop('is_bot', None)
+                    ts.pop('order_status', None)
+                    total = ts['total'] + 'Euro'
+                    ts.pop('total', None)
+                    order = [v['item'] + 'x' + v['quantity'] for v in ts.values()]
+                    order = ' - '.join(order)
+                    payload = {"order": order, "user": user, 'total': total}
+                    print(payload)
                     for t in table_key:
-                        self.td.create_table_order(device_access_token=f"{token}_item:table:{t}",
-                                                   payload={"order": order, "user": user})
+                        access_token = f"{token}_item:table:{t}"
+                        print(access_token)
+                        self.td.create_table_order(device_access_token=access_token,
+                                                   payload=payload)
             except:
                 traceback.print_exc()
 

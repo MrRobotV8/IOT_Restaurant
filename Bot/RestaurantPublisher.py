@@ -78,7 +78,8 @@ if __name__ == '__main__':
     sys.path.insert(0, "C:/Users/Riccardo/Desktop/IOT_Restaurant/OrderEatWebApp/thingsboard")
     from main import ThingsDash
     THINGSBOARD_HOST = '139.59.148.149'
-    ACCESS_TOKEN = 'de066470-5e69-11eb-bcf2-5f53f5d253b9_business:1'
+    ACCESS_TOKEN = '1ff2b990-5f52-11eb-bcf2-5f53f5d253b9_business:1'
+    # ACCESS_TOKEN = "de066470-5e69-11eb-bcf2-5f53f5d253b9_business:1"
     td = ThingsDash()
     url_api = f"http://{THINGSBOARD_HOST}:8080/api/v1/{ACCESS_TOKEN}/telemetry"
     headers = {"X-Authorization": "Bearer " + td.jwt_token, "Content-Type": "application/json",
@@ -87,7 +88,7 @@ if __name__ == '__main__':
     # client.username_pw_set(ACCESS_TOKEN)
     # client.connect(THINGSBOARD_HOST, 1883)
     # client.loop_start()
-    t = {'temperature_feedback': random.choice([2, -2])}
+    t = {'temperature_feedback': -6}
     print(t)
     x = requests.post(url_api, data=json.dumps(t))
     print(x)

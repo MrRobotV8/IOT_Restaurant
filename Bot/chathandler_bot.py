@@ -389,8 +389,7 @@ class SmartRestaurant:
             bot.message.reply_text(message)
             return self.START_RETURN
 
-        token = self.fb.db.child('restaurants').child(restaurant_key).child('details').child('token').get().val()
-        print(token)
+        token = self.fb.db.child('restaurants').child(restaurant_key).child('details').child('token_telemetry').get().val()
         self.sender.send(f'{token}_business:1', {'temperature_feedback': feeling})
         bot.message.reply_text('Thanks for the feedback')
         return self.START_RETURN
