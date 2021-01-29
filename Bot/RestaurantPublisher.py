@@ -71,40 +71,40 @@ class Publisher:
         self.mqtt_client.publish(self.topic, msg, self.qos)
 
 
-if __name__ == '__main__':
-    import sys
-    import requests
-
-    sys.path.insert(0, "C:/Users/Riccardo/Desktop/IOT_Restaurant/OrderEatWebApp/thingsboard")
-    from main import ThingsDash
-    THINGSBOARD_HOST = '139.59.148.149'
-    ACCESS_TOKEN = '1ff2b990-5f52-11eb-bcf2-5f53f5d253b9_business:1'
-    # ACCESS_TOKEN = "de066470-5e69-11eb-bcf2-5f53f5d253b9_business:1"
-    td = ThingsDash()
-    url_api = f"http://{THINGSBOARD_HOST}:8080/api/v1/{ACCESS_TOKEN}/telemetry"
-    headers = {"X-Authorization": "Bearer " + td.jwt_token, "Content-Type": "application/json",
-               "Accept": "application/json"}
-    # client = mqtt.Client()
-    # client.username_pw_set(ACCESS_TOKEN)
-    # client.connect(THINGSBOARD_HOST, 1883)
-    # client.loop_start()
-    t = {'temperature_feedback': -6}
-    print(t)
-    x = requests.post(url_api, data=json.dumps(t))
-    print(x)
-    exit()
-    topic = 'v1/devices/me/telemetry'
-    client.publish(topic, json.dumps(t), 1)
-    # l = [1, -1]
-    # try:
-    #     while True:
-    #         t = {'temperature_feedback': random.choice(l)}
-    #         print(t)
-    #         # Sending humidity and temperature data to ThingsBoard
-    #         client.publish('v1/devices/me/telemetry', json.dumps(t), 1)
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     pass
-
-    client.loop_stop()
-    client.disconnect()
+# if __name__ == '__main__':
+#     import sys
+#     import requests
+#
+#     sys.path.insert(0, "C:/Users/Riccardo/Desktop/IOT_Restaurant/OrderEatWebApp/thingsboard")
+#     from main import ThingsDash
+#     THINGSBOARD_HOST = '139.59.148.149'
+#     ACCESS_TOKEN = '1ff2b990-5f52-11eb-bcf2-5f53f5d253b9_business:1'
+#     # ACCESS_TOKEN = "de066470-5e69-11eb-bcf2-5f53f5d253b9_business:1"
+#     td = ThingsDash()
+#     url_api = f"http://{THINGSBOARD_HOST}:8080/api/v1/{ACCESS_TOKEN}/telemetry"
+#     headers = {"X-Authorization": "Bearer " + td.jwt_token, "Content-Type": "application/json",
+#                "Accept": "application/json"}
+#     # client = mqtt.Client()
+#     # client.username_pw_set(ACCESS_TOKEN)
+#     # client.connect(THINGSBOARD_HOST, 1883)
+#     # client.loop_start()
+#     t = {'temperature_feedback': -6}
+#     print(t)
+#     x = requests.post(url_api, data=json.dumps(t))
+#     print(x)
+#     exit()
+#     topic = 'v1/devices/me/telemetry'
+#     client.publish(topic, json.dumps(t), 1)
+#     # l = [1, -1]
+#     # try:
+#     #     while True:
+#     #         t = {'temperature_feedback': random.choice(l)}
+#     #         print(t)
+#     #         # Sending humidity and temperature data to ThingsBoard
+#     #         client.publish('v1/devices/me/telemetry', json.dumps(t), 1)
+#     #         time.sleep(1)
+#     # except KeyboardInterrupt:
+#     #     pass
+#
+#     client.loop_stop()
+#     client.disconnect()

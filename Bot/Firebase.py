@@ -1,18 +1,8 @@
 import traceback
-
-import pandas as pd
 import os
 import pyrebase
-import sys
-sys.path.insert(0, "C:/Users/Riccardo/Desktop/IOT_Restaurant/OrderEatWebApp/thingsboard")
-from main import ThingsDash
-
-td = ThingsDash()
-from collections import OrderedDict
-from collections import Counter
+from thingsboard.main import ThingsDash
 import datetime
-import json
-import random
 
 
 class Firebase:
