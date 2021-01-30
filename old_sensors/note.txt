@@ -1,8 +1,0 @@
-update/add dependencies
-1 - activate.bat in the env directory
-2 - pip install ...
-3 - pip freeze > requirements.txt
-4 - git push
-
-1 - activate.bat in the env directory
-2 - pip install -r requirements.txt

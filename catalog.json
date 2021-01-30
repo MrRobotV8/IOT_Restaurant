@@ -1,0 +1,31 @@
+{
+    "appname":"OrderEat",
+    "version":"1.0",
+    "firebase": {
+        "apiKey": "AIzaSyCNUQyDSE8LglsRzQGpk8OJGvTj2IyicT4",
+        "authDomain": "ordereat-94887.firebaseapp.com",
+        "databaseURL": "https://ordereat-94887.firebaseio.com",
+        "projectId": "ordereat-94887",
+        "storageBucket": "ordereat-94887.appspot.com",
+        "messagingSenderId": "89417842986",
+        "appId": "1:89417842986:web:162875424095cecd65de53",
+        "measurementId": "G-BHVSYJK293"
+    },
+    "thingsboard":{
+        "host":"139.59.148.149",
+        "port":"8080",
+        "mqtt_port":"1883",
+        "urlAPI":"http://139.59.148.149:8080/api/auth/login",
+        "topic_telemetry":"http://139.59.148.149:8080/api/v1/$token/telemetry",
+        "topic_attributes":"http://139.59.148.149:8080/api/v1/$token/attributes",
+        "qos":"1",
+        "username": "tenant@thingsboard.org",
+        "password": "tenant"
+    },
+    "bot_telegram":{
+        "token":"892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw",
+        "app_name": "order-eat2021"
+    }
+    
+
+}
