@@ -11,7 +11,7 @@ from datetime import date, datetime
 from thingsboard.main import ThingsDash
 
 # Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
-#TODO: Config File! JSON CATALOG
+"""
 config = {
     'apiKey': "AIzaSyCNUQyDSE8LglsRzQGpk8OJGvTj2IyicT4",
     'authDomain': "ordereat-94887.firebaseapp.com",
@@ -22,7 +22,10 @@ config = {
     'appId': "1:89417842986:web:162875424095cecd65de53",
     'measurementId': "G-BHVSYJK293"
 }
-
+"""
+with open('../catalog.json', 'r') as f:
+    config = json.loads(f.read())['firebase']
+#print(config)
 # Initialize Firebase
 firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()

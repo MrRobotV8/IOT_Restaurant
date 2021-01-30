@@ -14,18 +14,10 @@ from pprint import pprint
 from thingsboard.main import ThingsDash
 import os
 
-# Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
-# TODO BEST PRACTICE --> file config dedicato
-config = {
-    'apiKey': "AIzaSyCNUQyDSE8LglsRzQGpk8OJGvTj2IyicT4",
-    'authDomain': "ordereat-94887.firebaseapp.com",
-    'databaseURL': "https://ordereat-94887.firebaseio.com",
-    'projectId': "ordereat-94887",
-    'storageBucket': "ordereat-94887.appspot.com",
-    'messagingSenderId': "89417842986",
-    'appId': "1:89417842986:web:162875424095cecd65de53",
-    'measurementId': "G-BHVSYJK293"
-}
+
+with open('../catalog.json', 'r') as f:
+    config = json.loads(f.read())['firebase']
+
 #FIREBASE INITIALIZATION
 firebase = pyrebase.initialize_app(config)
 database = firebase.database()
@@ -194,7 +186,7 @@ def postSignUp(request):
         return render(request, 'rpanel/register.html', {'messg': msg})
 
 
-    #TODO: COME RENDERE PIÙ BELLA QUESTA PARTE?
+    #TODO: COME RENDERE PIÙ BELLA QUESTA PARTE? funzione di questo
     public = True
     td = ThingsDash()
     owner_id = td.create_customer(title=email, address=address)

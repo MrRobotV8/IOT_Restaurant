@@ -5,16 +5,20 @@ import os
 class ThingsDash:
     def __init__(self):
         # ThingsBoard REST API URL
-        self.url = "http://139.59.148.149"
-        self.port = 8080
+        with open('../catalog.json','r') as f:
+            config = json.loads(f.read())['thingsboard']
+        print(config)
+        self.url = config['host']
+        self.port = int(config['port'])
         self.url_all = f"{self.url}:{self.port}"
 
         # Default Tenant Administrator credentials
-        self.username = "tenant@thingsboard.org"
-        self.password = "tenant"
+        self.username = config['username']
+        self.password = config['password']
 
         # login
         self.jwt_token = self.tenant_login()
+        
 
     def tenant_login(self):
         url_api = f"{self.url_all}/api/auth/login"
@@ -288,6 +292,7 @@ class ThingsDash:
 if __name__ == "__main__":
 
     td = ThingsDash()
+    exit()
     public = True
 
     # create customer/owner

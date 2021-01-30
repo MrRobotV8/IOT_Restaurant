@@ -9,19 +9,8 @@ from .models import *
 from datetime import datetime
 from django.core.mail import send_mail
 
-#TODO: CONFIG
-# Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
-config = {
-    'apiKey': "AIzaSyCNUQyDSE8LglsRzQGpk8OJGvTj2IyicT4",
-    'authDomain': "ordereat-94887.firebaseapp.com",
-    'databaseURL': "https://ordereat-94887.firebaseio.com",
-    'projectId': "ordereat-94887",
-    'storageBucket': "ordereat-94887.appspot.com",
-    'messagingSenderId': "89417842986",
-    'appId': "1:89417842986:web:162875424095cecd65de53",
-    'measurementId': "G-BHVSYJK293"
-}
-
+with open('../catalog.json', 'r') as f:
+    config = json.loads(f.read())['firebase']
 ##Initialize Firebase
 firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
