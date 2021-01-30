@@ -180,7 +180,7 @@ function showSlides() {
         <th>Name</th>
         <th>Remove</th>
         </tr>
-        <!-- TODO: If menu is empty-->
+        {%if menu != None %}
         {%for key, value in menu.items%}
         
         
@@ -194,6 +194,9 @@ function showSlides() {
         <li style="text-align:right">{{value.name}}<a class="btn btn-sm btn-danger" href="{% url 'rpanel:removefrommenu' key %}">Remove</a></li>
         </ul> -->
         {%endfor%}
+        {%else%}
+        <h3>No items in menu </h3>
+        {% endif %}
         </table>
     </div>
       

@@ -5,7 +5,7 @@ from . import views
 app_name='rpanel'  # Restaurant_panel
 
 urlpatterns = [
-    path('index/', views.index, name='index'), 
+    #path('index/', views.index, name='index'), DEPRECATED
     path('signin/', views.signIn, name = 'Signin'),
     path('postSignIn/', views.postSignIn, name = 'Postsignin'),
     path('logout/', views.logout, name = 'log'),
@@ -15,7 +15,7 @@ urlpatterns = [
     path('postmenu/', views.postmenu, name="postmenu"),
     path('removefrommenu/<str:pk>', views.removefrommenu, name="removefrommenu"),
     path('home/', views.home, name='home'),
-    path('profile/', views.profile, name='profile'), 
+    #path('profile/', views.profile, name='profile'),  DEPRECATED
     path('orders/', views.orders, name='orders'),
     path('orders/updatestatus/<str:cust>/<str:pk>', views.updatestatus, name="updatestatus"),
 ]

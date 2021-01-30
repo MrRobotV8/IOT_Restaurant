@@ -26,20 +26,40 @@ config = {
     'appId': "1:89417842986:web:162875424095cecd65de53",
     'measurementId': "G-BHVSYJK293"
 }
-
+#FIREBASE INITIALIZATION
 firebase = pyrebase.initialize_app(config)
-
 database = firebase.database()
 authe = firebase.auth()
-# storage = firebase.storage()
+#storage = firebase.storage() --> Developed in HTML
+
+"""
+GENERAL GUIDELINES:
+Each function is a view or an action for the customer panel;
+The try & except is used to detect if the action requested by the user is available or not
+i.e the user logouts and then try to go back
+messg: negative message
+message: positive message 
+"""
 
 categories = ['starter', 'pizza', 'burger', 'maindish', 'dessert', 'drinks']
 
-
+"""
+LOGIN PAGE RESTAURANT PANEL
+success-->"GET /rpanel/signin/ HTTP/1.1" 200
+input form:
+    email
+    password
+"""
 def signIn(request):
     return render(request, 'rpanel/signIn.html')
 
+'''
+POST LOGIN REQUEST:
+The restaurant owner authenticates with email and password
+At this point we create session variable:
+    [uid] --> uid  (it's the ID Token)
 
+'''
 def postSignIn(request):
     try:
         email = request.POST.get('email')
@@ -53,27 +73,25 @@ def postSignIn(request):
         session_id = user['idToken']
         request.session['uid'] = str(session_id)
         rest_id = user['localId']
-
         restaurant = database.child('restaurants').child(rest_id).get().val()
-        name = database.child("restaurants").child(
-            rest_id).child('details').child('name').get().val()
+        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
         thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
 
+        # IF RESTAURANT HAS MENU RETURNS home.html, OTHERWISE RETURN index.html
         try:
-            data = database.child('restaurants').child(
-                rest_id).child('menu').get().val()
+            data = database.child('restaurants').child(rest_id).child('menu').get().val()  #MENÙ
             ctx = {
                 'data': data,
                 'name': name,
                 'thingsboard_url': thingsboard_url,
             }
-            print("TRY \n")
+            #print("TRY \n")
             return render(request, 'rpanel/home.html', ctx)
         except:
             ctx = {
                 'name': name,
-            }
-            print("Excpet \n")
+                }
+            #print("Excpet \n")
             return render(request, 'rpanel/index.html', ctx)
     except:
         msg = "Probably you have tried to go back, after been logged out! Plase login again!"
@@ -85,8 +103,8 @@ def postSignIn(request):
 
 def logout(request):
     try:
-        idtoken = request.session['uid']
-        rest_id = authe.get_account_info(idtoken)
+        #idtoken = request.session['uid']
+        rest_id = authe.get_account_info(request.session['uid'])
         rest_id = rest_id['users'][0]['localId']
         del request.session['uid']
         request.session.flush()
@@ -100,11 +118,31 @@ def logout(request):
     }
     return render(request, 'rpanel/signIn.html', ctx)
 
-
+"""
+REGISTER PAGE RESTAURANT
+success--> "GET /rpanel/register/ HTTP/1.1" 200
+Complex Input form, with multiple sections
+"""
 def signUp(request):
     return render(request, 'rpanel/register.html')
 
-
+"""
+POST REGISTER REQUEST
+Check if password and re_password are equal:
+If True: 
+    Create_user by pyrebase
+    Write restaurant in realtime database:
+    "name": name, 
+    "status": "1", 
+    "address": address, 
+    "description": description, 
+    "seats": seats,
+    'phone': phone,
+    'tables': {'2': tfor2, '4': tfor4, '6': tfor6},
+    'lunch-slot': list_slot_l,
+    'dinner-slot': list_slot_d}
+    
+"""
 def postSignUp(request):
     name = request.POST.get('name')  # name restaurant
     email = request.POST.get('email')
@@ -129,29 +167,37 @@ def postSignUp(request):
             added = 1
         except:
             msg = "Unable to create account, try again"  # weak password
-            print('except 1')
+            print(msg)
             return render(request, 'rpanel/register.html', {'messg': msg})
     else:
         msg = "The passwords don’t match, please try again"  # password matching
-        print('except 2')
+        print(msg)
         return render(request, 'rpanel/register.html', {'msg': msg})
-    uid = user['localId']
+    uid = user['localId']   #usually called rest_id
     if added == 1:
-        data = {"name": name, "status": "1", "address": address, "description": description, "seats": seats,
-                'phone': phone,
-                'tables': {'2': tfor2, '4': tfor4, '6': tfor6}, 'lunch-slot': list_slot_l, 'dinner-slot': list_slot_d}
-        database.child("restaurants").child(
-            uid).child("details").set(data)  # idtoken
-        print("here")
+        data = {
+            "name": name,
+            "status": "1",
+            "address": address,
+            "description": description,
+            "seats": seats,
+            'phone': phone,
+            'tables': {'2': tfor2, '4': tfor4, '6': tfor6},
+            'lunch-slot': list_slot_l,
+            'dinner-slot': list_slot_d,
+            }
+        database.child("restaurants").child(uid).child("details").set(data) 
+        print("Restaurant Added!")
     else:
         msg = "Something goes wrong, try again"
-        print("except 3")
+        print("msg")
         return render(request, 'rpanel/register.html', {'messg': msg})
 
-    # TODO: ADD VICTOR'S CODE TO CREATE ENTITY RESTAURANT
+
+    #TODO: COME RENDERE PIÙ BELLA QUESTA PARTE?
     public = True
     td = ThingsDash()
-    owner_id = td.create_customer(title=email, address=address)  # customer_id
+    owner_id = td.create_customer(title=email, address=address)
     building_name = f"{owner_id}_building:1"
     building_label = address  # Indirizzo del ristorante
     building_id = td.create_restaurant_asset(asset_name=building_name, asset_label=building_label)
@@ -233,10 +279,10 @@ def postSignUp(request):
 
     database.child('restaurants').child(uid).child('details').child('thingsboard').set(dashboard_url)
 
-    # create empty menu
-
+    #create empty menu #TODO: IT'S BETTER TO MANAGE THE ERROR IN HTML OF THE MENU SECTION
+    """
     database.child('restaurants').child(uid).child('menu').set({'item': 'first'})
-
+    """
     msg = "Account Created!"
     ctx = {
         'message': msg,
@@ -246,14 +292,23 @@ def postSignUp(request):
 
 
 def menu(request):
-    idtoken = request.session['uid']
-    rest_id = authe.get_account_info(idtoken)
-    rest_id = rest_id['users'][0]['localId']
-    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
-    menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
-    pprint(menu)
+    try:
 
-    return render(request, "rpanel/menu.html", {'uid': rest_id, 'name': name, 'menu': menu})
+        rest_id = authe.get_account_info(request.session['uid'])
+        rest_id = rest_id['users'][0]['localId']
+        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+        menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
+        pprint(menu)
+        thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+
+        return render(request, "rpanel/menu.html", {'uid': rest_id, 'name': name, 'menu': menu, 'thingsboard_url': thingsboard_url})
+
+    except:
+        msg = "Session expired! Please login again!"
+        ctx = {
+            'messg': msg,
+        }
+        return render(request, 'rpanel/signIn.html', ctx)
 
 
 def postmenu(request):
@@ -287,7 +342,8 @@ def postmenu(request):
         message = "Product Added!"
         menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
         pprint(menu)
-        return render(request, 'rpanel/menu.html', {"name": name, "uid": rest_id, 'menu': menu, "message": message})
+        thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+        return render(request, 'rpanel/menu.html', {"name": name, "uid": rest_id, 'menu': menu, "message": message, "thingsboard_url":thingsboard_url})
     except:
         msg = "Session expired! Please login again!"
         ctx = {
@@ -307,13 +363,14 @@ def removefrommenu(request, pk):
             rest_id).child('details').child('name').get().val()
         message = "Product Deleted!"
         menu = database.child('restaurants').child(rest_id).child('menu').get().val()
+        thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
 
         context = {
             "name": name,
             "uid": rest_id,
             'menu': menu,
-            "message": message
-
+            "message": message,
+            "thingsboard_url": thingsboard_url
         }
 
         return render(request, 'rpanel/menu.html', context)
@@ -327,22 +384,18 @@ def removefrommenu(request, pk):
 
 def home(request):
     try:
-        # We need to access the exact id in the database
-        idtoken = request.session['uid']
-        rest_id = authe.get_account_info(idtoken)
+        rest_id = authe.get_account_info(request.session['uid'])
         rest_id = rest_id['users'][0]['localId']
 
-        data = database.child('restaurants').child(
-            rest_id).child('menu').get().val()
-        name = database.child("restaurants").child(
-            rest_id).child('details').child('name').get().val()
+        data = database.child('restaurants').child(rest_id).child('menu').get().val()
+        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+        thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+
 
         ctx = {
             'name': name,
-            # 'comb_lis': comb_lis,
-            # 'data': sorted(obj.val().items()),
-            # 'data': obj.val().items(),
             'data': data,
+            "thingsboard_url":thingsboard_url,
         }
 
         return render(request, 'rpanel/home.html', ctx)
@@ -353,7 +406,7 @@ def home(request):
         }
         return render(request, 'food/signIn.html', ctx)
 
-
+""" DEPRECATED
 def profile(request):
     try:
         idtoken = request.session['uid']
@@ -369,12 +422,8 @@ def profile(request):
             'messg': msg,
         }
         return render(request, 'rpanel/signIn.html', ctx)
+"""
 
-
-def index(request):
-    # TODO: Delete IT!
-
-    return render(request, 'rpanel/index.html')
 
 
 def orders(request):
@@ -404,46 +453,26 @@ def orders(request):
                     print(timestamp)
                     my_orders[timestamp] = {
                         'name': database.child('users').child(customer).child('details').child('name').get().val(),
-                        'order': order,
+                        'order': order,  #dict
                         'day': d,
                         'ts': ts,
                         'customer_id': customer,
-                        'status': database.child('orders').child(customer).child(rest_id).child(ts).child(
-                            'order_status').get().val(),
+                        'status': database.child('orders').child(customer).child(rest_id).child(ts).child('order_status').get().val(),
 
                     }
-
+    pprint(my_orders)
     my_orders = OrderedDict(sorted(my_orders.items(), key=lambda x: x[0], reverse=True))
 
-    '''
-    users = []
-    for user in orders.keys():
-        users.append(user)
-
-    my_orders = {}
-    for user in users:
-        if database.child('orders').child(user).child(rest_id).get():
-            name = database.child('users').child(user).child('details').child('name').get().val()
-            ts = database.child('orders').child(user).child(rest_id).get().val()
-            try:
-                my_orders[name] = dict(database.child('orders').child(user).child(rest_id).get().val())
-            except:
-                pass
-        else:
-            pass
-    
-
-    pprint(my_orders)   
-    #TODO: ordinare secondo
-    #my_orders = order_dict(my_orders)
-    print('******* New dict ********\n\n')
-    pprint(my_orders)
-    '''
-
     info = dict(database.child("restaurants").child(rest_id).child('details').get().val())
+    thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+
+
     context = {
+        'name': name,
         'my_orders': my_orders,
         'info': info,
+        'thingsboard_url':thingsboard_url,
     }
     return render(request, "rpanel/orders.html", context)
 
@@ -456,7 +485,7 @@ def orders(request):
         }
         return render(request, 'rpanel/signIn.html', ctx)
 '''
-
+#TODO: RICARICA PAGINA --> MSG
 
 def updatestatus(request, cust, pk):
     order_status = request.POST.get('orderstatus')
@@ -499,9 +528,14 @@ def updatestatus(request, cust, pk):
     my_orders = OrderedDict(sorted(my_orders.items(), key=lambda x: x[0], reverse=True))
 
     info = dict(database.child("restaurants").child(rest_id).child('details').get().val())
+    thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+
     context = {
+        'name': name,
         'my_orders': my_orders,
         'info': info,
+        'thingsboard_url': thingsboard_url,
     }
     return render(request, "rpanel/orders.html", context)
 

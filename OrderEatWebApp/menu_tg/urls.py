@@ -9,7 +9,7 @@ urlpatterns = [
     path('<str:idtoken>/<str:rest_id>/add/<str:pk>', views.add_to_cart, name='addtocart' ),
     path('<str:idtoken>/<str:rest_id>/remove/<str:pk>', views.remove_from_cart, name='removefromcart' ),
     path('<str:idtoken>/<str:rest_id>/checkout', views.checkout, name='checkout' ),
-    #path('<str:idtoken>/<str:rest_id>/contacts', views.contacts, name='contacts' ),
+    #path('<str:idtoken>/<str:rest_id>/contacts', views.contacts, name='contacts' ) DEPRECATED,
 
 
 ]

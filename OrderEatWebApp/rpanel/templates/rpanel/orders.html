@@ -49,7 +49,7 @@ Orders
             {% elif k == "order_status" %}
             <form method='POST' action="{% url 'rpanel:updatestatus' value.customer_id value.ts %}">
             {% csrf_token %}
-            <label for="title">Order status:<b>{{value.status}}</b> -- Change --> 
+            <label for="title">Order status:<b>{{v}}</b> -- Change --> 
             <select class="select dark" name="orderstatus">
             <option value="ACCEPTED">Accepted</option>
             <option value="PREPARING">Preparing</option>

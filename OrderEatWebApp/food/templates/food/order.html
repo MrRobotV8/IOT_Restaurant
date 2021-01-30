@@ -9,6 +9,7 @@ body {
 }
 </style>
 <div class="container-md" style="background-color: #02053b; padding:20px">
+{%if my_orders != None %}
 {% for timestamp, value in my_orders.items %}
 <div class="card" style="margin:auto">
   <div class="card-body">
@@ -50,6 +51,9 @@ body {
 </div>
 <hr>
 {%endfor%}
+{%else%}
+<h1 style="color:white">No Orders in your history</h1>
+{% endif %}
 </div>
 
 

@@ -9,7 +9,7 @@ from .models import *
 from datetime import datetime
 from django.core.mail import send_mail
 
-#TODO: ADD IS_BOT=1
+#TODO: CONFIG
 # Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
 config = {
     'apiKey': "AIzaSyCNUQyDSE8LglsRzQGpk8OJGvTj2IyicT4",
@@ -28,7 +28,6 @@ authe = firebase.auth()
 database = firebase.database()
 
 
-# firebase.analytics()
 
 def menu(request, idtoken, rest_id):
     request.session['uid'] = str(idtoken)
@@ -78,8 +77,6 @@ def add_to_cart(request, idtoken, rest_id, pk):
     total = database.child('users').child(idtoken).child('last_basket').child('total').get().val()
     print('Totale')
     print(total)
-
-    # TODO: FOR FUNCTIONALITY TO COUNT THE TOTAL_AMOUNT
 
     if total is None:
         database.child('users').child(idtoken).child('last_basket').child('total').set(increase)
@@ -175,6 +172,7 @@ def checkout(request, idtoken, rest_id):
         }
     return render(request, 'menu_tg/checkout.html', context)
 
+""" DEPRECATED - future works """
 '''
 def contacts(request, idtoken, rest_id):
     fname = request.POST.get('fname')

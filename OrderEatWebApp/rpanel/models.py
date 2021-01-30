@@ -1,4 +1,6 @@
 from django.db import models
+
+""" ******************DEPRECATED***************** """
 '''
 class Restaurant(models.Model):
     name = models.CharField(max_length=120)
