@@ -3,7 +3,7 @@ import os
 import pyrebase
 from thingsboard.main import ThingsDash
 import datetime
-
+import copy
 
 class Firebase:
     def __init__(self):
@@ -86,25 +86,33 @@ class Firebase:
     #             # Maybe ask if the user want to book
     #             book_state = False
     #     return book_state
-
+    
     def check_table_availability(self, restaurant_key, hash_key):
         tables = self.download(f'restaurants/{restaurant_key}/details/tables')
-        t_new = tables
+        print('TABLE AVAILABILITY')
+        t_new = copy.deepcopy(tables)
         u_date, u_hour, u_people, u_user = self.unhash(hash_key)
         try:
             bookings = self.download(f'restaurants/{restaurant_key}/bookings')
             bookings_keys = bookings.keys()
             for k in bookings_keys:
+                print(t_new)
+                print(f'BOOKINGS FOR: {k}')
                 date, hour, people, user = self.unhash(k)
                 if hour == u_hour:
                     p = int(people)
-                    assigned = self.assign_table(p, t_new)
-                    for t in assigned:
-                        t_new[t] = int(t_new[t]) - 1
+                    assigned, t_new = self.assign_table(p, t_new)
+                    print(f'ASSIGNED: {assigned}')
+                    # for t in assigned:
+                    #     t_new[t] = int(t_new[t]) - 1
         except:
             print('No bookings')
         p = int(u_people)
-        assigned = self.assign_table(p, t_new)
+        print(t_new)
+        assigned, t_new = self.assign_table(p, t_new)
+        print(assigned)
+        print(tables)
+        print(t_new)
         table_key = self.assign_key_table(tables, t_new, assigned)
         if len(assigned) > 0:
             return table_key
@@ -121,10 +129,11 @@ class Firebase:
                     break
                 else:
                     to_add += v
-            table_key = [int(t_new[assigned[0]]) + to_add]
-        else:
+            table_key = [int(t_old[assigned[0]]) - int(t_new[assigned[0]]) + to_add]
+        elif len(assigned) > 1:
             table_key = []
             for a in assigned:
+                print(a)
                 to_add = 0
                 for k, v in t_old.items():
                     v = int(v)
@@ -132,20 +141,34 @@ class Firebase:
                         break
                     else:
                         to_add += v
-                table_key.append(int(t_new[a]) + to_add)
+                print(to_add)
+                print(t_old[a])
+                print(t_new[a])
+                table_key.append(int(t_old[a]) - int(t_new[a]) + to_add)
+        else:
+            table_key = None
         return table_key
 
     @staticmethod
     def assign_table(people, tables):
+        tables_assigned = None
         for k, v in tables.items():
-            for kk, vv in tables.items():
-                if int(k) == people and int(v) > 0:
-                    return [k]
-                if int(kk) == people and int(vv) > 0:
-                    return [kk]
-                if (int(v) > 0) and (int(vv) > 0) and (int(kk + k) <= people + 1):
-                    return [k, kk]
-        return None
+            if int(v) > 0 and int(k) >= people:
+                tables_assigned = [k]
+                break
+        if tables_assigned is None:
+            for k, v in tables.items():
+                for kk, vv in tables.items():
+                    if (int(v) > 0) and (int(vv) > 0) and (int(kk) + int(k) >= people) and kk != k:
+                        tables_assigned = [k, kk]
+                        break
+                    elif (int(v) > 1) and (int(vv) > 1) and (int(kk) + int(k) >= people) and kk == k:
+                        tables_assigned = [k, kk]
+                        break
+        for t in tables_assigned:
+            tables[t] = int(tables[t]) - 1
+
+        return tables_assigned, tables
 
     def get_available_tables(self, restaurant_key):
         tables = self.download(f'restaurants/{restaurant_key}/details/tables')
@@ -227,9 +250,9 @@ class Firebase:
                     ts.pop('address', None)
                     ts.pop('is_bot', None)
                     ts.pop('order_status', None)
-                    total = ts['total'] + 'Euro'
+                    total = f"{ts['total']} Euro"
                     ts.pop('total', None)
-                    order = [v['item'] + 'x' + v['quantity'] for v in ts.values()]
+                    order = [f"{v['item']} x {v['quantity']}" for v in ts.values()]
                     order = ' - '.join(order)
                     payload = {"order": order, "user": user, 'total': total}
                     print(payload)
@@ -248,21 +271,23 @@ class Firebase:
 
 
 if __name__ == '__main__':
-    fb = Firebase()
-    fb.authenticate()
-    # fb.db.child('users').child('Q4RbTEUSanS2k9ErfXaKFdoy6KQ2').child('details').update({'table_key': 'GIGI'})
-    # fb.get_available_tables('WVqxkU2XXuQ988euCmqbcUvrQfp1')
-    import time
-
+    # fb = Firebase()
+    # fb.authenticate()
+    # import time
+    # fb.listener()
     # try:
     #     while True:
-    #         fb.listener()
-    #         time.sleep(3)
+    #         pass
     # except:
     #     fb.stream.close()
-    fb.listener()
-    try:
-        while True:
-            pass
-    except:
-        fb.stream.close()
+    td = ThingsDash()
+    headers = {"X-Authorization": "Bearer " + td.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
+    import requests as req
+    token_order = "203bd080-5f52-11eb-bcf2-5f53f5d253b9"
+    token_telemetery = "1ff2b990-5f52-11eb-bcf2-5f53f5d253b9"
+    url = 'http://139.59.148.149'
+    url_all = f'{url}:8080'
+    get_url = f"{url_all}/api/v1/{token_telemetery}_business:1/telemetry"
+    x = req.get(get_url)
+    print(x)
+    print(x.text)
