@@ -296,7 +296,7 @@ class ThingsDash:
         return dash_custom
 
     def get_device_telemetry(self, entityId, keys=None, interval=None, limit=None, agg=None, entityType="DEVICE"):
-        """for more info pls check: https://thingsboard.io/docs/user-guide/telemetry/"""
+        # example: td.get_device_telemetry("203bd080-5f52-11eb-bcf2-5f53f5d253b9", keys=["temperature", "humidity"], interval=None, limit=None, agg="AVG", entityType="DEVICE")
         url_api = f"{self.url_all}/api/plugins/telemetry/{entityType}/{entityId}/values/timeseries?"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
 
