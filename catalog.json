@@ -12,8 +12,8 @@
         "measurementId": "G-BHVSYJK293"
     },
     "thingsboard":{
-        "host":"139.59.148.149",
-        "port":"8080",
+        "host":"http://139.59.148.149",
+        "http_port":"8080",
         "mqtt_port":"1883",
         "urlAPI":"http://139.59.148.149:8080/api/auth/login",
         "topic_telemetry":"http://139.59.148.149:8080/api/v1/$token/telemetry",

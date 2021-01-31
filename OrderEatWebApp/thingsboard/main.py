@@ -1,15 +1,21 @@
 import requests
 import json
 import os
+from pathlib import Path
 
 class ThingsDash:
     def __init__(self):
+        p = Path('.')
+        p = p.resolve()
+        parent = p.parents[1]
+        parent.joinpath('catalog.json')
+
         # ThingsBoard REST API URL
-        with open('../catalog.json','r') as f:
+        with open(parent.joinpath('catalog.json'),'r') as f:
             config = json.loads(f.read())['thingsboard']
         print(config)
         self.url = config['host']
-        self.port = int(config['port'])
+        self.port = int(config['http_port'])
         self.url_all = f"{self.url}:{self.port}"
 
         # Default Tenant Administrator credentials
@@ -24,9 +30,9 @@ class ThingsDash:
         url_api = f"{self.url_all}/api/auth/login"
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
         payload = {"username": str(self.username), "password": str(self.password)}
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            self.jwt_token = json.loads(x.text)["token"]
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
+            self.jwt_token = json.loads(response.text)["token"]
             return self.jwt_token
 
     def create_customer(self, address=None, city=None, country=None, email=None, name=None, phone=None, state=None, title=None, zip=None):
@@ -52,9 +58,9 @@ class ThingsDash:
         if zip is not None:
             payload["zip"] = zip
 
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            self.customer_id = json.loads(x.text)["id"]["id"]
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
+            self.customer_id = json.loads(response.text)["id"]["id"]
             return self.customer_id
 
     def create_restaurant_asset(self, asset_label=None, asset_name=None):
@@ -69,9 +75,9 @@ class ThingsDash:
         if type is not None:
             payload["type"] = "restaurant_children"
 
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            self.asset_id = json.loads(x.text)["id"]["id"]
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
+            self.asset_id = json.loads(response.text)["id"]["id"]
             return self.asset_id
 
     def relation_customer_contains_asset(self, customer_id, asset_id):
@@ -89,8 +95,8 @@ class ThingsDash:
                 "id": f"{asset_id}"
             },
         }
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     def assign_asset_to_customer(self, customer_id, asset_id):
@@ -98,8 +104,8 @@ class ThingsDash:
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json"}
 
         payload={}
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     # def assign_device_to_public(self, asset_id):
@@ -119,9 +125,9 @@ class ThingsDash:
             "provisionDeviceKey": "restaurant_provision_key",
             "provisionDeviceSecret": "provision_device_secret"
         }
-        x = requests.post(self, url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            self.acess_token = json.loads(x.text)["credentialsValue"]
+        response = requests.post(self, url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
+            self.acess_token = json.loads(response.text)["credentialsValue"]
             return self.acess_token
 
     def save_restaurant_device(self, device_name, device_label, device_token):
@@ -134,9 +140,9 @@ class ThingsDash:
             "label": device_label
             }
 
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            self.device_id = json.loads(x.text)["id"]["id"]
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
+            self.device_id = json.loads(response.text)["id"]["id"]
             return self.device_id
 
     def relation_asset_contains_device(self, asset_id, device_id):
@@ -154,8 +160,8 @@ class ThingsDash:
                 "id": f"{device_id}"
             },
         }
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     def relation_device_contains_device(self, device_id_parent, device_id_child):
@@ -173,8 +179,8 @@ class ThingsDash:
                 "id": f"{device_id_child}"
             },
         }
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     def assign_device_to_customer(self, customer_id, device_id):
@@ -182,16 +188,16 @@ class ThingsDash:
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json"}
 
         payload={}
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     def assign_device_to_public(self, device_id):
         url_api = f"{self.url_all}/api/customer/public/device/{device_id}"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json"}
         payload={}
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     def save_table_device(self, table_number, device_token, device_restaurant_id):
@@ -204,9 +210,9 @@ class ThingsDash:
             "label": f"Table {table_number}"
             }
 
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            self.device_id = json.loads(x.text)["id"]["id"]
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
+            self.device_id = json.loads(response.text)["id"]["id"]
             return self.device_id
 
     def save_togo_device(self,  device_token, restaurant_device_id):
@@ -219,26 +225,26 @@ class ThingsDash:
             "label": "To Go"
             }
 
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            self.device_id = json.loads(x.text)["id"]["id"]
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
+            self.device_id = json.loads(response.text)["id"]["id"]
             return self.device_id
 
     def set_device_attributes(self, device_token, payload):
         url_api = f"{self.url_all}/api/v1/{device_token}/attributes"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
 
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     def save_dashboard(self, payload):
         url_api = f"{self.url_all}/api/dashboard"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
 
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            self.dashboard_id = json.loads(x.text)["id"]["id"]
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
+            self.dashboard_id = json.loads(response.text)["id"]["id"]
             return self.dashboard_id
 
     def assign_dashboard_to_customer(self, customer_id, dashboard_id):
@@ -247,8 +253,8 @@ class ThingsDash:
 
         payload={}
 
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     def assign_dashboard_to_public_customer(self, dashboard_id):
@@ -257,9 +263,9 @@ class ThingsDash:
 
         payload={}
 
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
-            decoded_json = json.loads(x.text)
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
+            decoded_json = json.loads(response.text)
             self.dashboard_id = decoded_json["id"]["id"]
             self.public_client_id = decoded_json["assignedCustomers"][-1]["customerId"]["id"]
             self.dashboard_url = f"{self.url_all}/dashboard/{self.dashboard_id}?publicId={self.public_client_id}"
@@ -268,15 +274,15 @@ class ThingsDash:
     def create_togo_order(self, device_access_token, payload):
         url_api = f"{self.url_all}/api/v1/{device_access_token}/telemetry"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     def create_table_order(self, device_access_token, payload):
         url_api = f"{self.url_all}/api/v1/{device_access_token}/telemetry"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
-        x = requests.post(url_api, data=json.dumps(payload), headers=headers)
-        if x.status_code==200:
+        response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        if response.status_code==200:
             return True
 
     def customize_dashboard(self, restaurant_dashboard_path, restaurant_label, customer_id):
@@ -289,9 +295,73 @@ class ThingsDash:
                 "predicates"][0]["keyFilterPredicate"]["value"]["defaultValue"] = customer_id
         return dash_custom
 
+    def get_device_telemetry(self, entityId, keys=None, interval=None, limit=None, agg=None, entityType="DEVICE"):
+        # example: td.get_device_telemetry("203bd080-5f52-11eb-bcf2-5f53f5d253b9", keys=["temperature", "humidity"], interval=None, limit=None, agg="AVG", entityType="DEVICE")
+        url_api = f"{self.url_all}/api/plugins/telemetry/{entityType}/{entityId}/values/timeseries?"
+        headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
+
+        is_first_parameter = True
+        #
+        if keys is not None:
+            if is_first_parameter:
+                is_first_parameter = False
+            else:
+                url_api += f"&"
+
+            if len(keys) == 1:
+                url_api += f"keys={keys[0]}"
+            else:
+                url_api += f"keys={','.join(keys)}"
+
+        # milliseconds
+        if interval is not None:
+            if is_first_parameter:
+                is_first_parameter = False
+            else:
+                url_api += f"&"
+            url_api += f"interval={interval}"
+
+        #  the max amount of data points to return or intervals to process
+        if limit is not None:
+            if is_first_parameter:
+                is_first_parameter = False
+            else:
+                url_api += f"&"
+            url_api += f"limit={limit}"
+
+        # the aggregation function. One of MIN, MAX, AVG, SUM, COUNT, NONE.
+        if agg is not None:
+            if is_first_parameter:
+                is_first_parameter = False
+            else:
+                url_api += f"&"
+            url_api += f"agg={agg}"
+
+        response = requests.get(url_api, headers=headers)
+        if response.status_code==200:
+            return response
+
+    def update_table_request(self, table_device_access_token, request=True):
+        # example: td.update_table_request("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:3", request=True)
+        url_api = f"{self.url_all}/api/v1/{table_device_access_token}/attributes"
+        headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
+        response = requests.post(url_api, data=json.dumps({"request": request}), headers=headers)
+        if response.status_code==200:
+            return True
+
+    def update_table_reservation(self, table_device_access_token, reservation=True):
+        # example: td.update_table_reservation("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:3", reservation=True)
+        url_api = f"{self.url_all}/api/v1/{table_device_access_token}/attributes"
+        headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
+        response = requests.post(url_api, data=json.dumps({"reserved": reservation}), headers=headers)
+        if response.status_code==200:
+            return True
+
 if __name__ == "__main__":
 
     td = ThingsDash()
+    # td.get_device_telemetry("203bd080-5f52-11eb-bcf2-5f53f5d253b9", keys=["temperature", "humidity"], interval=None, limit=None, agg="AVG", entityType="DEVICE")
+    # td.update_table_reservation("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:2", reservation=True)
     exit()
     public = True
 
