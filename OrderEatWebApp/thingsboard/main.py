@@ -341,11 +341,27 @@ class ThingsDash:
         if response.status_code==200:
             return response
 
+    def update_table_request(self, table_device_access_token, request=True):
+        # example: td.update_table_request("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:3", request=True)
+        url_api = f"{self.url_all}/api/v1/{table_device_access_token}/attributes"
+        headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
+        response = requests.post(url_api, data=json.dumps({"request": request}), headers=headers)
+        if response.status_code==200:
+            return True
+
+    def update_table_reservation(self, table_device_access_token, reservation=True):
+        # example: td.update_table_reservation("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:3", reservation=True)
+        url_api = f"{self.url_all}/api/v1/{table_device_access_token}/attributes"
+        headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
+        response = requests.post(url_api, data=json.dumps({"reserved": reservation}), headers=headers)
+        if response.status_code==200:
+            return True
+
 if __name__ == "__main__":
 
     td = ThingsDash()
-    td.get_device_telemetry("203bd080-5f52-11eb-bcf2-5f53f5d253b9", keys=["temperature", "humidity"], interval=None, limit=None, agg="AVG", entityType="DEVICE")
-
+    # td.get_device_telemetry("203bd080-5f52-11eb-bcf2-5f53f5d253b9", keys=["temperature", "humidity"], interval=None, limit=None, agg="AVG", entityType="DEVICE")
+    # td.update_table_reservation("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:2", reservation=True)
     exit()
     public = True
 
