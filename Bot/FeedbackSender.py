@@ -59,3 +59,11 @@ class Sender:
         response = req.get(url_api, headers=headers)
         if response.status_code == 200:
             return response
+
+
+if __name__ == '__main__':
+    token_order = "a0d722d0-647f-11eb-bcf2-5f53f5d253b9"
+    token_telemetry = "a0718330-647f-11eb-bcf2-5f53f5d253b9"
+
+    s = Sender()
+    s.send(f'{token_order}_item:table:6', {'reserved': True, 'request': False}, 'attributes')

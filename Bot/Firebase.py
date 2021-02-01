@@ -4,6 +4,8 @@ import pyrebase
 from thingsboard.main import ThingsDash
 import datetime
 import copy
+from FeedbackSender import Sender
+
 
 class Firebase:
     def __init__(self):
@@ -17,6 +19,7 @@ class Firebase:
             'appId': "1:89417842986:web:162875424095cecd65de53",
             'measurementId': "G-BHVSYJK293"
         }
+        self.sender = Sender()
         self.firebase = pyrebase.initialize_app(self.config)
         self.td = ThingsDash()
         self.start_stream = True
@@ -49,26 +52,20 @@ class Firebase:
         """
         self.db.child(field).child(key).set(data2upload)
 
-    def upload_booking(self, restaurant_key, hour, n_people, user_id):
+    def upload_booking(self, user_firebase, restaurant_key, hour, n_people, user_id):
         # Check before uploading
-        # prev_data = self.db.child('restaurants').child(restaurant_key).child('bookings').get().val()
         hash_key = self.hash_creator(user_id, hour, n_people)
-        # table_key = self.check_table_availability(restaurant_key, hash_key)
-        # if prev_data is None:
-        #     # No other bookings for that restaurant
-        #     data = {hash_key: user_id}
-        #     self.db.child('restaurants').child(restaurant_key).child('bookings').set(data)
-        # else:
-        # check if user has already bookings for that restaurant
         table_key = self.check_table_availability(restaurant_key, hash_key)
         if len(table_key) > 0:
-            # data = dict(prev_data)
-            # data.update({hash_key: user_id})
             to_set = {
                 'bot_id': user_id,
                 'table_id': table_key
             }
+            for t in table_key:
+                token = self.db.child(f'restaurants/{restaurant_key}/details/token_order').get().val()
+                self.sender.send(f'{token}_item:table:{t}', {'reserved': True}, 'attributes')
             self.db.child('restaurants').child(restaurant_key).child('bookings').child(hash_key).set(to_set)
+            self.db.child(f'users/{user_id}/active').update({'table_id': table_key})
         else:
             # TODO: no tables available; create new path
             print('Your booking was not uploaded')
@@ -89,30 +86,20 @@ class Firebase:
     
     def check_table_availability(self, restaurant_key, hash_key):
         tables = self.download(f'restaurants/{restaurant_key}/details/tables')
-        print('TABLE AVAILABILITY')
         t_new = copy.deepcopy(tables)
         u_date, u_hour, u_people, u_user = self.unhash(hash_key)
         try:
             bookings = self.download(f'restaurants/{restaurant_key}/bookings')
             bookings_keys = bookings.keys()
             for k in bookings_keys:
-                print(t_new)
-                print(f'BOOKINGS FOR: {k}')
                 date, hour, people, user = self.unhash(k)
                 if hour == u_hour:
                     p = int(people)
                     assigned, t_new = self.assign_table(p, t_new)
-                    print(f'ASSIGNED: {assigned}')
-                    # for t in assigned:
-                    #     t_new[t] = int(t_new[t]) - 1
         except:
             print('No bookings')
         p = int(u_people)
-        print(t_new)
         assigned, t_new = self.assign_table(p, t_new)
-        print(assigned)
-        print(tables)
-        print(t_new)
         table_key = self.assign_key_table(tables, t_new, assigned)
         if len(assigned) > 0:
             return table_key
@@ -133,7 +120,6 @@ class Firebase:
         elif len(assigned) > 1:
             table_key = []
             for a in assigned:
-                print(a)
                 to_add = 0
                 for k, v in t_old.items():
                     v = int(v)
@@ -141,9 +127,6 @@ class Firebase:
                         break
                     else:
                         to_add += v
-                print(to_add)
-                print(t_old[a])
-                print(t_new[a])
                 table_key.append(int(t_old[a]) - int(t_new[a]) + to_add)
         else:
             table_key = None
@@ -195,33 +178,6 @@ class Firebase:
         user = key[15:]
         return date, hour, n_people, user
 
-    # def specific_download(self, field, reference, n=1):
-    #     activity_times = [
-    #         '10 min', '10-20 min', '20-30 min',
-    #         '30-60 min', '1-2 h', '2-3 h',
-    #         '3-8 h', '>8 h'
-    #     ]
-    #     modes = ['unknown_activity_type', 'Car', 'Walk', 'Bike',
-    #              'Bus/Tram', 'in_passenger_vehicle', 'Train', 'in_bus', 'Subway',
-    #              'flying', 'motorcycling', 'running']
-    #
-    #     query = self.db.child(field).order_by_child("user_id").equal_to(reference).get().val()
-    #
-    #     pretty_query = ''
-    #     categories = []
-    #     destinations = []
-    #     for i in query.values():
-    #         categories.append(i['category'])
-    #         destinations.append(i['D']['name'])
-    #         s = f"From {i['O']['name']} to {i['D']['name']} for {activity_times[i['activity_time']]} by {modes[i['mode']]}\n"
-    #         pretty_query += s
-    #
-    #     n_trips = len(query)
-    #     most_categories = self.most_frequent(categories, n)
-    #     most_destinations = self.most_frequent(destinations, n)
-    #
-    #     return pretty_query, n_trips, most_categories, most_destinations
-
     def callback_listen(self, message):
         if self.start_stream:
             pass
@@ -271,21 +227,12 @@ class Firebase:
 
 
 if __name__ == '__main__':
-    # fb = Firebase()
-    # fb.authenticate()
-    # import time
-    # fb.listener()
-    # try:
-    #     while True:
-    #         pass
-    # except:
-    #     fb.stream.close()
-    td = ThingsDash()
-    headers = {"X-Authorization": "Bearer " + td.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
-    import requests as req
-    token_order = "203bd080-5f52-11eb-bcf2-5f53f5d253b9"
-    token_telemetery = "1ff2b990-5f52-11eb-bcf2-5f53f5d253b9"
-    url = 'http://139.59.148.149'
-    response = td.get_device_telemetry(token_order)
-    print(response)
-    print(response.text)
+    fb = Firebase()
+    fb.authenticate()
+    import time
+    fb.listener()
+    try:
+        while True:
+            pass
+    except:
+        fb.stream.close()
