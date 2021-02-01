@@ -6,8 +6,10 @@ from pathlib import Path
 class ThingsDash:
     def __init__(self):
         p = Path('.')
+        print(p)
         p = p.resolve()
-        parent = p.parents[1]
+        parent = p.parents[0]
+        print(parent)
         parent.joinpath('catalog.json')
 
         # ThingsBoard REST API URL
