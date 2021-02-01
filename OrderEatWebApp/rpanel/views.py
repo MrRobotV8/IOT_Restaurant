@@ -186,9 +186,11 @@ def postSignUp(request):
         return render(request, 'rpanel/register.html', {'messg': msg})
 
 
-    #TODO: COME RENDERE PIÙ BELLA QUESTA PARTE? funzione di questo
+    #TODO: best practice?
     public = True
+    print("before: "+ str(os.getcwd()))
     td = ThingsDash()
+    print("after:",os.getcwd())
     owner_id = td.create_customer(title=email, address=address)
     building_name = f"{owner_id}_building:1"
     building_label = address  # Indirizzo del ristorante
@@ -285,12 +287,14 @@ def postSignUp(request):
 
 def menu(request):
     try:
-
         rest_id = authe.get_account_info(request.session['uid'])
         rest_id = rest_id['users'][0]['localId']
         name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
-        menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
-        pprint(menu)
+        try:
+            menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
+            pprint(menu)
+        except:
+            menu=None
         thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
 
         return render(request, "rpanel/menu.html", {'uid': rest_id, 'name': name, 'menu': menu, 'thingsboard_url': thingsboard_url})

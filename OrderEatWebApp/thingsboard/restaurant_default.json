@@ -19,9 +19,9 @@
             }
           },
           "showTitle": false,
-          "backgroundColor": "rgb(255, 255, 255)",
+          "backgroundColor": "#000000",
           "color": "rgba(0, 0, 0, 0.87)",
-          "padding": "8px",
+          "padding": "1px",
           "settings": {
             "cardCss": ".card {\n    font-weight: bold;\n    font-size: 32px;\n    color: #999;\n    width: 100%;\n    height: auto;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    margin: 0px;\n}",
             "cardHtml": "<div class='card'><img src=\"https://iheartvirginiawine.com/wp-content/uploads/2014/03/restaurant-4.jpg\">\r\n</div>\r\n\r\n"
@@ -38,7 +38,8 @@
             "fontSize": "16px",
             "fontWeight": 400
           },
-          "showLegend": false
+          "showLegend": false,
+          "margin": "0"
         },
         "row": 0,
         "col": 0,
@@ -64,7 +65,7 @@
             }
           },
           "showTitle": true,
-          "backgroundColor": "rgb(255, 255, 255)",
+          "backgroundColor": "#fff0e5",
           "color": "rgba(0, 0, 0, 0.87)",
           "padding": "4px",
           "settings": {
@@ -156,7 +157,7 @@
           "showTitleIcon": true,
           "iconColor": "rgba(0, 0, 0, 0.87)",
           "iconSize": "24px",
-          "titleTooltip": "",
+          "titleTooltip": "Here you can check the table status",
           "widgetStyle": {},
           "titleIcon": "assignment",
           "actions": {
@@ -195,7 +196,7 @@
             }
           },
           "showTitle": true,
-          "backgroundColor": "rgb(255, 255, 255)",
+          "backgroundColor": "#bfbfbf",
           "color": "rgba(0, 0, 0, 0.87)",
           "padding": "4px",
           "settings": {
@@ -229,28 +230,14 @@
                 {
                   "name": "label",
                   "type": "entityField",
-                  "label": "Label",
-                  "color": "#4caf50",
-                  "settings": {
-                    "columnWidth": "0px",
-                    "useCellStyleFunction": false,
-                    "cellStyleFunction": "",
-                    "useCellContentFunction": false,
-                    "cellContentFunction": ""
-                  },
-                  "_hash": 0.534103091535213
-                },
-                {
-                  "name": "temperature_feedback",
-                  "type": "timeseries",
-                  "label": "Temperature Feedback",
+                  "label": "Restaurant Name",
                   "color": "#4caf50",
                   "settings": {
                     "columnWidth": "0px",
                     "useCellStyleFunction": false,
                     "useCellContentFunction": false
                   },
-                  "_hash": 0.09519688299427931,
+                  "_hash": 0.534103091535213,
                   "units": null,
                   "decimals": null,
                   "funcBody": null,
@@ -506,13 +493,14 @@
             }
           },
           "showTitle": true,
-          "backgroundColor": "rgb(255, 255, 255)",
-          "color": "rgba(0, 0, 0, 0.87)",
+          "backgroundColor": "#ffffff",
+          "color": "#000000",
           "padding": "8px",
           "settings": {
             "showTimestamp": true,
             "displayPagination": true,
-            "defaultPageSize": 10
+            "defaultPageSize": 10,
+            "hideEmptyLines": true
           },
           "title": "Delivery",
           "dropShadow": true,
@@ -527,7 +515,7 @@
           "widgetStyle": {},
           "actions": {},
           "showTitleIcon": true,
-          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconColor": "rgba(255,0,0,0.87)",
           "iconSize": "24px",
           "displayTimewindow": false,
           "titleTooltip": "",
@@ -556,8 +544,8 @@
               "limit": 200
             }
           },
-          "showTitle": false,
-          "backgroundColor": "rgb(255, 255, 255)",
+          "showTitle": true,
+          "backgroundColor": "#f6f6f6",
           "color": "rgba(0, 0, 0, 0.87)",
           "padding": "4px",
           "settings": {
@@ -567,9 +555,10 @@
             "defaultSortOrder": "entityName",
             "displayEntityName": false,
             "displayEntityType": false,
-            "enableSelectColumnDisplay": false
+            "enableSelectColumnDisplay": false,
+            "entitiesTitle": "Info"
           },
-          "title": "",
+          "title": "Info",
           "dropShadow": false,
           "enableFullscreen": false,
           "titleStyle": {
@@ -640,7 +629,7 @@
               ]
             }
           ],
-          "showTitleIcon": false,
+          "showTitleIcon": true,
           "iconColor": "rgba(0, 0, 0, 0.87)",
           "iconSize": "24px",
           "titleTooltip": "",
@@ -1272,33 +1261,34 @@
             }
           },
           "showTitle": true,
-          "backgroundColor": "rgb(255, 255, 255)",
+          "backgroundColor": "#ffffff",
           "color": "rgba(0, 0, 0, 0.87)",
-          "padding": "8px",
+          "padding": "30px",
           "settings": {
             "showTimestamp": true,
             "displayPagination": false,
             "defaultPageSize": 10,
             "hideEmptyLines": true
           },
-          "title": "Table Orders",
-          "dropShadow": false,
-          "enableFullscreen": false,
+          "title": "",
+          "dropShadow": true,
+          "enableFullscreen": true,
           "titleStyle": {
-            "fontSize": "16px",
-            "fontWeight": 400,
-            "padding": "5px 10px 5px 10px"
+            "fontSize": "30px",
+            "fontWeight": 600,
+            "padding": "0px 10px 30px 0px"
           },
           "useDashboardTimewindow": false,
           "showLegend": false,
           "widgetStyle": {},
           "actions": {},
           "showTitleIcon": true,
-          "iconColor": "rgba(0, 0, 0, 0.87)",
-          "iconSize": "24px",
-          "displayTimewindow": true,
-          "titleTooltip": "",
-          "titleIcon": "notifications_active"
+          "iconColor": "#ff0000",
+          "iconSize": "40px",
+          "displayTimewindow": false,
+          "titleTooltip": "Table Orders",
+          "titleIcon": "notifications_active",
+          "margin": "0"
         },
         "row": 0,
         "col": 0,
@@ -1368,6 +1358,135 @@
         "row": 0,
         "col": 0,
         "id": "cc2d8769-556f-98aa-ce64-4a573456704e"
+      },
+      "5e2c2746-bba8-aa95-68f8-90f4a1965f38": {
+        "isSystemType": true,
+        "bundleAlias": "input_widgets",
+        "typeAlias": "update_shared_boolean_attribute",
+        "type": "latest",
+        "title": "New widget",
+        "sizeX": 7.5,
+        "sizeY": 3,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "b0c22a2d-f075-c37d-d635-86adaf50e3d8",
+              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
+              "dataKeys": [
+                {
+                  "name": "reserved",
+                  "type": "attribute",
+                  "label": "Reserved",
+                  "color": "#2196f3",
+                  "settings": {},
+                  "_hash": 0.8054192350369866,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                }
+              ]
+            }
+          ],
+          "timewindow": {
+            "realtime": {
+              "timewindowMs": 60000
+            }
+          },
+          "showTitle": true,
+          "backgroundColor": "#ffffff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "showResultMessage": true,
+            "trueValue": "Yes",
+            "falseValue": "No"
+          },
+          "title": "Is Reserved?",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "20px",
+            "fontWeight": 600
+          },
+          "useDashboardTimewindow": true,
+          "showLegend": false,
+          "actions": {},
+          "showTitleIcon": true,
+          "iconColor": "#0019ff",
+          "iconSize": "26px",
+          "titleTooltip": "Does the client reserved the table?",
+          "titleIcon": "contact_phone"
+        },
+        "row": 0,
+        "col": 0,
+        "id": "5e2c2746-bba8-aa95-68f8-90f4a1965f38"
+      },
+      "84696b6f-9946-2789-344a-a020cbbd8c78": {
+        "isSystemType": true,
+        "bundleAlias": "input_widgets",
+        "typeAlias": "update_shared_boolean_attribute",
+        "type": "latest",
+        "title": "New widget",
+        "sizeX": 7.5,
+        "sizeY": 3,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "b0c22a2d-f075-c37d-d635-86adaf50e3d8",
+              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
+              "dataKeys": [
+                {
+                  "name": "request",
+                  "type": "attribute",
+                  "label": "request",
+                  "color": "#2196f3",
+                  "settings": {},
+                  "_hash": 0.7354657187212275
+                }
+              ]
+            }
+          ],
+          "timewindow": {
+            "realtime": {
+              "timewindowMs": 60000
+            }
+          },
+          "showTitle": true,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "showResultMessage": true,
+            "trueValue": "Yes",
+            "falseValue": "No"
+          },
+          "title": "Client Requiring Assistance?",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "20px",
+            "fontWeight": 600
+          },
+          "useDashboardTimewindow": true,
+          "showLegend": false,
+          "actions": {},
+          "showTitleIcon": true,
+          "iconColor": "#ff0000",
+          "iconSize": "30px",
+          "titleTooltip": "Does the client needs assistance?",
+          "titleIcon": "room_service"
+        },
+        "row": 0,
+        "col": 0,
+        "id": "84696b6f-9946-2789-344a-a020cbbd8c78"
       }
     },
     "states": {
@@ -1385,12 +1504,12 @@
               },
               "d8bf0257-80b6-7fb1-1482-01adb8463751": {
                 "sizeX": 24,
-                "sizeY": 6,
+                "sizeY": 9,
                 "row": 8,
                 "col": 0
               },
               "786124ad-3ee6-529e-c4d2-baaeaff88444": {
-                "sizeX": 7,
+                "sizeX": 8,
                 "sizeY": 6,
                 "row": 2,
                 "col": 0
@@ -1484,10 +1603,10 @@
           "main": {
             "widgets": {
               "46fd2b38-d668-adb8-1476-fde96f4a6246": {
-                "sizeX": 13,
-                "sizeY": 4,
+                "sizeX": 10,
+                "sizeY": 3,
                 "row": 2,
-                "col": 11
+                "col": 15
               },
               "b4f6b498-e87e-17e3-095f-8ae43889f23c": {
                 "sizeX": 25,
@@ -1500,6 +1619,18 @@
                 "sizeY": 6,
                 "row": 2,
                 "col": 0
+              },
+              "5e2c2746-bba8-aa95-68f8-90f4a1965f38": {
+                "sizeX": 4,
+                "sizeY": 2,
+                "row": 8,
+                "col": 0
+              },
+              "84696b6f-9946-2789-344a-a020cbbd8c78": {
+                "sizeX": 7,
+                "sizeY": 2,
+                "row": 8,
+                "col": 4
               }
             },
             "gridSettings": {

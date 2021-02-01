@@ -6,8 +6,10 @@ from pathlib import Path
 class ThingsDash:
     def __init__(self):
         p = Path('.')
+        print(p)
         p = p.resolve()
-        parent = p.parents[1]
+        parent = p.parents[0]
+        print(parent)
         parent.joinpath('catalog.json')
 
         # ThingsBoard REST API URL
@@ -301,7 +303,7 @@ class ThingsDash:
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
 
         is_first_parameter = True
-        #
+        # keys that you would like to retrieve. Should be list: []
         if keys is not None:
             if is_first_parameter:
                 is_first_parameter = False
@@ -342,26 +344,25 @@ class ThingsDash:
             return response
 
     def update_table_request(self, table_device_access_token, request=True):
-        # example: td.update_table_request("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:3", request=True)
+        # Example: td.update_table_request("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:3", request=True)
         url_api = f"{self.url_all}/api/v1/{table_device_access_token}/attributes"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
         response = requests.post(url_api, data=json.dumps({"request": request}), headers=headers)
         if response.status_code==200:
             return True
 
-    def update_table_reservation(self, table_device_access_token, reservation=True):
-        # example: td.update_table_reservation("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:3", reservation=True)
+    def update_table_reservation(self, table_device_access_token, reserved=True):
+        # Example: td.update_table_reservation("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:3", reserved=True)
         url_api = f"{self.url_all}/api/v1/{table_device_access_token}/attributes"
         headers = {"X-Authorization": "Bearer " + self.jwt_token, "Content-Type": "application/json", "Accept": "application/json"}
-        response = requests.post(url_api, data=json.dumps({"reserved": reservation}), headers=headers)
+        response = requests.post(url_api, data=json.dumps({"reserved": reserved}), headers=headers)
         if response.status_code==200:
             return True
+
 
 if __name__ == "__main__":
 
     td = ThingsDash()
-    # td.get_device_telemetry("203bd080-5f52-11eb-bcf2-5f53f5d253b9", keys=["temperature", "humidity"], interval=None, limit=None, agg="AVG", entityType="DEVICE")
-    # td.update_table_reservation("203bd080-5f52-11eb-bcf2-5f53f5d253b9_item:table:2", reservation=True)
     exit()
     public = True
 
