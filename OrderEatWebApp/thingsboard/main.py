@@ -403,7 +403,8 @@ if __name__ == "__main__":
             table_number += 1
             # create device table
             table_token = f"{restaurant_device_id}_item:table:{table_number}"
-            table_device_id = td.save_table_device(table_number=table_number, device_token=table_token, device_restaurant_id=restaurant_device_id)
+            table_device_id = td.save_table_device(table_number=table_number, device_token=table_token,
+                                                   device_restaurant_id=restaurant_device_id)
             # set table attributes
             td.set_device_attributes(table_token, {"customer_owner": customer_id, "seats": n_seats})
             # assign device to customer

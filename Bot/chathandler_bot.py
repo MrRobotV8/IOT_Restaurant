@@ -26,6 +26,7 @@ PORT = int(os.environ.get('PORT', '8443'))
 
 class SmartRestaurant:
     def __init__(self):
+
         self.fb = Firebase()
         self.sender = Sender()
         self.fb.authenticate()
@@ -34,7 +35,7 @@ class SmartRestaurant:
         self.restaurants_mapper = {self.restaurants_names[i]: list(self.restaurants.keys())[i]
                                    for i in range(len(self.restaurants_names))}
 
-        self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Join', 'CheckOut']]
+        self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Join', 'CheckOut', 'Info']]
         self.time_booking = [['19:00', '19:30', '20:00'], ['20:30', '21:00', '21:30']]
 
         self.email_filter = EmailFilter()
@@ -42,11 +43,11 @@ class SmartRestaurant:
         self.people_filter = PeopleFilter()
         self.key_restaurant_filter = KeyRestaurantFilter(self.restaurants_names)
 
-        n_states = 16
+        n_states = 17
         self.START, self.START_RETURN, self.COND_1, self.EMAIL, self.PASSWORD, \
         self.PASSWORD_2, self.NICK, self.SIGN_IN, self.CHECK_SIGN, self.CHECK_BOOKING, \
         self.ORDER, self.FEED, self.JOIN, self.CHECK, \
-        self.PEOPLE, self.TIME = range(n_states)
+        self.PEOPLE, self.TIME, self.INFO = range(n_states)
         self.STATE = self.START
 
     def check_signin(self):
@@ -228,8 +229,6 @@ class SmartRestaurant:
 
         elif selection == 'Wait':
             if self.fb.db.child('orders').child(self.restaurant_key).child(self.fb_id).get():
-            # if hasattr(self, 'link'):
-            # if self.link:
                 customers_before = self.fb.db.child('restaurants').child(self.restaurant_key).child('customers').get()
                 customers_before = len(customers_before.val())
                 message = f'We have {customers_before} before you! Your order will be starting in ~ ' \
@@ -251,6 +250,21 @@ class SmartRestaurant:
             bot.message.reply_text(message)
 
             return self.CHECK
+        elif selection == 'Info':
+            restaurant = self.fb.db.child(f'users/{self.fb_id}/active/restaurant_key').get().val()
+            if restaurant is not None:
+                token = self.fb.db.child(f'restaurants/{restaurant}/details/token_order').get().val()
+                response = self.sender.get_device_telemetry(token)
+                json_response = json.loads(response.text)
+                message = f'TEMPERATURE: {json_response["temperature"][-1]["value"]}°C\n' \
+                          f'HUMIDITY: {json_response["humidity"][-1]["value"]}%\n' \
+                          f'NOISE: {json_response["noise"][-1]["value"]}dB'
+                bot.message.reply_text(message)
+            else:
+                message = 'You are not booked.'
+                bot.message.reply_text(message)
+
+            return self.START_RETURN
 
     def check_booking(self, bot, update):
         restaurant_chosen = bot.message.text
@@ -389,8 +403,9 @@ class SmartRestaurant:
             bot.message.reply_text(message)
             return self.START_RETURN
 
-        token = self.fb.db.child('restaurants').child(restaurant_key).child('details').child('token_telemetry').get().val()
-        self.sender.send(f'{token}_business:1', {'temperature_feedback': feeling})
+        token = self.fb.db.child('restaurants').child(restaurant_key).child('details').child(
+            'token_telemetry').get().val()
+        self.sender.send(f'{token}_business:1', {'temperature_feedback': feeling}, 'telemetry')
         bot.message.reply_text('Thanks for the feedback')
         return self.START_RETURN
 
@@ -400,13 +415,11 @@ class SmartRestaurant:
         # get order history
         # TODO: check date of order how to handle it
         order_obj = self.fb.db.child('orders').child(self.fb_id).child(restaurant).get().val()
-        last_order = order_obj[-1]
-        total = last_order['total']
-        last_order_history = {v.pop('url', None) for k, v in last_order.pop('total', None)}
-
+        last_order = list(order_obj.keys())[-1]
+        last_order = order_obj[last_order]
+        # total = last_order['total']
+        # last_order_history = {v.pop('url', None) for k, v in last_order.pop('total', None)}
         # add to restaurant history
-
-
         # remove from active customers of restaurant
         restaurant_obj = self.fb.db.child('restaurants').child(restaurant).child('customers').child(self.user_id).get()
         restaurant_obj = restaurant_obj.val()
@@ -421,16 +434,15 @@ class SmartRestaurant:
             'details': {
                 'people': restaurant_obj['people'],
                 'time': restaurant_obj['time'],
-                'order': last_order_history,
-                'total': total
+                'order': last_order,
+                # 'total': total
             }
         }
         self.fb.db.child('users').child(self.fb_id).child('history').update(history_object)
-
         # remove table key
         self.fb.db.child('users').child(self.fb_id).child('table_key').remove()
 
-        return last_order_history, total
+        return last_order, last_order['total']
 
     def others(self, bot, update):
         others = """
@@ -488,9 +500,9 @@ class SmartRestaurant:
         )
 
         dp.add_handler(conv_handler)
-        updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN)
-        updater.bot.set_webhook(APP_URL)
-        # updater.start_polling()
+        # updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN)
+        # updater.bot.set_webhook(APP_URL)
+        updater.start_polling()
         updater.idle()
 
 

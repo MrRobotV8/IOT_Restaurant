@@ -286,8 +286,6 @@ if __name__ == '__main__':
     token_order = "203bd080-5f52-11eb-bcf2-5f53f5d253b9"
     token_telemetery = "1ff2b990-5f52-11eb-bcf2-5f53f5d253b9"
     url = 'http://139.59.148.149'
-    url_all = f'{url}:8080'
-    get_url = f"{url_all}/api/v1/{token_telemetery}_business:1/telemetry"
-    x = req.get(get_url)
-    print(x)
-    print(x.text)
+    response = td.get_device_telemetry(token_order)
+    print(response)
+    print(response.text)
