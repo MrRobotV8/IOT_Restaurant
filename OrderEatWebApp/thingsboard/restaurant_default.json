@@ -735,7 +735,7 @@
                     }
                   },
                   "_hash": 0.5882736119847549,
-                  "units": null,
+                  "units": "",
                   "decimals": null,
                   "funcBody": null,
                   "usePostProcessing": null,
@@ -809,7 +809,8 @@
             "showMax": false,
             "showAvg": true,
             "showTotal": false
-          }
+          },
+          "units": "dB"
         },
         "row": 0,
         "col": 0,
@@ -1055,7 +1056,8 @@
             "showMax": false,
             "showAvg": true,
             "showTotal": false
-          }
+          },
+          "units": "°C"
         },
         "row": 0,
         "col": 0,
@@ -1173,7 +1175,8 @@
             "showMax": false,
             "showAvg": true,
             "showTotal": false
-          }
+          },
+          "units": "%"
         },
         "row": 0,
         "col": 0,
@@ -1332,14 +1335,14 @@
             }
           },
           "showTitle": true,
-          "backgroundColor": "#fff",
+          "backgroundColor": "#d8d8d8",
           "color": "rgba(0, 0, 0, 0.87)",
           "padding": "8px",
           "settings": {
             "showResultMessage": false,
             "showLabel": false
           },
-          "title": "Temperature Feedback Threshold",
+          "title": "Temperature Feedback Threshold (Admin)",
           "dropShadow": true,
           "enableFullscreen": false,
           "widgetStyle": {},
@@ -1350,10 +1353,11 @@
           "useDashboardTimewindow": true,
           "showLegend": false,
           "actions": {},
-          "showTitleIcon": false,
-          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "showTitleIcon": true,
+          "iconColor": "rgba(255,0,0,0.87)",
           "iconSize": "24px",
-          "titleTooltip": "Cumulative temperature feedback of the last 30 minutes to create alarm"
+          "titleTooltip": "Cumulative temperature feedback of the last 30 minutes to create alarm",
+          "titleIcon": "lock_outline"
         },
         "row": 0,
         "col": 0,
@@ -1487,6 +1491,371 @@
         "row": 0,
         "col": 0,
         "id": "84696b6f-9946-2789-344a-a020cbbd8c78"
+      },
+      "b8e987b9-ef0f-71a2-368c-f63e8f85f80f": {
+        "isSystemType": true,
+        "bundleAlias": "charts",
+        "typeAlias": "timeseries_bars_flot",
+        "type": "timeseries",
+        "title": "New widget",
+        "sizeX": 8,
+        "sizeY": 5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "0e9c7ddb-4c21-792f-23e4-9840107ae22a",
+              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
+              "dataKeys": [
+                {
+                  "name": "pressure",
+                  "type": "timeseries",
+                  "label": "Pressure [hPa]",
+                  "color": "#008f16",
+                  "settings": {
+                    "excludeFromStacking": false,
+                    "hideDataByDefault": false,
+                    "disableDataHiding": false,
+                    "removeFromLegend": false,
+                    "showLines": false,
+                    "fillLines": false,
+                    "showPoints": false,
+                    "showPointShape": "circle",
+                    "pointShapeFormatter": "var size = radius * Math.sqrt(Math.PI) / 2;\nctx.moveTo(x - size, y - size);\nctx.lineTo(x + size, y + size);\nctx.moveTo(x - size, y + size);\nctx.lineTo(x + size, y - size);",
+                    "showPointsLineWidth": 5,
+                    "showPointsRadius": 3,
+                    "showSeparateAxis": false,
+                    "axisPosition": "left",
+                    "thresholds": [
+                      {
+                        "thresholdValueSource": "predefinedValue"
+                      }
+                    ],
+                    "comparisonSettings": {
+                      "showValuesForComparison": true
+                    }
+                  },
+                  "_hash": 0.37197642784803575,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                }
+              ]
+            }
+          ],
+          "timewindow": {
+            "realtime": {
+              "timewindowMs": 60000
+            },
+            "aggregation": {
+              "limit": 200,
+              "type": "AVG"
+            }
+          },
+          "showTitle": true,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "shadowSize": 4,
+            "fontColor": "#545454",
+            "fontSize": 10,
+            "xaxis": {
+              "showLabels": true,
+              "color": "#545454"
+            },
+            "yaxis": {
+              "showLabels": true,
+              "color": "#545454"
+            },
+            "grid": {
+              "color": "#545454",
+              "tickColor": "#DDDDDD",
+              "verticalLines": true,
+              "horizontalLines": true,
+              "outlineWidth": 1
+            },
+            "stack": true,
+            "tooltipIndividual": false,
+            "defaultBarWidth": 600,
+            "barAlignment": "left",
+            "timeForComparison": "months",
+            "xaxisSecond": {
+              "axisPosition": "top",
+              "showLabels": true
+            }
+          },
+          "title": "Sensor - Pressure ",
+          "dropShadow": true,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "widgetStyle": {},
+          "useDashboardTimewindow": true,
+          "showLegend": true,
+          "actions": {},
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "units": "hPa",
+          "decimals": 0,
+          "legendConfig": {
+            "direction": "column",
+            "position": "bottom",
+            "sortDataKeys": false,
+            "showMin": false,
+            "showMax": false,
+            "showAvg": true,
+            "showTotal": false
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "b8e987b9-ef0f-71a2-368c-f63e8f85f80f"
+      },
+      "f2f56c31-2807-766c-c75c-7c8433cc28fd": {
+        "isSystemType": true,
+        "bundleAlias": "charts",
+        "typeAlias": "basic_timeseries",
+        "type": "timeseries",
+        "title": "New widget",
+        "sizeX": 8,
+        "sizeY": 5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "0e9c7ddb-4c21-792f-23e4-9840107ae22a",
+              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
+              "dataKeys": [
+                {
+                  "name": "gas",
+                  "type": "timeseries",
+                  "label": "Gas [kOhms]",
+                  "color": "#baba00",
+                  "settings": {
+                    "excludeFromStacking": false,
+                    "hideDataByDefault": false,
+                    "disableDataHiding": false,
+                    "removeFromLegend": false,
+                    "showLines": true,
+                    "fillLines": false,
+                    "showPoints": false,
+                    "showPointShape": "circle",
+                    "pointShapeFormatter": "var size = radius * Math.sqrt(Math.PI) / 2;\nctx.moveTo(x - size, y - size);\nctx.lineTo(x + size, y + size);\nctx.moveTo(x - size, y + size);\nctx.lineTo(x + size, y - size);",
+                    "showPointsLineWidth": 5,
+                    "showPointsRadius": 3,
+                    "showSeparateAxis": false,
+                    "axisPosition": "left",
+                    "thresholds": [
+                      {
+                        "thresholdValueSource": "predefinedValue"
+                      }
+                    ],
+                    "comparisonSettings": {
+                      "showValuesForComparison": true
+                    }
+                  },
+                  "_hash": 0.5649775495855329,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                }
+              ]
+            }
+          ],
+          "timewindow": {
+            "realtime": {
+              "timewindowMs": 60000
+            }
+          },
+          "showTitle": true,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "shadowSize": 4,
+            "fontColor": "#545454",
+            "fontSize": 10,
+            "xaxis": {
+              "showLabels": true,
+              "color": "#545454"
+            },
+            "yaxis": {
+              "showLabels": true,
+              "color": "#545454"
+            },
+            "grid": {
+              "color": "#545454",
+              "tickColor": "#DDDDDD",
+              "verticalLines": true,
+              "horizontalLines": true,
+              "outlineWidth": 1
+            },
+            "stack": false,
+            "tooltipIndividual": false,
+            "timeForComparison": "months",
+            "xaxisSecond": {
+              "axisPosition": "top",
+              "showLabels": true
+            }
+          },
+          "title": "Sensor - Gas VOC",
+          "dropShadow": true,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "useDashboardTimewindow": true,
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "widgetStyle": {},
+          "units": "KOhms",
+          "showLegend": true,
+          "legendConfig": {
+            "direction": "column",
+            "position": "bottom",
+            "sortDataKeys": false,
+            "showMin": false,
+            "showMax": false,
+            "showAvg": true,
+            "showTotal": false
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "f2f56c31-2807-766c-c75c-7c8433cc28fd"
+      },
+      "1e3b44d7-1226-7390-7dff-82dbb708d077": {
+        "isSystemType": true,
+        "bundleAlias": "charts",
+        "typeAlias": "basic_timeseries",
+        "type": "timeseries",
+        "title": "New widget",
+        "sizeX": 8,
+        "sizeY": 5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "0e9c7ddb-4c21-792f-23e4-9840107ae22a",
+              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
+              "dataKeys": [
+                {
+                  "name": "altitude",
+                  "type": "timeseries",
+                  "label": "Altitude [m]",
+                  "color": "#2000ff",
+                  "settings": {
+                    "excludeFromStacking": false,
+                    "hideDataByDefault": false,
+                    "disableDataHiding": false,
+                    "removeFromLegend": false,
+                    "showLines": true,
+                    "fillLines": false,
+                    "showPoints": false,
+                    "showPointShape": "circle",
+                    "pointShapeFormatter": "var size = radius * Math.sqrt(Math.PI) / 2;\nctx.moveTo(x - size, y - size);\nctx.lineTo(x + size, y + size);\nctx.moveTo(x - size, y + size);\nctx.lineTo(x + size, y - size);",
+                    "showPointsLineWidth": 5,
+                    "showPointsRadius": 3,
+                    "showSeparateAxis": false,
+                    "axisPosition": "left",
+                    "thresholds": [
+                      {
+                        "thresholdValueSource": "predefinedValue"
+                      }
+                    ],
+                    "comparisonSettings": {
+                      "showValuesForComparison": true
+                    }
+                  },
+                  "_hash": 0.15604048359505907,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                }
+              ]
+            }
+          ],
+          "timewindow": {
+            "realtime": {
+              "timewindowMs": 60000
+            }
+          },
+          "showTitle": true,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "shadowSize": 4,
+            "fontColor": "#545454",
+            "fontSize": 10,
+            "xaxis": {
+              "showLabels": true,
+              "color": "#545454"
+            },
+            "yaxis": {
+              "showLabels": true,
+              "color": "#545454"
+            },
+            "grid": {
+              "color": "#545454",
+              "tickColor": "#DDDDDD",
+              "verticalLines": true,
+              "horizontalLines": true,
+              "outlineWidth": 1
+            },
+            "stack": false,
+            "tooltipIndividual": false,
+            "timeForComparison": "months",
+            "xaxisSecond": {
+              "axisPosition": "top",
+              "showLabels": true
+            }
+          },
+          "title": "Sensor - Approx. Altitude",
+          "dropShadow": true,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "useDashboardTimewindow": true,
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "widgetStyle": {},
+          "units": "m",
+          "showLegend": true,
+          "legendConfig": {
+            "direction": "column",
+            "position": "bottom",
+            "sortDataKeys": false,
+            "showMin": false,
+            "showMax": false,
+            "showAvg": true,
+            "showTotal": false
+          }
+        },
+        "row": 0,
+        "col": 0,
+        "id": "1e3b44d7-1226-7390-7dff-82dbb708d077"
       }
     },
     "states": {
@@ -1556,7 +1925,7 @@
                 "col": 0
               },
               "25b8900c-fb59-b600-34b4-b6d824607357": {
-                "sizeX": 8,
+                "sizeX": 5,
                 "sizeY": 6,
                 "row": 2,
                 "col": 0
@@ -1568,22 +1937,40 @@
                 "col": 17
               },
               "64faf3d8-bac0-f981-b0be-31ef5d741f76": {
-                "sizeX": 9,
+                "sizeX": 4,
                 "sizeY": 6,
                 "row": 2,
-                "col": 8
+                "col": 5
               },
               "5f94bd56-f2f3-84c2-ff90-a913b7593570": {
-                "sizeX": 8,
+                "sizeX": 4,
                 "sizeY": 6,
                 "row": 2,
-                "col": 17
+                "col": 9
               },
               "cc2d8769-556f-98aa-ce64-4a573456704e": {
                 "sizeX": 9,
                 "sizeY": 3,
                 "row": 11,
                 "col": 8
+              },
+              "b8e987b9-ef0f-71a2-368c-f63e8f85f80f": {
+                "sizeX": 4,
+                "sizeY": 6,
+                "row": 2,
+                "col": 13
+              },
+              "f2f56c31-2807-766c-c75c-7c8433cc28fd": {
+                "sizeX": 4,
+                "sizeY": 6,
+                "row": 2,
+                "col": 17
+              },
+              "1e3b44d7-1226-7390-7dff-82dbb708d077": {
+                "sizeX": 4,
+                "sizeY": 6,
+                "row": 2,
+                "col": 21
               }
             },
             "gridSettings": {
