@@ -1,8 +1,3 @@
-/***
-  Read Our Complete Guide: https://RandomNerdTutorials.com/esp32-bme680-sensor-arduino/
-  Designed specifically to work with the Adafruit BME680 Breakout ----> http://www.adafruit.com/products/3660 These sensors use I2C or SPI to communicate, 2 or 4 pins are required to interface. Adafruit invests time and resources providing this open source code, please support Adafruit and open-source hardware by purchasing products from Adafruit! Written by Limor Fried & Kevin Townsend for Adafruit Industries. BSD license, all text above must be included in any redistribution
-***/
-
 //For Json
 #include <Arduino.h>
 #include <ArduinoJson.h>
@@ -30,16 +25,10 @@ PubSubClient client(wifiClient);
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BME680.h"
 
-/*#define BME_SCK 18
-#define BME_MISO 19
-#define BME_MOSI 23
-#define BME_CS 15*/
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
 Adafruit_BME680 bme; // I2C
-//Adafruit_BME680 bme(BME_CS); // hardware SPI
-//Adafruit_BME680 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK);
 
 
 void setup_wifi() {
