@@ -301,7 +301,7 @@ class ThingsDash:
         print(os.listdir())
         with open(restaurant_dashboard_path, "r") as f:
             dash_custom = json.load(f)
-            dash_custom["title"] = dash_custom["title"] + " - " + restaurant_label
+            dash_custom["title"] = "Dashboard" + " - " + restaurant_label
             dash_custom["configuration"]["states"]["default"]["name"] = restaurant_label
             dash_custom["configuration"]["filters"]['13b2a505-0a36-8ea8-ec1e-99459f04d698']["keyFilters"][0][
                 "predicates"][0]["keyFilterPredicate"]["value"]["defaultValue"] = customer_id
