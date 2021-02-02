@@ -5,14 +5,12 @@ from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import logging
 import json
 import os
+from multiprocessing import Process
 from functions import *
 from BotFilters import *
-from RestaurantPublisher import Publisher
-from RestaurantSubscriber import Subscriber
 from Firebase import Firebase
 import datetime
 from FeedbackSender import Sender
-
 
 # Enable logging
 logging.basicConfig(
@@ -84,6 +82,7 @@ class SmartRestaurant:
             reply_markup = ReplyKeyboardMarkup([['Create Account', 'Sign-In']], one_time_keyboard=True,
                                                resize_keyboard=True)
             bot.message.reply_text(message, reply_markup=reply_markup)
+
             return self.CHECK_SIGN
         # message = 'Welcome back. Please select one of the following.'
         # reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
@@ -184,23 +183,6 @@ class SmartRestaurant:
             traceback.print_exc()
             return False
 
-    def book_(self, bot, update):
-        self.user_id = str(bot.message.from_user.id)
-        is_signed = self.check_signin()
-        if is_signed:
-            message = 'At which Restaurant do you want to book a table?'
-            bot.message.reply_text(message)
-            sorted_restaurants = sorted(self.restaurants_names)
-            for i in sorted_restaurants:
-                new_restaurant = i
-                bot.message.reply_text(new_restaurant)
-            return self.CHECK_BOOKING
-        else:
-            message = 'You are not signed. Please sing-up first to our service'
-            bot.message.reply_text(message)
-
-            return self.START_RETURN
-
     def cond1(self, bot, update):
         selection = bot.message.text
         if selection == 'Book':
@@ -220,7 +202,12 @@ class SmartRestaurant:
                 link = f'https://order-eat2021-django.herokuapp.com/tg-menu/{self.fb_id}/{restaurant}'
                 self.link = link
                 bot.message.reply_text(message)
-                bot.message.reply_text(link)
+                sent_link = bot.message.reply_text(link)
+                # delete_callback(self.updater.bot, sent_link.message_id, sent_link.chat.id,
+                #                                     ttl=3)
+                # run_process(self.updater.bot, sent_link.message_id, sent_link.chat.id,
+                #                                     ttl=5)
+
                 return self.START_RETURN
             else:
                 traceback.print_exc()
@@ -319,11 +306,11 @@ class SmartRestaurant:
             n = len(dinner_slots)
             time_booking = []
             for i in range(n // 3 + 1):
-                if i*3+3 < n:
-                    new = dinner_slots[i*3:i*3+3]
+                if i * 3 + 3 < n:
+                    new = dinner_slots[i * 3:i * 3 + 3]
                     time_booking.append(new)
                 else:
-                    new = dinner_slots[i*3:]
+                    new = dinner_slots[i * 3:]
                     time_booking.append(new)
         except:
             traceback.print_exc()
@@ -361,7 +348,7 @@ class SmartRestaurant:
                     return k, v
             except:
                 pass
-        return None
+        return [None, None]
 
     def join_table(self, user_key, restaurant_key):
         self.fb.db.child('users').child(user_key).child('active').child('friends').update({self.fb_id: self.user_id})
@@ -372,11 +359,11 @@ class SmartRestaurant:
     def join(self, bot, update):
         sent_key = bot.message.text
         key, obj = self.check_table(sent_key)
-        if key:
+        if key is not None:
             self.join_table(key, obj['active']['restaurant_key'])
             message = f"Joined {obj['details']['name']}'s Table"
         else:
-            message = f"KEY not FOUND"
+            message = 'No key has been found. Please check your key.'
 
         bot.message.reply_text(message)
 
@@ -401,9 +388,6 @@ class SmartRestaurant:
 
         # add new booking KEY to restaurant's bookings
         self.fb.upload_booking(self.fb_id, self.restaurant_key, self.time_selected, self.people, self.user_id)
-
-    def order(self, bot, update):
-        message = 'Click on the link to begin the ordering phase'
 
     def search_user_restaurant(self):
         users = self.fb.db.child('users').get().val()
@@ -464,7 +448,7 @@ class SmartRestaurant:
         }
         self.fb.db.child('users').child(self.fb_id).child('history').update(history_object)
 
-        #remove from thingsboard reservation table
+        # remove from thingsboard reservation table
         token = self.fb.db.child(f'restaurants/{restaurant}/details/token_order').get().val()
         tables = self.fb.db.child(f'users/{self.fb_id}/active/table_id').get().val()
         for i, t in tables.items():
@@ -497,7 +481,7 @@ class SmartRestaurant:
         APP_NAME = 'order-eat2021'
         APP_URL = f'https://{APP_NAME}.herokuapp.com/' + TOKEN
         updater = Updater(TOKEN, use_context=True)
-
+        self.updater = updater
         # Get the dispatcher to register handlers:
         dp = updater.dispatcher
         conv_handler = ConversationHandler(
@@ -531,7 +515,19 @@ class SmartRestaurant:
         updater.idle()
 
 
+# def run_process(bot, message_id, chat_id, ttl):
+#     p = Process(target=delete_callback(bot, message_id, chat_id, ttl))
+#     p.start()
+#
+#
+# def delete_callback(bot, message_id, chat_id, ttl=5):
+#     time.sleep(ttl)
+#     bot.delete_message(chat_id=chat_id, message_id=message_id)
+
+
 if __name__ == '__main__':
     print('STARTED')
     sr = SmartRestaurant()
+    # p1 = Process(target=sr.main)
+    # p1.start()
     sr.main()

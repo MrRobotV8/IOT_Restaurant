@@ -214,7 +214,6 @@ class Firebase:
                     print(payload)
                     for t in table_key:
                         access_token = f"{token}_item:table:{t}"
-                        print(access_token)
                         self.td.create_table_order(device_access_token=access_token,
                                                    payload=payload)
             except:
