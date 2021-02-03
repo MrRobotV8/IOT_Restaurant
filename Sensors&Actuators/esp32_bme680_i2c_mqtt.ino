@@ -1,8 +1,8 @@
-//For Json
+// Json
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-
+// WIFI&MQTT
 #include <WiFi.h>
 #include <PubSubClient.h>
 
@@ -14,22 +14,24 @@ const char* mqtt_server = "139.59.148.149"; // dont put http, nor port
 #define MQTT_USER "1ff2b990-5f52-11eb-bcf2-5f53f5d253b9_business:1"
 #define MQTT_PASSWORD ""
 #define MQTT_SERIAL_PUBLISH_CH "v1/devices/me/telemetry"
-#define MQTT_SERIAL_RECEIVER_CH "/icircuit/ESP32/serialdata/rx"
+#define MQTT_SERIAL_RECEIVER_CH "v1/devices/me/attributes"
 
 WiFiClient wifiClient;
 
 PubSubClient client(wifiClient);
 
+// BME680
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BME680.h"
 
-
 #define SEALEVELPRESSURE_HPA (1013.25)
 
 Adafruit_BME680 bme; // I2C
 
+// "HVAC"
+const int ledPin = 5;
 
 void setup_wifi() {
     delay(10);
@@ -60,7 +62,7 @@ void reconnect() {
     if (client.connect(clientId.c_str(),MQTT_USER,MQTT_PASSWORD)) {
       Serial.println("connected");
       //Once connected, publish an announcement...
-      client.publish("/icircuit/presence/ESP32/", "hello world");
+      // client.publish("/icircuit/presence/ESP32/", "hello world");
       // ... and resubscribe
       client.subscribe(MQTT_SERIAL_RECEIVER_CH);
     } else {
@@ -77,9 +79,22 @@ void callback(char* topic, byte *payload, unsigned int length) {
     Serial.println("-------new message from broker-----");
     Serial.print("channel:");
     Serial.println(topic);
-    Serial.print("data:");  
+    Serial.print("data:");
     Serial.write(payload, length);
     Serial.println();
+
+    StaticJsonDocument<30> doc;
+    deserializeJson(doc, payload, length);
+    bool level = doc["hvac"];
+    Serial.print("level:");
+    Serial.println(level);
+
+    if (level){
+      digitalWrite (ledPin, HIGH);
+    }else{
+      digitalWrite (ledPin, LOW);
+    }
+
 }
 
 void publishSerialData(char *serialData){
@@ -108,16 +123,18 @@ void setup() {
 
 
 
-  Serial.setTimeout(500);// Set time out for 
+  Serial.setTimeout(500);// Set time out for
   setup_wifi();
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
   reconnect();
-  
+
+  pinMode (ledPin, OUTPUT);
+
 }
 
 void loop() {
-   client.loop();
+    client.loop();
 
   // Tell BME680 to begin measurement.
   unsigned long endTime = bme.beginReading();
@@ -147,9 +164,9 @@ void loop() {
   StaticJsonDocument<50> doc_temp;
   JsonObject root_temp = doc_temp.to<JsonObject>();
   root_temp["temperature"] = bme.temperature;
-  
+
   char temp_json_buffer[50];
-  
+
   serializeJson(doc_temp, temp_json_buffer);
   Serial.print("Temperature JSON payload: ");
   Serial.println(temp_json_buffer);
@@ -157,7 +174,7 @@ void loop() {
   if (client.publish(MQTT_SERIAL_PUBLISH_CH, temp_json_buffer) == true)
   {
     Serial.println("Success sending Temperature MQTT message");
-  } 
+  }
   else
   {
     Serial.println("Error sending Temperature MQTT message");
@@ -168,9 +185,9 @@ void loop() {
   StaticJsonDocument<50> doc_press;
   JsonObject root_press = doc_press.to<JsonObject>();
   root_press["pressure"]=bme.pressure / 100.0;
-  
+
   char press_json_buffer[50];
-  
+
   serializeJson(doc_press, press_json_buffer);
   Serial.print("Pressure JSON payload: ");
   Serial.println(press_json_buffer);
@@ -178,7 +195,7 @@ void loop() {
   if (client.publish(MQTT_SERIAL_PUBLISH_CH, press_json_buffer) == true)
   {
     Serial.println("Success sending Pressure MQTT message");
-  } 
+  }
   else
   {
     Serial.println("Error sending Pressure MQTT message");
@@ -189,9 +206,9 @@ void loop() {
   StaticJsonDocument<50> doc_hum;
   JsonObject root_hum = doc_hum.to<JsonObject>();
   root_hum["humidity"] = bme.humidity;
-  
+
   char hum_json_buffer[50];
-  
+
   serializeJson(doc_hum, hum_json_buffer);
   Serial.print("Humidity JSON payload: ");
   Serial.println(hum_json_buffer);
@@ -199,7 +216,7 @@ void loop() {
   if (client.publish(MQTT_SERIAL_PUBLISH_CH, hum_json_buffer) == true)
   {
     Serial.println("Success sending Humidity MQTT message");
-  } 
+  }
   else
   {
     Serial.println("Error sending Humidity MQTT message");
@@ -210,9 +227,9 @@ void loop() {
   StaticJsonDocument<50> doc_gas;
   JsonObject root_gas = doc_gas.to<JsonObject>();
   root_gas["gas"] = bme.gas_resistance / 1000.0;
-  
+
   char gas_json_buffer[50];
-  
+
   serializeJson(doc_gas, gas_json_buffer);
   Serial.print("Gas JSON payload: ");
   Serial.println(gas_json_buffer);
@@ -220,7 +237,7 @@ void loop() {
   if (client.publish(MQTT_SERIAL_PUBLISH_CH, gas_json_buffer) == true)
   {
     Serial.println("Success sending Gas MQTT message");
-  } 
+  }
   else
   {
     Serial.println("Error sending Gas MQTT message");
@@ -231,9 +248,9 @@ void loop() {
   StaticJsonDocument<50> doc_alt;
   JsonObject root_alt = doc_alt.to<JsonObject>();
   root_alt["altitude"] = bme.readAltitude(SEALEVELPRESSURE_HPA);
-  
+
   char alt_json_buffer[50];
-  
+
   serializeJson(doc_alt, alt_json_buffer);
   Serial.print("Altitude JSON payload: ");
   Serial.println(alt_json_buffer);
@@ -241,12 +258,12 @@ void loop() {
   if (client.publish(MQTT_SERIAL_PUBLISH_CH, alt_json_buffer) == true)
   {
     Serial.println("Success sending Altitude MQTT message");
-  } 
+  }
   else
   {
     Serial.println("Error sending Altitude MQTT message");
   }
-  
+
   Serial.println();
   delay(5000);
 }
