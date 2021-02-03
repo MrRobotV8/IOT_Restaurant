@@ -1856,6 +1856,73 @@
         "row": 0,
         "col": 0,
         "id": "1e3b44d7-1226-7390-7dff-82dbb708d077"
+      },
+      "a7b35c18-4e35-0f61-f45c-7303e0fbcb80": {
+        "isSystemType": true,
+        "bundleAlias": "input_widgets",
+        "typeAlias": "update_shared_boolean_attribute",
+        "type": "latest",
+        "title": "Update shared boolean attribute",
+        "sizeX": 15,
+        "sizeY": 6,
+        "row": 0,
+        "col": 2,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "0e9c7ddb-4c21-792f-23e4-9840107ae22a",
+              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
+              "dataKeys": [
+                {
+                  "name": "hvac",
+                  "label": "HVAC",
+                  "type": "attribute",
+                  "color": "#2196f3",
+                  "settings": {},
+                  "_hash": 0.664091118733724,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                }
+              ]
+            }
+          ],
+          "timewindow": {
+            "realtime": {
+              "timewindowMs": 60000
+            }
+          },
+          "showTitle": true,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "showResultMessage": true,
+            "trueValue": "ON",
+            "falseValue": "OFF"
+          },
+          "title": "HVAC",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "useDashboardTimewindow": true,
+          "showLegend": false,
+          "actions": {},
+          "showTitleIcon": true,
+          "iconColor": "#001476",
+          "iconSize": "24px",
+          "titleTooltip": "HVAC control",
+          "titleIcon": "ac_unit"
+        },
+        "id": "a7b35c18-4e35-0f61-f45c-7303e0fbcb80"
       }
     },
     "states": {
@@ -1913,7 +1980,7 @@
                 "col": 0
               },
               "7cc9370f-7e65-4f3d-d3dd-ac1feab65b7e": {
-                "sizeX": 9,
+                "sizeX": 4,
                 "sizeY": 3,
                 "row": 8,
                 "col": 8
@@ -1971,6 +2038,12 @@
                 "sizeY": 6,
                 "row": 2,
                 "col": 21
+              },
+              "a7b35c18-4e35-0f61-f45c-7303e0fbcb80": {
+                "sizeX": 5,
+                "sizeY": 3,
+                "row": 8,
+                "col": 12
               }
             },
             "gridSettings": {
@@ -2136,6 +2209,18 @@
           "resolveMultiple": true,
           "stateEntityParamName": "selectedDevice",
           "defaultStateEntity": null
+        }
+      },
+      "0b137c7a-51b6-8051-f3cb-945238a481a9": {
+        "id": "0b137c7a-51b6-8051-f3cb-945238a481a9",
+        "alias": "1ff2b990-5f52-11eb-bcf2-5f53f5d253b9_business:1",
+        "filter": {
+          "type": "singleEntity",
+          "singleEntity": {
+            "entityType": "DEVICE",
+            "id": "203bd080-5f52-11eb-bcf2-5f53f5d253b9"
+          },
+          "resolveMultiple": false
         }
       }
     },
