@@ -11,17 +11,21 @@ import json
 import collections
 from collections import OrderedDict
 from pprint import pprint
-from thingsboard.main import ThingsDash
+from thingsboard.main import ThingsDash #TODO: Comment
 import os
+from .Dash import Dash
+from .functions import *
 
 
 with open('../catalog.json', 'r') as f:
-    config = json.loads(f.read())['firebase']
+    config_db = json.loads(f.read())['firebase']
 
 #FIREBASE INITIALIZATION
-firebase = pyrebase.initialize_app(config)
-database = firebase.database()
+firebase = pyrebase.initialize_app(config_db)
 authe = firebase.auth()
+database = firebase.database()
+
+
 #storage = firebase.storage() --> Developed in HTML
 
 """
@@ -30,7 +34,19 @@ Each function is a view or an action for the customer panel;
 The try & except is used to detect if the action requested by the user is available or not
 i.e the user logouts and then try to go back
 messg: negative message
-message: positive message 
+message: positive message
+Functions: 
+    signIn
+    postSignIn
+    logout
+    signUp
+    postSignUp
+    menu
+    postmenu
+    removefrommenu
+    home
+    orders
+    updatestatus
 """
 
 categories = ['starter', 'pizza', 'burger', 'maindish', 'dessert', 'drinks']
@@ -59,7 +75,7 @@ def postSignIn(request):
         try:
             user = authe.sign_in_with_email_and_password(email, passw)
         except:
-            message = 'invalid credentials'
+            message = 'Invalid credentials'
             return render(request, 'rpanel/signIn.html', {"messg": message})
 
         session_id = user['idToken']
@@ -149,14 +165,24 @@ def postSignUp(request):
     tfor6 = request.POST.get('tfor6')
     list_slot_l = request.POST.getlist('slot-l')
     list_slot_d = request.POST.getlist('slot-d')
-
-    print(list_slot_d)
-    print(list_slot_l)
-    added = 0
-    if passw == re_passw:
+    print("checking password")
+    if password_checker(passw, re_passw)==True:
         try:
             user = authe.create_user_with_email_and_password(email, passw)
-            added = 1
+            uid = user['localId'] 
+            data = {
+                "name": name,
+                "status": "1",
+                "address": address,
+                "description": description,
+                "seats": seats,
+                'phone': phone,
+                'tables': {'2': tfor2, '4': tfor4, '6': tfor6},
+                'lunch-slot': list_slot_l,
+                'dinner-slot': list_slot_d,
+                }
+            database.child("restaurants").child(uid).child("details").set(data) 
+            print("Restaurant Added!")
         except:
             msg = "Unable to create account, try again"  # weak password
             print(msg)
@@ -165,118 +191,17 @@ def postSignUp(request):
         msg = "The passwords don’t match, please try again"  # password matching
         print(msg)
         return render(request, 'rpanel/register.html', {'msg': msg})
-    uid = user['localId']   #usually called rest_id
-    if added == 1:
-        data = {
-            "name": name,
-            "status": "1",
-            "address": address,
-            "description": description,
-            "seats": seats,
-            'phone': phone,
-            'tables': {'2': tfor2, '4': tfor4, '6': tfor6},
-            'lunch-slot': list_slot_l,
-            'dinner-slot': list_slot_d,
-            }
-        database.child("restaurants").child(uid).child("details").set(data) 
-        print("Restaurant Added!")
-    else:
-        msg = "Something goes wrong, try again"
-        print("msg")
-        return render(request, 'rpanel/register.html', {'messg': msg})
 
-
-    #TODO: best practice?
-    public = True
-    print("before: "+ str(os.getcwd()))
-    td = ThingsDash()
-    print("after:",os.getcwd())
-    owner_id = td.create_customer(title=email, address=address)
-    building_name = f"{owner_id}_building:1"
-    building_label = address  # Indirizzo del ristorante
-    building_id = td.create_restaurant_asset(asset_name=building_name, asset_label=building_label)
-    #TOKEN_TELEMETRY
-    database.child('restaurants').child(uid).child('details').child('token_telemetry').set(building_id)
-    # assign asset/building to customer
-    td.relation_customer_contains_asset(owner_id, building_id)
-    if public:
-        td.assign_device_to_public(building_id)
-    else:
-        td.assign_asset_to_customer(owner_id, building_id)
-
-    #create restaurant device
-    restaurant_name = f"{building_id}_business:1"
-    restaurant_token = restaurant_name
-    restaurant_label = name  # Nome del ristorante
-    restaurant_device_id = td.save_restaurant_device(device_name=restaurant_name, device_label=restaurant_label,
-                                                     device_token=restaurant_name)
-    #TOKEN_ORDER
-    database.child('restaurants').child(uid).child('details').child('token_order').set(restaurant_device_id)
-    # set restaurant attributes
-    td.set_device_attributes(restaurant_token, {"customer_owner": owner_id,
-                                                "address": address, "description": description, "name": name,
-                                                "phone": phone, "seats": seats, "status": "1", "dinner_slot": "",
-                                                "lunch_slot": ""})
-    # assign device to asset
-    td.relation_asset_contains_device(building_id, restaurant_device_id)
-    # assign device to customer
-    if public:
-        td.assign_device_to_public(restaurant_device_id)
-    else:
-        td.assign_device_to_customer(owner_id, restaurant_device_id)
-
-    # create the tables
-    dict_tables = {2: int(tfor2), 4: int(tfor4), 6: int(tfor6)}  # this should be given by ciccio
-    table_number = 0
-    for n_seats, n_tables in dict_tables.items():
-        for i in range(n_tables):
-            table_number += 1
-            # create device table
-            table_token = f"{restaurant_device_id}_item:table:{table_number}"
-            table_device_id = td.save_table_device(table_number=table_number, device_token=table_token,
-                                                   device_restaurant_id=restaurant_device_id)
-            # set table attributes
-            td.set_device_attributes(table_token, {"customer_owner": owner_id, "seats": n_seats})
-            # assign device to customer
-            if public:
-                td.assign_device_to_public(table_device_id)
-            else:
-                td.assign_device_to_customer(owner_id, table_device_id)
-            # assign device to asset
-            td.relation_asset_contains_device(building_id, table_device_id)
-            # assign device to restaurant device
-            td.relation_device_contains_device(restaurant_device_id, table_device_id)
-
-    # create the togo device
-    togo_token = f"{restaurant_device_id}_togo"
-    togo_device_id = td.save_togo_device(togo_token, restaurant_device_id)
-    # assign device to asset
-    td.relation_asset_contains_device(building_id, togo_device_id)
-    # assign device to owner
-    if public:
-        td.assign_device_to_public(togo_device_id)
-    else:
-        td.assign_device_to_customer(owner_id, togo_device_id)
-    # set togo attributes
-    td.set_device_attributes(togo_token, {"customer_owner": owner_id})
-
-    # creates a dashboard and assigns it to the owner
-    custom_dash = td.customize_dashboard(restaurant_dashboard_path="thingsboard/restaurant_default.json",
-                                         restaurant_label=restaurant_label, customer_id=owner_id)
-    dashboard_id = td.save_dashboard(custom_dash)
-    if public:
-        # make the dashboard public and get its url
-        dashboard_id, public_client_id, dashboard_url = td.assign_dashboard_to_public_customer(dashboard_id)
-        print(f"Customer dashboard URL: {dashboard_url}")
-    else:
-        td.assign_dashboard_to_customer(owner_id, dashboard_id)
-
-    database.child('restaurants').child(uid).child('details').child('thingsboard').set(dashboard_url)
-
-    #create empty menu #TODO: IT'S BETTER TO MANAGE THE ERROR IN HTML OF THE MENU SECTION
-    """
-    database.child('restaurants').child(uid).child('menu').set({'item': 'first'})
-    """
+    config = {
+        'email': email,
+        'uid': uid,        
+    }
+    config.update(data)
+    dash = Dash(config)
+    things = dash.create_dash()
+    #TOKEN_TELEMETRY/TOKEN_ORDER/DASHBOARD_URL
+    database.child('restaurants').child(uid).child('details').update(things)
+   
     msg = "Account Created!"
     ctx = {
         'message': msg,
@@ -320,8 +245,7 @@ def postmenu(request):
         item_availability = request.POST.get('available')
         item_url = request.POST.get('url')
 
-        idtoken = request.session['uid']
-        rest_id = authe.get_account_info(idtoken)
+        rest_id = authe.get_account_info(request.session['uid'])
         rest_id = rest_id['users'][0]['localId']
 
         data = {
@@ -337,7 +261,6 @@ def postmenu(request):
         name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
         message = "Product Added!"
         menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
-        pprint(menu)
         thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
         return render(request, 'rpanel/menu.html', {"name": name, "uid": rest_id, 'menu': menu, "message": message, "thingsboard_url":thingsboard_url})
     except:
@@ -350,13 +273,11 @@ def postmenu(request):
 
 def removefrommenu(request, pk):
     try:
-        idtoken = request.session['uid']
-        rest_id = authe.get_account_info(idtoken)
+        rest_id = authe.get_account_info(request.session['uid'])
         rest_id = rest_id['users'][0]['localId']
 
         database.child('restaurants').child(rest_id).child('menu').child(pk).remove()
-        name = database.child("restaurants").child(
-            rest_id).child('details').child('name').get().val()
+        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
         message = "Product Deleted!"
         menu = database.child('restaurants').child(rest_id).child('menu').get().val()
         thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
@@ -402,61 +323,13 @@ def home(request):
         }
         return render(request, 'food/signIn.html', ctx)
 
-""" DEPRECATED
-def profile(request):
-    try:
-        idtoken = request.session['uid']
-        rest_id = authe.get_account_info(idtoken)
-        rest_id = rest_id['users'][0]['localId']
-        info = dict(database.child("restaurants").child(
-            rest_id).child('details').get().val())
 
-        return render(request, "rpanel/profile.html", {'info': info})
-    except:
-        msg = "Session expired! Please login again!"
-        ctx = {
-            'messg': msg,
-        }
-        return render(request, 'rpanel/signIn.html', ctx)
-"""
-
-
-
-def orders(request):
-    idtoken = request.session['uid']
-    rest_id = authe.get_account_info(idtoken)
+def orders(request): 
+    rest_id = authe.get_account_info(request.session['uid'])
     rest_id = rest_id['users'][0]['localId']
 
     orders = database.child('orders').get().val()
-    my_orders = {}
-    for customer, value in orders.items():
-        for rest, val in value.items():
-            if rest == rest_id:
-                for ts, order in val.items():
-                    print(customer)
-                    print(rest)
-                    print(ts)
-                    d = datetime(
-                        day=int(ts[:2]),
-                        month=int(ts[2:4]),
-                        year=int(ts[4:8]),
-                        hour=int(ts[8:10]),
-                        minute=int(ts[10:12]),
-                        second=int(ts[12:14]),
-                    )
-                    timestamp = datetime.timestamp(d)
-                    print(d)
-                    print(timestamp)
-                    my_orders[timestamp] = {
-                        'name': database.child('users').child(customer).child('details').child('name').get().val(),
-                        'order': order,  #dict
-                        'day': d,
-                        'ts': ts,
-                        'customer_id': customer,
-                        'status': database.child('orders').child(customer).child(rest_id).child(ts).child('order_status').get().val(),
-
-                    }
-    pprint(my_orders)
+    my_orders = mapping_orders(orders, database, rest_id)
     my_orders = OrderedDict(sorted(my_orders.items(), key=lambda x: x[0], reverse=True))
 
     info = dict(database.child("restaurants").child(rest_id).child('details').get().val())
@@ -481,8 +354,8 @@ def orders(request):
         }
         return render(request, 'rpanel/signIn.html', ctx)
 '''
-#TODO: RICARICA PAGINA --> MSG
 
+#TODO: RICARICA PAGINA --> MSG
 def updatestatus(request, cust, pk):
     order_status = request.POST.get('orderstatus')
     idtoken = request.session['uid']
@@ -492,34 +365,7 @@ def updatestatus(request, cust, pk):
     database.child('orders').child(cust).child(rest_id).child(pk).child('order_status').set(order_status)  # or update?
 
     orders = database.child('orders').get().val()
-    my_orders = {}
-    for customer, value in orders.items():
-        for rest, val in value.items():
-            if rest == rest_id:
-                for ts, order in val.items():
-                    print(customer)
-                    print(rest)
-                    print(ts)
-                    d = datetime(
-                        day=int(ts[:2]),
-                        month=int(ts[2:4]),
-                        year=int(ts[4:8]),
-                        hour=int(ts[8:10]),
-                        minute=int(ts[10:12]),
-                        second=int(ts[12:14]),
-                    )
-                    timestamp = datetime.timestamp(d)
-                    print(d)
-                    print(timestamp)
-                    my_orders[timestamp] = {
-                        'name': database.child('users').child(customer).child('details').child('name').get().val(),
-                        'order': order,
-                        'day': d,
-                        'ts': ts,
-                        'customer_id': customer,
-                        'status': database.child('orders').child(cust).child(rest_id).child(pk).child(
-                            'order_status').get().val(),
-                    }
+    my_orders = mapping_orders(orders, database, rest_id)
 
     my_orders = OrderedDict(sorted(my_orders.items(), key=lambda x: x[0], reverse=True))
 
@@ -535,33 +381,20 @@ def updatestatus(request, cust, pk):
     }
     return render(request, "rpanel/orders.html", context)
 
+""" DEPRECATED   -FUTURE WORKS
+def profile(request):
+    try:
+        idtoken = request.session['uid']
+        rest_id = authe.get_account_info(idtoken)
+        rest_id = rest_id['users'][0]['localId']
+        info = dict(database.child("restaurants").child(
+            rest_id).child('details').get().val())
 
-'''
-import os
-
-
-
-if __name__ == "__main__":
-    print(os.listdir())
-
-    # creates a dashboard and assigns it to the owner
-    f = open("thingsboard/template_restaurant.json")
-    
-'''
-
-
-def order_dict(dict_):
-    pprint(dict_)
-    ord_lst = []
-    clients = list(dict_.keys())
-    for cl in clients:
-        orders = list(dict_[cl].keys())
-        [ord_lst.append((x, cl)) for x in orders]
-        ord_lst = sorted(ord_lst)
-
-    new_dict = OrderedDict()
-    # ord_lst = sorted(ord_lst, reverse=True)
-    for e in ord_lst[::-1]:
-        print([e[1]], [e[0]])
-        new_dict.update({e[1]: {e[0]: dict_[e[1]][e[0]]}})
-    return dict(new_dict)
+        return render(request, "rpanel/profile.html", {'info': info})
+    except:
+        msg = "Session expired! Please login again!"
+        ctx = {
+            'messg': msg,
+        }
+        return render(request, 'rpanel/signIn.html', ctx)
+"""
