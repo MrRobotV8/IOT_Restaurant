@@ -75,7 +75,7 @@ def postsign(request):  # homepage
         user_id = authe.get_account_info(request.session['uid'])
         user_id = user_id['users'][0]['localId']
         request.session['user_id'] = user_id
-        print(request.session.items())  #COMMENT
+        #print(request.session.items())  #COMMENT
         name = database.child('users').child(user_id).child('details/name').get().val()
         ctx = {
             'user': name,
@@ -154,7 +154,7 @@ def logout(request):
         request.session.flush()
         # Azzera Basket
         #database.child('users').child(user_id).child('last_basket').remove()
-        print(request.session.items())
+        #print(request.session.items())
     except KeyError:
         pass
     message = "You are logged out!"
@@ -289,97 +289,93 @@ POST request: client address (it's a delivery order)
 2)Create delivery order in Thingsboard
 """
 def checkout(request, rest_id):
-    now = datetime.now()
-    dt_string = now.strftime("%d%m%Y%H%M%S")
-    idtoken = request.session['user_id']    #usually called user_id, maybe I was drunk
-    client_name = database.child('users').child(idtoken).child('details/name').get().val()
-    client_address = request.POST.get('address')
-    is_bot = 0   #False
-    delivery = {
-        'address': client_address,
-        'is_bot': is_bot,
-    }
+    try: 
+        now = datetime.now()
+        dt_string = now.strftime("%d%m%Y%H%M%S")
+        idtoken = request.session['user_id']    #usually called user_id, maybe I was drunk
+        client_name = database.child('users').child(idtoken).child('details/name').get().val()
+        client_address = request.POST.get('address')
+        is_bot = 0   #False
+        delivery = {
+            'address': client_address,
+            'is_bot': is_bot,
+        }
 
-    try:
-        last_basket = database.child('users').child(idtoken).child('last_basket').get().val()
-        database.child('orders').child(idtoken).child(rest_id).child(dt_string).set(last_basket)
-        database.child('orders').child(idtoken).child(rest_id).child(dt_string).update(delivery)
+        try:
+            last_basket = database.child('users').child(idtoken).child('last_basket').get().val()
+            database.child('orders').child(idtoken).child(rest_id).child(dt_string).set(last_basket)
+            database.child('orders').child(idtoken).child(rest_id).child(dt_string).update(delivery)
 
-        message = "Your order has been accepted by OrderEat"
+            message = "Your order has been accepted by OrderEat"
+        except:
+            message = "Something went wrong, please try again"
+
+        order = dict(database.child('orders').child(
+            idtoken).child(rest_id).child(dt_string).get().val())
+
+        del order['total']
+        del order['is_bot']
+        del order['address']
+        total = database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('total').get().val()
+        
+        order_status = "ACCEPTED"
+        database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('order_status').set(order_status)
+
+        #Create delivery order on Thingsboard 
+        token = database.child('restaurants').child(rest_id).child('details').child('token_order').get().val()
+        togo_order(token, order, client_name, client_address)
+
+        context = {
+            'message': message,
+            'user': client_name,
+            'tot': total,
+            'rest_id': rest_id,
+            'idtoken': idtoken,
+            'order': order,
+            'address': client_address,
+        }
+        return render(request, 'food/checkout.html', context)
     except:
-        message = "Something went wrong, please try again"
-
-    order = dict(database.child('orders').child(
-        idtoken).child(rest_id).child(dt_string).get().val())
-
-    del order['total']
-    del order['is_bot']
-    del order['address']
-    total = database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('total').get().val()
-    
-    order_status = "ACCEPTED"
-    database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('order_status').set(order_status)
-
-    #Create delivery order on Thingsboard 
-    token = database.child('restaurants').child(rest_id).child('details').child('token_order').get().val()
-    togo_order(token, order, client_name, client_address)
-
-    context = {
-        'message': message,
-        'user': client_name,
-        'tot': total,
-        'rest_id': rest_id,
-        'idtoken': idtoken,
-        'order': order,
-        'address': client_address,
-    }
-    return render(request, 'food/checkout.html', context)
-    '''
-    except:
-        print()
         msg="Something went wrong! Probably session is expired, try again!"
         ctx = {
         'messg': msg
         }
         return render(request, 'food/login.html', ctx)
-    '''
 
 """
 GET REQUEST
 
 """
 def orders(request):
-    user_id = request.session['user_id']
-    client_name = database.child('users').child(user_id).child('details/name').get().val()
-    try:
+    try: 
+        user_id = request.session['user_id']
+        client_name = database.child('users').child(user_id).child('details/name').get().val()
+        try:
 
-        last_order = dict(database.child('users').child(user_id).child('last_basket').get().val())
-        del last_order['total']
-        pprint(last_order)
-        last_order_total = database.child('users').child(user_id).child('last_basket').child('total').get().val()
-        pprint(last_order_total)
-    except:
-        last_order = None
-        last_order_total = None
+            last_order = dict(database.child('users').child(user_id).child('last_basket').get().val())
+            del last_order['total']
+            #pprint(last_order)
+            last_order_total = database.child('users').child(user_id).child('last_basket').child('total').get().val()
+            #pprint(last_order_total)
+        except:
+            last_order = None
+            last_order_total = None
 
-    orders = database.child('orders').child(user_id).get().val()
-    print("orders")
-    pprint(orders)
-    my_orders = mapping_customer_orders(orders, database)
-    context = {
-        'my_orders': my_orders,
-        'user': client_name,
-        'last_order': last_order,
-        'tot': last_order_total,
-    }
+        orders = database.child('orders').child(user_id).get().val()
+        my_orders = mapping_customer_orders(orders, database)
+        context = {
+            'my_orders': my_orders,
+            'user': client_name,
+            'last_order': last_order,
+            'tot': last_order_total,
+        }
 
-    return render(request, 'food/order.html', context)
-    '''
+        return render(request, 'food/order.html', context)
+
     except:
         msg = "Something went wrong! Please Try again :)"
         ctx = {
         'messg': msg
         }
         return render(request, 'food/login.html', ctx)
-    '''
 

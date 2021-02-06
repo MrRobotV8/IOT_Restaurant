@@ -11,7 +11,7 @@ import json
 import collections
 from collections import OrderedDict
 from pprint import pprint
-from thingsboard.main import ThingsDash #TODO: Comment
+#from thingsboard.main import ThingsDash 
 import os
 from .Dash import Dash
 from functions import *
@@ -26,7 +26,7 @@ authe = firebase.auth()
 database = firebase.database()
 
 
-#storage = firebase.storage() --> Developed in HTML
+#storage = firebase.storage() --> Developed in JS --> menu.html
 
 """
 GENERAL GUIDELINES:
@@ -117,7 +117,7 @@ def logout(request):
         del request.session['uid']
         request.session.flush()
         # Azzera Basket
-        print(request.session.items())
+        #print(request.session.items())
     except KeyError:
         pass
     message = "You are logged out!"
@@ -217,7 +217,7 @@ def menu(request):
         name = database.child("restaurants").child(rest_id).child('details/name').get().val()
         try:
             menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
-            pprint(menu)
+            #pprint(menu)
         except:
             menu=None
         thingsboard_url = database.child('restaurants').child(rest_id).child('details/thingsboard').get().val()
@@ -317,14 +317,14 @@ def home(request):
 
         return render(request, 'rpanel/home.html', ctx)
     except:
-        msg = "Something goes wrong! Try again :)"
+        msg = "Something went wrong! Try again :)"
         ctx = {
             'messg': msg
         }
         return render(request, 'food/signIn.html', ctx)
 
 
-def orders(request): 
+def orders(request):
     rest_id = authe.get_account_info(request.session['uid'])
     rest_id = rest_id['users'][0]['localId']
 
@@ -355,7 +355,6 @@ def orders(request):
         return render(request, 'rpanel/signIn.html', ctx)
 '''
 
-#TODO: RICARICA PAGINA --> MSG
 def updatestatus(request, cust, pk):
     order_status = request.POST.get('orderstatus')
     idtoken = request.session['uid']

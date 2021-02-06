@@ -16,7 +16,7 @@ class Dash(ThingsDash):
         self.seats = config['seats']
         self.phone = config['phone']
         self.tables = config['tables']
-        print(config)
+        #print(config)
         #self.lunch_slot = config['lunch-slot'] # comment
         #self.dinner_slot = config['dinner-slot'] # comment
             
@@ -67,7 +67,7 @@ class Dash(ThingsDash):
 
         # create the tables
         dict_tables = {2: int(self.tables['2']), 4: int(self.tables['4']), 6: int(self.tables['6'])} 
-        print(dict_tables) # this should be given by ciccio
+        #print(dict_tables) 
         table_number = 0
         for n_seats, n_tables in dict_tables.items():
             for i in range(n_tables):
