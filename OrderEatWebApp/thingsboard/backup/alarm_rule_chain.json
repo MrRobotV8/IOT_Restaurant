@@ -1,0 +1,268 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": ""
+    },
+    "name": "Alarm Rule Chain",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": true,
+    "configuration": null
+  },
+  "metadata": {
+    "firstNodeIndex": 9,
+    "nodes": [
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1042,
+          "layoutY": 545
+        },
+        "type": "org.thingsboard.rule.engine.action.TbClearAlarmNode",
+        "name": "Too Warm Clear Alarm",
+        "debugMode": true,
+        "configuration": {
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;",
+          "alarmType": "Too Warm"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1046,
+          "layoutY": 815
+        },
+        "type": "org.thingsboard.rule.engine.action.TbClearAlarmNode",
+        "name": "Too Fresh Clear Alarm",
+        "debugMode": true,
+        "configuration": {
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;",
+          "alarmType": "Too Fresh"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1038,
+          "layoutY": 732
+        },
+        "type": "org.thingsboard.rule.engine.action.TbCreateAlarmNode",
+        "name": "Too Fresh Alarm",
+        "debugMode": true,
+        "configuration": {
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;",
+          "useMessageAlarmData": false,
+          "alarmType": "Too Fresh",
+          "severity": "WARNING",
+          "propagate": false,
+          "relationTypes": []
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 763,
+          "layoutY": 738
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "(-) Threshold vs Calc",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "return msg.sum <= metadata.ss_maxCount*-1;"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 758,
+          "layoutY": 626
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "(+) Threshold vs Calc",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "return msg.sum >= metadata.ss_maxCount;"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 493,
+          "layoutY": 697
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Calc Sum",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var tmp\r\nvar newMsg = {}\r\nvar sum = 0\r\n\r\nparsed_metadata = JSON.parse(metadata.temperature_feedback)\r\n\r\nfor (var i in parsed_metadata) {\r\n   sum += parsed_metadata[i].value;\r\n}\r\n\r\nnewMsg.sum = sum;\r\nreturn {msg: newMsg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Fetch last 1 hour of \"temperature_feedback\" of \"restaurant_device_profile\" telemetry data",
+          "layoutX": 447,
+          "layoutY": 513
+        },
+        "type": "org.thingsboard.rule.engine.metadata.TbGetTelemetryNode",
+        "name": "Fetch Lasts",
+        "debugMode": true,
+        "configuration": {
+          "latestTsKeyNames": [
+            "temperature_feedback"
+          ],
+          "fetchMode": "ALL",
+          "orderBy": "DESC",
+          "limit": 15,
+          "useMetadataIntervalPatterns": false,
+          "startInterval": 30,
+          "startIntervalTimeUnit": "MINUTES",
+          "endInterval": 1,
+          "endIntervalTimeUnit": "MILLISECONDS",
+          "startIntervalPattern": "",
+          "endIntervalPattern": ""
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Check if the message contains temperature_feedback",
+          "layoutX": 271,
+          "layoutY": 407
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbCheckMessageNode",
+        "name": "Contains temperature_feedback?",
+        "debugMode": true,
+        "configuration": {
+          "messageNames": [
+            "temperature_feedback"
+          ],
+          "metadataNames": [],
+          "checkAllKeys": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1043,
+          "layoutY": 621
+        },
+        "type": "org.thingsboard.rule.engine.action.TbCreateAlarmNode",
+        "name": "Too Warm Alarm",
+        "debugMode": true,
+        "configuration": {
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;",
+          "useMessageAlarmData": false,
+          "alarmType": "Too Warm",
+          "severity": "WARNING",
+          "propagate": false,
+          "relationTypes": []
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Check if the originator is a device",
+          "layoutX": 117,
+          "layoutY": 233
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbOriginatorTypeFilterNode",
+        "name": "Is Device?",
+        "debugMode": true,
+        "configuration": {
+          "originatorTypes": [
+            "DEVICE"
+          ]
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Adding client feedback count threshold to the originator (restaurant_device_profile device) attributes, to be used in a later stage",
+          "layoutX": 447,
+          "layoutY": 606
+        },
+        "type": "org.thingsboard.rule.engine.metadata.TbGetAttributesNode",
+        "name": "Adding maxCount",
+        "debugMode": true,
+        "configuration": {
+          "tellFailureIfAbsent": true,
+          "clientAttributeNames": [],
+          "sharedAttributeNames": [],
+          "serverAttributeNames": [
+            "maxCount"
+          ],
+          "latestTsKeyNames": [],
+          "getLatestValueWithTs": false
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "Check if the originator is of deviceType=\"restaurant_device_profile\"",
+          "layoutX": 217,
+          "layoutY": 324
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Is Restaurant Device?",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "return metadata.deviceType === \"restaurant_device_profile\";"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 3,
+        "toIndex": 2,
+        "type": "True"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 1,
+        "type": "False"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 8,
+        "type": "True"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 0,
+        "type": "False"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 4,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 3,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 10,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 6,
+        "type": "True"
+      },
+      {
+        "fromIndex": 9,
+        "toIndex": 11,
+        "type": "True"
+      },
+      {
+        "fromIndex": 10,
+        "toIndex": 5,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 11,
+        "toIndex": 7,
+        "type": "True"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}
