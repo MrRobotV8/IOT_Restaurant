@@ -1,4 +1,6 @@
-"Ciccio Refactoring" 
+"Ciccio Refactoring"
+
+"The Dash class inherith attributes and methods of ThingsDash developed by Victor, but it is optimized for Django purposes"
 from thingsboard.main import ThingsDash
 
 class Dash(ThingsDash):
@@ -22,14 +24,12 @@ class Dash(ThingsDash):
     def create_dash(self):
         public = True
         owner_id = self.create_customer(title=self.email, address=self.address)  
-        print("owner_id:")
-        print(owner_id)
         building_name = f"{owner_id}_building:1"
-        print("building name " + str(building_name))
+        #print("building name " + str(building_name))
         building_label = self.address  # Indirizzo del ristorante
-        print("builing_label " + str(building_label))
+        #print("builing_label " + str(building_label))
         building_id = self.create_restaurant_asset(asset_name=building_name, asset_label=building_label)
-        print("builing_id " + str(building_id))
+        #print("builing_id " + str(building_id))
         #TOKEN_TELEMETRY
         #self.database.child('restaurants').child(self.uid).child('details').child('token_telemetry').set(building_id)
         #assign asset/building to customer

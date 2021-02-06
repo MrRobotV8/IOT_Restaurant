@@ -14,7 +14,7 @@ from pprint import pprint
 from thingsboard.main import ThingsDash #TODO: Comment
 import os
 from .Dash import Dash
-from .functions import *
+from functions import *
 
 
 with open('../catalog.json', 'r') as f:
@@ -82,8 +82,8 @@ def postSignIn(request):
         request.session['uid'] = str(session_id)
         rest_id = user['localId']
         restaurant = database.child('restaurants').child(rest_id).get().val()
-        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
-        thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+        name = database.child("restaurants").child(rest_id).child('details/name').get().val()
+        thingsboard_url = database.child('restaurants').child(rest_id).child('details/thingsboard').get().val()
 
         # IF RESTAURANT HAS MENU RETURNS home.html, OTHERWISE RETURN index.html
         try:
@@ -214,13 +214,13 @@ def menu(request):
     try:
         rest_id = authe.get_account_info(request.session['uid'])
         rest_id = rest_id['users'][0]['localId']
-        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+        name = database.child("restaurants").child(rest_id).child('details/name').get().val()
         try:
             menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
             pprint(menu)
         except:
             menu=None
-        thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+        thingsboard_url = database.child('restaurants').child(rest_id).child('details/thingsboard').get().val()
 
         return render(request, "rpanel/menu.html", {'uid': rest_id, 'name': name, 'menu': menu, 'thingsboard_url': thingsboard_url})
 
@@ -258,10 +258,10 @@ def postmenu(request):
         }
 
         database.child('restaurants').child(rest_id).child('menu').child(millis).set(data)
-        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+        name = database.child("restaurants").child(rest_id).child('details/name').get().val()
         message = "Product Added!"
         menu = dict(database.child('restaurants').child(rest_id).child('menu').get().val())
-        thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+        thingsboard_url = database.child('restaurants').child(rest_id).child('details/thingsboard').get().val()
         return render(request, 'rpanel/menu.html', {"name": name, "uid": rest_id, 'menu': menu, "message": message, "thingsboard_url":thingsboard_url})
     except:
         msg = "Session expired! Please login again!"
@@ -277,10 +277,10 @@ def removefrommenu(request, pk):
         rest_id = rest_id['users'][0]['localId']
 
         database.child('restaurants').child(rest_id).child('menu').child(pk).remove()
-        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+        name = database.child("restaurants").child(rest_id).child('details/name').get().val()
         message = "Product Deleted!"
         menu = database.child('restaurants').child(rest_id).child('menu').get().val()
-        thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+        thingsboard_url = database.child('restaurants').child(rest_id).child('details/thingsboard').get().val()
 
         context = {
             "name": name,
@@ -305,8 +305,8 @@ def home(request):
         rest_id = rest_id['users'][0]['localId']
 
         data = database.child('restaurants').child(rest_id).child('menu').get().val()
-        name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
-        thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
+        name = database.child("restaurants").child(rest_id).child('details/name').get().val()
+        thingsboard_url = database.child('restaurants').child(rest_id).child('details/thingsboard').get().val()
 
 
         ctx = {
@@ -333,8 +333,8 @@ def orders(request):
     my_orders = OrderedDict(sorted(my_orders.items(), key=lambda x: x[0], reverse=True))
 
     info = dict(database.child("restaurants").child(rest_id).child('details').get().val())
-    thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
-    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+    thingsboard_url = database.child('restaurants').child(rest_id).child('details/thingsboard').get().val()
+    name = database.child("restaurants").child(rest_id).child('details/name').get().val()
 
 
     context = {
@@ -370,8 +370,8 @@ def updatestatus(request, cust, pk):
     my_orders = OrderedDict(sorted(my_orders.items(), key=lambda x: x[0], reverse=True))
 
     info = dict(database.child("restaurants").child(rest_id).child('details').get().val())
-    thingsboard_url = database.child('restaurants').child(rest_id).child('details').child('thingsboard').get().val()
-    name = database.child("restaurants").child(rest_id).child('details').child('name').get().val()
+    thingsboard_url = database.child('restaurants').child(rest_id).child('details/thingsboard').get().val()
+    name = database.child("restaurants").child(rest_id).child('details/name').get().val()
 
     context = {
         'name': name,
