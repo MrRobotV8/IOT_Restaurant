@@ -1,3 +1,4 @@
+"By Victor"
 import requests
 import json
 import os
@@ -63,7 +64,9 @@ class ThingsDash:
 
         response = requests.post(url_api, data=json.dumps(payload), headers=headers)
         if response.status_code == 200:
+            print("response post request 200")
             self.customer_id = json.loads(response.text)["id"]["id"]
+            print(self.customer_id)
             return self.customer_id
 
     def create_restaurant_asset(self, asset_label=None, asset_name=None):

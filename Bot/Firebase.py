@@ -1,24 +1,24 @@
 import traceback
-import os
+import logging
 import pyrebase
 from thingsboard.main import ThingsDash
 import datetime
 import copy
 from FeedbackSender import Sender
+import json
+
+# Enable logging for displaying prints
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 class Firebase:
     def __init__(self):
-        self.config = {
-            'apiKey': "AIzaSyCNUQyDSE8LglsRzQGpk8OJGvTj2IyicT4",
-            'authDomain': "ordereat-94887.firebaseapp.com",
-            'databaseURL': "https://ordereat-94887.firebaseio.com",
-            'projectId': "ordereat-94887",
-            'storageBucket': "ordereat-94887.appspot.com",
-            'messagingSenderId': "89417842986",
-            'appId': "1:89417842986:web:162875424095cecd65de53",
-            'measurementId': "G-BHVSYJK293"
-        }
+        with open('../catalog.json', 'r') as f:
+            self.config = json.loads(f.read())['firebase']
         self.sender = Sender()
         self.firebase = pyrebase.initialize_app(self.config)
         self.td = ThingsDash()
@@ -57,6 +57,7 @@ class Firebase:
         hash_key = self.hash_creator(user_id, hour, n_people)
         table_key = self.check_table_availability(restaurant_key, hash_key)
         if len(table_key) > 0:
+            logger.info('TABLE: table available')
             to_set = {
                 'bot_id': user_id,
                 'table_id': table_key
@@ -65,26 +66,16 @@ class Firebase:
                 token = self.db.child(f'restaurants/{restaurant_key}/details/token_order').get().val()
                 self.sender.send(f'{token}_item:table:{t}', {'reserved': True}, 'attributes')
             self.db.child('restaurants').child(restaurant_key).child('bookings').child(hash_key).set(to_set)
-            self.db.child(f'users/{user_id}/active').update({'table_id': table_key})
+            self.db.child(f'users/{user_firebase}/active').update({'table_id': table_key})
+            return True
         else:
+            logger.info('TABLE: table NOT available')
             # TODO: no tables available; create new path
             print('Your booking was not uploaded')
-
-    # def check_booking(self, data, booking_key):
-    #     book_state = True
-    #
-    #     # check the requested booking vs. the already present ones
-    #     date_b, hour_b, n_people_b, user_b = self.unhash(booking_key)
-    #
-    #     for key in data.keys():
-    #         date, hour, n_people, user = self.unhash(key)
-    #         if user == user_b:
-    #             print('You already have a booking on %s for this restaurant\n' % date)
-    #             # Maybe ask if the user want to book
-    #             book_state = False
-    #     return book_state
+            return False
     
     def check_table_availability(self, restaurant_key, hash_key):
+        logger.info(f'TABLES: look for available table in {restaurant_key}')
         tables = self.download(f'restaurants/{restaurant_key}/details/tables')
         t_new = copy.deepcopy(tables)
         u_date, u_hour, u_people, u_user = self.unhash(hash_key)
@@ -196,11 +187,10 @@ class Firebase:
                         user_key = path[0]
                         rest_key = path[1]
                         ts = data
-                    token = self.db.child('restaurants').child(rest_key).child('details').child('token_order').get().val()
-                    user = self.db.child('users').child(user_key).child('details').child('name').get().val()
-                    user_details = self.db.child('users').child(user_key).child('details').get().val()
-                    booking_details = self.db.child('users').child(user_key).child('active').child('details').get().val()
-                    hash = self.hash_creator(user_details['bot_id'], booking_details['time'], booking_details['people'])
+                    token = self.db.child(f'restaurants/{rest_key}/details/token_order').get().val()
+                    user = self.db.child('users').child(user_key).get().val()
+                    user_name = user['details']['name']
+                    hash = user['active']['details']['booking_key']
                     table_key = self.db.child('restaurants').child(rest_key).child('bookings').child(hash).child(
                         'table_id').get().val()
                     ts.pop('address', None)
@@ -210,8 +200,7 @@ class Firebase:
                     ts.pop('total', None)
                     order = [f"{v['item']} x {v['quantity']}" for v in ts.values()]
                     order = ' - '.join(order)
-                    payload = {"order": order, "user": user, 'total': total}
-                    print(payload)
+                    payload = {"order": order, "user": user_name, 'total': total}
                     for t in table_key:
                         access_token = f"{token}_item:table:{t}"
                         self.td.create_table_order(device_access_token=access_token,

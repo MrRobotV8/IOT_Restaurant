@@ -14,7 +14,8 @@ class Sender:
 
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
         payload = {"username": str(self.username), "password": str(self.password)}
-        x = req.post(f'{self.th_host}:{self.th_port}/api/auth/login', data=json.dumps(payload), headers=headers)
+        post_url = f'{self.th_host}:{self.th_port}/api/auth/login'
+        x = req.post(post_url, data=json.dumps(payload), headers=headers)
         if x.status_code == 200:
             self.jwt_token = json.loads(x.text)["token"]
 
@@ -22,7 +23,7 @@ class Sender:
         url = f'{self.url}/{token}/{attribute}'
         payload = json.dumps(payload)
         request = req.post(url=url, data=payload)
-        print(request.text)
+        print(request)
 
     def get_device_telemetry(self, entity_id, keys=None, interval=None, limit=None, agg=None, entityType="DEVICE"):
         url_api = f"{self.th_host}:{self.th_port}/api/plugins/telemetry/{entityType}/{entity_id}/values/timeseries?"

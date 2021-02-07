@@ -1,3 +1,6 @@
+"""
+Here it is defined the customer panel url pattern 
+"""
 from django.urls import path, re_path
 
 from . import views
