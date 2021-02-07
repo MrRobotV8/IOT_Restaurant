@@ -25,5 +25,11 @@
     "bot_telegram":{
         "token":"892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw",
         "app_name": "order-eat2021"
+    },
+    "heroku": {
+        "base_link": "https://$APP_NAME.herokuapp.com/",
+        "port": 6969,
+        "app_name": "order-eat2021",
+        "order_link": "https://order-eat2021-django.herokuapp.com/tg-menu/"
     }
 }

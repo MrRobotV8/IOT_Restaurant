@@ -1,3 +1,9 @@
+"""
+Main of the TelegramBot. It is created as a class with states, following the guidelines of the telegram-api docs.
+Each state of the telegram is connected to a function handling two parameters: bot and update of the imported
+class Updater.
+"""
+import random
 import traceback
 from telegram.ext import Updater, CommandHandler, MessageHandler
 from telegram.ext import ConversationHandler, Filters
@@ -5,34 +11,44 @@ from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 import logging
 import json
 import os
-from multiprocessing import Process
 from functions import *
 from BotFilters import *
 from Firebase import Firebase
 import datetime
 from FeedbackSender import Sender
 
-# Enable logging
+# Enable logging for displaying prints
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-PORT = int(os.environ.get('PORT', '8443'))
+# PORT where exposing the telegram, needed for continuously run on the heroku server
+with open('../catalog.json', 'r') as f:
+    CONFIG = json.loads(f.read())
+
+HEROKU = CONFIG['heroku']
+PORT = int(os.environ.get('PORT', HEROKU['port']))
 
 
-class SmartRestaurant:
+class TelegramBot:
     def __init__(self):
+        logger.info('TelegramBot started')
+        self.token = CONFIG['bot_telegram']['token']
+        self.heroku_link = HEROKU['base_link']
+        self.order_link = HEROKU['order_link']
+        self.app_name = HEROKU['app_name']
         self.fb = Firebase()
         self.sender = Sender()
         self.fb.authenticate()
+        # self.fb.listener()
         self.restaurants = self.fb.download('restaurants')
         self.restaurants_names = [r['details']['name'] for r in self.restaurants.values()]
         self.restaurants_mapper = {self.restaurants_names[i]: list(self.restaurants.keys())[i]
                                    for i in range(len(self.restaurants_names))}
 
-        self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Join', 'CheckOut', 'Info']]
+        self.initial_keyboard = [['Book', 'Order', 'Feedback'], ['Join', 'Wait', 'CheckOut'], ['Info']]
         self.time_booking = [['19:00', '19:30', '20:00'], ['20:30', '21:00', '21:30']]
 
         self.email_filter = EmailFilter()
@@ -40,6 +56,7 @@ class SmartRestaurant:
         self.people_filter = PeopleFilter()
         self.key_restaurant_filter = KeyRestaurantFilter(self.restaurants_names)
 
+        # states of the telegram bot
         n_states = 17
         self.START, self.START_RETURN, self.COND_1, self.EMAIL, self.PASSWORD, \
         self.PASSWORD_2, self.NICK, self.SIGN_IN, self.CHECK_SIGN, self.CHECK_BOOKING, \
@@ -68,8 +85,9 @@ class SmartRestaurant:
 
     def start(self, bot, update):
         self.user_id = str(bot.message.from_user.id)
-        logger.info(f'Bot Started - {self.user_id}')
+        logger.info(f'{self.user_id} STARTED Bot')
         if self.check_signin():
+            logger.info(f'{self.user_id} Already Signed-Up')
             if self.fb.db.child('users').child('active').child('restaurant_key').get():
                 self.restaurant_key = self.fb.db.child('users').child('active').child('restaurant_key').get().val()
             message = 'Welcome back. Please select one of the following.'
@@ -77,19 +95,18 @@ class SmartRestaurant:
             bot.message.reply_text(message, reply_markup=reply_markup)
             return self.COND_1
         else:
-            message = 'Welcome to the StartRestaurantBot. Create an account or insert credentials ' \
-                      'if you already have one'
+            logger.info(f'{self.user_id} Creation Account')
+            message = 'Welcome to OrderEat. This bot will allow you to BOOK, ORDER, INTERACT with' \
+                      'Restaurants subscribed to our service.\n' \
+                      'Create an account or insert your credentials if you already have one.'
             reply_markup = ReplyKeyboardMarkup([['Create Account', 'Sign-In']], one_time_keyboard=True,
                                                resize_keyboard=True)
             bot.message.reply_text(message, reply_markup=reply_markup)
 
             return self.CHECK_SIGN
-        # message = 'Welcome back. Please select one of the following.'
-        # reply_markup = ReplyKeyboardMarkup(self.initial_keyboard, one_time_keyboard=True, resize_keyboard=True)
-        # bot.message.reply_text(message, reply_markup=reply_markup)
-        # return self.COND_1
 
     def check_sign(self, bot, update):
+        logger.info(f'{self.user_id} sent: {bot.message.text}')
         if bot.message.text == 'Create Account':
             self.new = True
             bot.message.reply_text('Please Inert your email')
@@ -100,6 +117,7 @@ class SmartRestaurant:
             return self.EMAIL
 
     def email(self, bot, update):
+        logger.info(f'{self.user_id} sent: {bot.message.text}')
         self.email = bot.message.text
         if self.new:
             message = 'Insert your Nickname'
@@ -111,6 +129,7 @@ class SmartRestaurant:
             return self.PASSWORD
 
     def nickname(self, bot, update):
+        logger.info(f'{self.user_id} sent: {bot.message.text}')
         self.nickname = bot.message.text
         message = 'Insert now your password'
         bot.message.reply_text(message)
@@ -118,6 +137,7 @@ class SmartRestaurant:
         return self.PASSWORD
 
     def password(self, bot, update):
+        logger.info(f'{self.user_id} sent: {bot.message.text}')
         self.password = bot.message.text
         if self.new:
             message = 'Insert again'
@@ -137,6 +157,7 @@ class SmartRestaurant:
                 return self.CHECK_SIGN
 
     def password_2(self, bot, update):
+        logger.info(f'{self.user_id} sent: {bot.message.text}')
         if bot.message.text == self.password:
             self.sign_up()
             message = 'You have been signed-up!'
@@ -144,6 +165,7 @@ class SmartRestaurant:
 
             return self.START_RETURN
         else:
+            logger.info(f'Password are not the same')
             message = 'Your passwords do not coincide. Reinsert your password.'
             bot.message.reply_text(message)
 
@@ -159,18 +181,18 @@ class SmartRestaurant:
             'bot_id': self.user_id,
             'timestamp': int(datetime.datetime.now().timestamp())
         }
-        logger.info(f'Singed-Up: {data}')
 
+        logger.info(f'{self.user_id} successfully singed-up.\nNew entry on the Firebase.\nPayload to Firebase: {data}')
         self.fb.db.child('users').child(uid).child('details').set(data)
 
-    def return_user(self, key, value):
-        users = self.fb.download('users')
-        for k, v in users.items():
-            try:
-                if v['details'][key] == value:
-                    return v
-            except:
-                pass
+    # def return_user(self, key, value):
+    #     users = self.fb.download('users')
+    #     for k, v in users.items():
+    #         try:
+    #             if v['details'][key] == value:
+    #                 return v
+    #         except:
+    #             pass
 
     def sign_in(self):
         try:
@@ -184,8 +206,10 @@ class SmartRestaurant:
             return False
 
     def cond1(self, bot, update):
+        logger.info(f'{self.user_id} sent: {bot.message.text}')
         selection = bot.message.text
         if selection == 'Book':
+            logger.info(f'BOOK: selection of restaurant')
             message = 'At which Restaurant do you want to book a table?'
             bot.message.reply_text(message)
             sorted_restaurants = sorted(self.restaurants_names)
@@ -195,32 +219,39 @@ class SmartRestaurant:
             return self.CHECK_BOOKING
 
         elif selection == 'Order':
-            if self.fb.db.child('users').child(self.fb_id).child('active').get().val() is not None:
+            user = self.fb.db.child('users').child(self.fb_id).child('active').get().val()
+            if user is not None:
+                logger.info(f'ORDER: {self.user_id} has already a booking and now can click on the order page')
                 restaurant = self.fb.db.child('users').child(self.fb_id).child(
                     'active').child('restaurant_key').get().val()
                 message = 'Click on the link to begin the ordering phase'
-                link = f'https://order-eat2021-django.herokuapp.com/tg-menu/{self.fb_id}/{restaurant}'
+                link = f'{self.order_link}{self.fb_id}/{restaurant}'
                 self.link = link
                 bot.message.reply_text(message)
-                sent_link = bot.message.reply_text(link)
-                # delete_callback(self.updater.bot, sent_link.message_id, sent_link.chat.id,
-                #                                     ttl=3)
-                # run_process(self.updater.bot, sent_link.message_id, sent_link.chat.id,
-                #                                     ttl=5)
+                bot.message.reply_text(link)
 
                 return self.START_RETURN
             else:
-                traceback.print_exc()
+                logger.info(f'ORDER: {self.user_id} does not have any bookings. Redirect to the start')
                 message = 'You do not have any active bookings. First create a booking'
                 bot.message.reply_text(message)
                 return self.START_RETURN
 
         elif selection == 'Feedback':
-            message = 'Tap if you want to change the room_temperature'
-            reply_markup = ReplyKeyboardMarkup([['Lower', 'Raise', 'Good']], one_time_keyboard=True,
-                                               resize_keyboard=True)
-            bot.message.reply_text(message, reply_markup=reply_markup)
-            return self.FEED
+            user = self.fb.db.child('users').child(self.fb_id).child('active').get().val()
+            if user is not None:
+                logger.info(f'FEEDBACK: {self.user_id} can notify the restaurant owner of his desire to change '
+                            f'the temperature')
+                message = 'Tap if you want to change the room_temperature'
+                reply_markup = ReplyKeyboardMarkup([['Lower', 'Raise', 'Good']], one_time_keyboard=True,
+                                                   resize_keyboard=True)
+                bot.message.reply_text(message, reply_markup=reply_markup)
+                return self.FEED
+            else:
+                logger.info(f'FEEDBACK: {self.user_id} does not have any bookings. Redirect to the start')
+                message = 'You do not have any active bookings. First create a booking'
+                bot.message.reply_text(message)
+                return self.START_RETURN
 
         elif selection == 'Join':
             message = 'You chose to JOIN a Table. Please insert the relative KEY'
@@ -228,20 +259,35 @@ class SmartRestaurant:
             return self.JOIN
 
         elif selection == 'Wait':
-            if self.fb.db.child('orders').child(self.restaurant_key).child(self.fb_id).get():
-                customers_before = self.fb.db.child('restaurants').child(self.restaurant_key).child('customers').get()
-                customers_before = len(customers_before.val())
-                message = f'We have {customers_before} before you! Your order will be starting in ~ ' \
-                          f'{customers_before / 10} Minutes'
+            restaurant_key = self.fb.db.child(f'users/{self.fb_id}/active/restaurant_key').get().val()
+            order = self.fb.db.child(f'orders/{self.fb_id}/{restaurant_key}').get().val()
+            if restaurant_key is None:
+                message = 'You do not an active booking. Please start again.'
                 bot.message.reply_text(message)
-
                 return self.START_RETURN
-
-            else:
-                message = 'You do not have placed an order yet. Please select ORDER from the keyboard menu'
+            if order is None:
+                message = 'You do not have placed an order yet. Please start again and select ORDER.'
                 bot.message.reply_text(message)
-
                 return self.START_RETURN
+            if order is not None and restaurant_key is not None:
+                last_order_key = list(order.keys())[-1]
+                # last_order = order[last_order_key]
+                # TODO: change data type
+                date = datetime.datetime.strptime(last_order_key, '%d%m%Y%H%M%S')
+                if date < (datetime.datetime.now() - datetime.timedelta(days=1)):
+                    message = 'Your last order is too old. Please start again and select ORDER'
+                    bot.message.reply_text(message)
+                    return self.START_RETURN
+                else:
+                    active_customers = self.fb.db.child(f'restaurants/{restaurant_key}/customers').get().val()
+                    n_active = len(list(active_customers.values()))
+                    # M/M/m queue but not so much
+                    f = 20 if n_active < 3\
+                        else 20 + 20 / 3 * n_active
+                    message = f'There are {n_active} customers before you.\n' \
+                              f'Your waiting time is approximately {int(f)} minutes'
+                    bot.message.reply_text(message)
+                    return self.START_RETURN
 
         elif selection == 'CheckOut':
             history_order, check = self.checkout()
@@ -255,10 +301,14 @@ class SmartRestaurant:
                 token = self.fb.db.child(f'restaurants/{restaurant}/details/token_order').get().val()
                 response = self.sender.get_device_telemetry(token)
                 json_response = json.loads(response.text)
-                message = f'TEMPERATURE: {json_response["temperature"][-1]["value"]}°C\n' \
-                          f'HUMIDITY: {json_response["humidity"][-1]["value"]}%\n' \
-                          f'NOISE: {json_response["noise"][-1]["value"]}dB'
-                bot.message.reply_text(message)
+                try:
+                    message = f'TEMPERATURE: {json_response["temperature"][-1]["value"]}°C\n' \
+                              f'HUMIDITY: {json_response["humidity"][-1]["value"]}%\n' \
+                              f'NOISE: {json_response["noise"][-1]["value"]}dB'
+                    bot.message.reply_text(message)
+                except:
+                    message = 'No Info can be retrieved. Sensors are not yet deployed.'
+                    bot.message.reply_text(message)
             else:
                 message = 'You are not booked.'
                 bot.message.reply_text(message)
@@ -276,16 +326,21 @@ class SmartRestaurant:
                 bot.message.reply_text(message)
 
     def check_booking(self, bot, update):
+        logger.info(f'BOOK: {self.user_id} sent: {bot.message.text}')
         restaurant_chosen = bot.message.text
         self.restaurant_name = restaurant_chosen
         restaurant_key = self.restaurants_mapper[restaurant_chosen]
         try:
             restaurant_ids = self.restaurants[restaurant_key]['customers'].keys()
             if self.user_id in list(restaurant_ids):
-                message = f'You already have a Booking at {restaurant_chosen}. Do you want to change it?'
+                logger.info(f'BOOK: {self.user_id} already has a booking in the restaurant')
+                message = f'You already have a Booking at {restaurant_chosen}. Do you want to delete it?'
                 reply_markup = ReplyKeyboardMarkup([['YES', 'NO']], one_time_keyboard=True, resize_keyboard=True)
                 bot.message.reply_text(message, reply_markup=reply_markup)
+
+                return self.DELETE_BOOKING
             else:
+                logger.info(f'BOOK: number of people')
                 self.restaurant_key = restaurant_key
                 message = 'How many People'
                 bot.message.reply_text(message)
@@ -296,22 +351,31 @@ class SmartRestaurant:
             bot.message.reply_text(message)
             return self.PEOPLE
 
+    def time_booking_creation(self, slot, time_booking):
+        n = len(slot)
+        for i in range(n // 3 + 1):
+            if i * 3 + 3 < n:
+                new = slot[i * 3:i * 3 + 3]
+                time_booking.append(new)
+            else:
+                new = slot[i * 3:]
+                time_booking.append(new)
+
+        return time_booking
+
     def people(self, bot, update):
+        logger.info(f'BOOK: {self.user_id} sent: {bot.message.text}')
         self.people = int(bot.message.text)
         message = 'Let us now know the time. Select form the keyboard'
         try:
-            dinner_slots = self.fb.db.child('restaurants').child(self.restaurant_key).child(
-                'details').child('dinner-slot')
-            dinner_slots = dinner_slots.get().val()
-            n = len(dinner_slots)
             time_booking = []
-            for i in range(n // 3 + 1):
-                if i * 3 + 3 < n:
-                    new = dinner_slots[i * 3:i * 3 + 3]
-                    time_booking.append(new)
-                else:
-                    new = dinner_slots[i * 3:]
-                    time_booking.append(new)
+            dinner_slots = self.fb.db.child(f'restaurants/{self.restaurant_key}/details/dinner-slot').get().val()
+            lunch_slots = self.fb.db.child(f'restaurants/{self.restaurant_key}/details/lunch-slot').get().val()
+            if dinner_slots is not None:
+                time_booking = self.time_booking_creation(dinner_slots, time_booking)
+            if lunch_slots is not None:
+                time_booking = self.time_booking_creation(lunch_slots, time_booking)
+            logger.info(f'BOOK: {self.user_id} time.\nReturn Restaurant\'s available timetables: {time_booking}')
         except:
             traceback.print_exc()
             time_booking = self.time_booking
@@ -325,20 +389,29 @@ class SmartRestaurant:
         return s
 
     def time(self, bot, update):
+        logger.info(f'BOOK: {self.user_id} sent: {bot.message.text}')
         self.time_selected = bot.message.text
-        u = self.return_user('bot_id', self.user_id)
+        u = self.fb.db.child(f'users/{self.fb_id}').get().val()
         if 'nickname' in u['details'].keys():
             nick = u['details']['nickname']
         else:
             nick = u['details']['name']
         self.table_key = self.key_creation(nick, self.restaurant_name)
-        message = 'This Key will be needed if anyone wants to join your table: Share it with your friends!'
-        bot.message.reply_text(message)
-        message = f'{self.table_key}'
-        bot.message.reply_text(message)
-        self.post_booking()
-
-        return self.START_RETURN
+        is_booked = self.post_booking()
+        if is_booked:
+            logger.info(f'BOOK: booking accepted')
+            message = f'Booking has been accepted.\n' \
+                      f'User {self.user_id} at {self.restaurant_name} for {self.people} at {self.time_selected}.\n'
+            bot.message.reply_text(message)
+            message = f'Share this key to your friends to let them join your table: {self.table_key}'
+            bot.message.reply_text(message)
+            return self.START_RETURN
+        else:
+            logger.info(f'BOOK: booking not available')
+            message = 'Sorry there are no available tables for that many people at that time.' \
+                      '\nPlease retry another time.'
+            bot.message.reply_text(message)
+            return self.START_RETURN
 
     def check_table(self, key):
         users = self.fb.download('users')
@@ -368,26 +441,33 @@ class SmartRestaurant:
         bot.message.reply_text(message)
 
     def post_booking(self):
-        # add new customer to restaurant's customers
-        obj = {
-            'people': self.people,
-            'time': self.time_selected,
-            'firebase_key': self.fb_id,
-        }
-        logger.info(f'Set {self.restaurant_key} Active customer: {obj}')
-        self.fb.db.child('restaurants').child(self.restaurant_key).child('customers').child(self.user_id).set(obj)
-        obj_active = {
-            'restaurant_key': self.restaurant_key,
-            'details': obj
-        }
-        logger.info(f'Set {self.fb_id} object: {obj_active}')
-        self.fb.db.child('users').child(self.fb_id).update({'table_key': self.table_key})
-
-        # add new booking to user's active
-        self.fb.db.child('users').child(self.fb_id).child('active').set(obj_active)
-
         # add new booking KEY to restaurant's bookings
-        self.fb.upload_booking(self.fb_id, self.restaurant_key, self.time_selected, self.people, self.user_id)
+        is_booked = self.fb.upload_booking(self.fb_id, self.restaurant_key,
+                                           self.time_selected, self.people, self.user_id)
+        if is_booked:
+            # add new customer to restaurant's customers
+            obj = {
+                'people': self.people,
+                'time': self.time_selected,
+                'firebase_key': self.fb_id,
+                'booking_key': self.fb.hash_creator(self.user_id, self.time_selected, self.people)
+            }
+            self.fb.db.child('restaurants').child(self.restaurant_key).child('customers').child(self.user_id).set(obj)
+            obj_active = {
+                'restaurant_key': self.restaurant_key,
+                'details': obj
+            }
+            self.fb.db.child('users').child(self.fb_id).update({'table_key': self.table_key})
+
+            # add new booking to user's active
+            self.fb.db.child('users').child(self.fb_id).child('active').set(obj_active)
+            logger.info(f'BOOK: booking completed.\nNew active customer for {self.restaurant_key} with data: {obj}\n'
+                        f'New active booking for {self.user_id} with data: {obj_active} '
+                        f'and table key: {self.table_key}')
+            return True
+        else:
+            logger.info('BOOK: booking NOT completed')
+            return False
 
     def search_user_restaurant(self):
         users = self.fb.db.child('users').get().val()
@@ -399,6 +479,7 @@ class SmartRestaurant:
                 print('Web User')
 
     def feedback(self, bot, update):
+        logger.info(f'FEEDBACK: {self.user_id} sent: {bot.message.text}')
         feeling = bot.message.text
         if feeling == 'Raise':
             feeling = 1
@@ -416,37 +497,16 @@ class SmartRestaurant:
         token = self.fb.db.child('restaurants').child(restaurant_key).child('details').child(
             'token_telemetry').get().val()
         payload = {'temperature_feedback': feeling}
-        logger.info(f'Send to restaurant feedback: {payload}')
         self.sender.send(f'{token}_business:1', payload, 'telemetry')
         bot.message.reply_text('Thanks for the feedback')
+        logger.info(f'FEED: {self.user_id} sent {payload} to telemetry/{token}_business:1')
         return self.START_RETURN
 
     def checkout(self):
         restaurant = self.search_user_restaurant()
-        # get bill
-        # get order history
-        # TODO: check date of order how to handle it
         order_obj = self.fb.db.child('orders').child(self.fb_id).child(restaurant).get().val()
         last_order = list(order_obj.keys())[-1]
         last_order = order_obj[last_order]
-        # total = last_order['total']
-        # last_order_history = {v.pop('url', None) for k, v in last_order.pop('total', None)}
-        # add to restaurant history
-        # remove from active customers of restaurant
-        restaurant_obj = self.fb.db.child('restaurants').child(restaurant).child('customers').child(self.user_id).get()
-        restaurant_obj = restaurant_obj.val()
-
-        # add to user history
-        history_object = {
-            'restaurant': restaurant,
-            'details': {
-                'people': restaurant_obj['people'],
-                'time': restaurant_obj['time'],
-                'order': last_order,
-                # 'total': total
-            }
-        }
-        self.fb.db.child('users').child(self.fb_id).child('history').update(history_object)
 
         # remove from thingsboard reservation table
         token = self.fb.db.child(f'restaurants/{restaurant}/details/token_order').get().val()
@@ -459,8 +519,9 @@ class SmartRestaurant:
         self.fb.db.child('users').child(self.fb_id).child('active').remove()
         # remove table key
         self.fb.db.child('users').child(self.fb_id).child('table_key').remove()
-        logger.info(f'Remove order from user; Remove user from restaurant customers; '
-                    f'Add to user history; Return order object: {history_object}')
+        logger.info(f'CHECKOUT: removed from {self.user_id} the active object.\nRemoved from thingsboard'
+                    f'reservation.\nRemoved from Firebase Restaurant\'s active customer')
+
         return last_order, last_order['total']
 
     def others(self, bot, update):
@@ -477,10 +538,8 @@ class SmartRestaurant:
         print('AAA')
 
     def main(self):
-        TOKEN = '892866853:AAF3W2Dns7-Koiayk-2fuDgIDiFCfrLEfLw'
-        APP_NAME = 'order-eat2021'
-        APP_URL = f'https://{APP_NAME}.herokuapp.com/' + TOKEN
-        updater = Updater(TOKEN, use_context=True)
+        APP_URL = f'{self.heroku_link.replace("$APP_NAME", self.app_name)}' + self.token
+        updater = Updater(self.token, use_context=True)
         self.updater = updater
         # Get the dispatcher to register handlers:
         dp = updater.dispatcher
@@ -501,33 +560,25 @@ class SmartRestaurant:
                 self.JOIN: [MessageHandler(Filters.text, self.join)]
 
             },
-            fallbacks=[CommandHandler('help', self.help_),
-                       # CommandHandler('cancel', self.cancel)
-                       ],
+            fallbacks=[CommandHandler('help', self.help_)],
             allow_reentry=True
         )
 
         dp.add_handler(conv_handler)
         # dp.add_handler(CommandHandler('book', self.book_))
-        # updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN)
+        # updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=self.token)
         # updater.bot.set_webhook(APP_URL)
         updater.start_polling()
         updater.idle()
 
 
-# def run_process(bot, message_id, chat_id, ttl):
-#     p = Process(target=delete_callback(bot, message_id, chat_id, ttl))
-#     p.start()
-#
-#
-# def delete_callback(bot, message_id, chat_id, ttl=5):
-#     time.sleep(ttl)
-#     bot.delete_message(chat_id=chat_id, message_id=message_id)
-
-
 if __name__ == '__main__':
-    print('STARTED')
-    sr = SmartRestaurant()
-    # p1 = Process(target=sr.main)
-    # p1.start()
+    import sys
+
+    sr = TelegramBot()
+    # try:
     sr.main()
+    # except KeyboardInterrupt:
+    #     print('key')
+    #     sr.fb.stream.close()
+    #     sys.exit(0)
