@@ -9,25 +9,13 @@ from pprint import pprint
 from .models import *
 from datetime import date, datetime
 from thingsboard.main import ThingsDash
+from functions import *
 
-# Please Note the difference between auth from django.contrib and the variable authe=firebase.auth()
-"""
-config = {
-    'apiKey': "AIzaSyCNUQyDSE8LglsRzQGpk8OJGvTj2IyicT4",
-    'authDomain': "ordereat-94887.firebaseapp.com",
-    'databaseURL': "https://ordereat-94887.firebaseio.com",
-    'projectId': "ordereat-94887",
-    'storageBucket': "ordereat-94887.appspot.com",
-    'messagingSenderId': "89417842986",
-    'appId': "1:89417842986:web:162875424095cecd65de53",
-    'measurementId': "G-BHVSYJK293"
-}
-"""
 with open('../catalog.json', 'r') as f:
-    config = json.loads(f.read())['firebase']
-#print(config)
+    config_db = json.loads(f.read())['firebase']
+
 # Initialize Firebase
-firebase = pyrebase.initialize_app(config)
+firebase = pyrebase.initialize_app(config_db)
 authe = firebase.auth()
 database = firebase.database()
 
@@ -48,7 +36,7 @@ def panelSelector(request):
     return render(request, 'food/zero.html')
 
 
-#TODO: REFACTOR FOLDER FOOD IN CPANEL --> In any case the app food is related to the Customer Panel
+#Possible upgrade -> REFACTOR FOLDER FOOD IN CPANEL --> In any case the app food is related to the Customer Panel
 """
 LOGIN PAGE CUSTOMER
 success-->"GET /food/signin/ HTTP/1.1" 200
@@ -87,14 +75,14 @@ def postsign(request):  # homepage
         user_id = authe.get_account_info(request.session['uid'])
         user_id = user_id['users'][0]['localId']
         request.session['user_id'] = user_id
-        print(request.session.items())  #COMMENT
-        name = database.child('users').child(user_id).child('details').child('name').get().val()
+        #print(request.session.items())  #COMMENT
+        name = database.child('users').child(user_id).child('details/name').get().val()
         ctx = {
             'user': name,
             }
         return render(request, 'food/index.html', ctx)
     except:
-        msg="Something goes wrong! Probably session is expired, try again!"
+        msg="Something went wrong! Probably session is expired, try again!"
         ctx = {
         'messg': msg
         }
@@ -129,28 +117,28 @@ def postsignup(request):
     passw = request.POST.get('psw')
     re_passw = request.POST.get('psw-repeat')
     #address = request.POST.get('address')  DEPRECATED
-    added = 0
-    if passw == re_passw:
+    #added = 0
+    if password_checker(passw, re_passw)==True: #True 
         try:
             user = authe.create_user_with_email_and_password(email, passw)
-            added = 1
+            #added = 1
+            uid = user['localId']
+            data = {
+                "name": name,
+                "mail": email,
+                "is_bot": 0,
+                }
+            database.child("users").child(uid).child("details").set(data)
+            msg = "Account Created! Please fill the form and login"
+            return render(request, 'food/login.html', {'message':msg})
+
         except:
-            msg = "Unable to create account, try again"  # weak password
+            msg = "Unable to create account, try again" # Invalid Credentials
             return render(request, 'food/signUp.html', {'messg': msg})
     else:
         msg = "The passwords don’t match, please try again"  # password matching
         return render(request, 'food/signUp.html', {'messg': msg})
-    if added == 1:
-        uid = user['localId']
-        data = {
-            "name": name,
-            "mail": email,
-            "is_bot": 0,
-            }
-        database.child("users").child(uid).child("details").set(data)
-    msg = "Account Created! Please fill the form and login"
-
-    return render(request, 'food/login.html', {'message':msg})
+        
 
 """
 LOGOUT REQUEST
@@ -159,7 +147,6 @@ Flush the session variables --> Try except in each function detect if the user c
 def logout(request):
     
     try:
-        #idtoken = request.session['uid']
         user_id = authe.get_account_info(request.session['uid'])
         user_id = user_id['users'][0]['localId']
         #database.child('users').child(user_id).child('last_basket').remove()
@@ -167,7 +154,7 @@ def logout(request):
         request.session.flush()
         # Azzera Basket
         #database.child('users').child(user_id).child('last_basket').remove()
-        print(request.session.items())
+        #print(request.session.items())
     except KeyError:
         pass
     message = "You are logged out!"
@@ -179,18 +166,19 @@ def logout(request):
 """
 GET REQUEST FOR THE INDEX PAGE
 If success --> returns the index.html 
-the name is passed to populate the navigation bar
+the name is passed to populate the navigation bar -> We could use a session to improve the quality of the code, save the name in a 
+session variable and retrieve it any time.
 """
 def index(request):
     try:
         user_id = request.session['user_id']
-        name = database.child('users').child(user_id).child('details').child('name').get().val()
+        name = database.child('users').child(user_id).child('details/name').get().val()
         context = {
             'user': name,
         }
         return render(request, 'food/index.html', context)
     except:
-        msg="Something goes wrong! Try again :)"
+        msg="Something went wrong! Try again :)"
         ctx = {
         'messg': msg
         }
@@ -201,17 +189,15 @@ GET REQUEST FOR THE RESTAURANTS LIST
 """
 def restaurants(request):
     try:
-        #idtoken = request.session['uid']
         user_id = authe.get_account_info(request.session['uid'])
         user_id = user_id['users'][0]['localId']
         all_restaurants = database.child('restaurants').get()
         rest_list = {}
-        #description = "ristorante stellato" DEPRECATED
         for restaurant in all_restaurants.each():
             rest_list[restaurant.key()] = {'name': restaurant.val()['details']['name'],
                                             'description': restaurant.val()['details']['description']}
 
-        name = database.child('users').child(user_id).child('details').child('name').get().val()
+        name = database.child('users').child(user_id).child('details/name').get().val()
 
         ctx = {
             'user': name,
@@ -221,7 +207,7 @@ def restaurants(request):
         return render(request, 'food/restaurants.html', ctx)
 
     except:
-        msg="Something goes wrong! Try again :)"
+        msg="Something went wrong! Try again :)"
         ctx = {
         'messg': msg
         }
@@ -236,11 +222,10 @@ def store(request, rest_id):
         data = database.child('restaurants').child(rest_id).child('menu').get().val()
         # Update variable session to idetify the restaurant selected
         request.session['rest_id'] = str(rest_id)
-        #idtoken = request.session['uid']
         user_id = authe.get_account_info(request.session['uid'])
         user_id = user_id['users'][0]['localId']
         rest_id = str(rest_id)
-        name = database.child('users').child(user_id).child('details').child('name').get().val() 
+        name = database.child('users').child(user_id).child('details/name').get().val() 
 
         # When the user enters a restaurant menu page his last basket is deleted - AZZERA LAST BASKET
         database.child('users').child(user_id).child('last_basket').remove()
@@ -253,7 +238,7 @@ def store(request, rest_id):
 
         return render(request, 'food/menu.html', context)
     except:
-        msg="Something goes wrong! Try again :)"
+        msg="Something went wrong! Try again :)"
         ctx = {
         'messg': msg
         }
@@ -267,117 +252,32 @@ rest_id: restaurant id
 pk: id product selected
 1)Update a TEMP_bakset ad user child
 """
+
 def add_to_cart(request, rest_id, pk):
-    try:
-        #rest_id = request.session['rest_id'] DEPRECATED
-        #idtoken = request.session['uid'] DEPRECATED
-        user_id = authe.get_account_info(request.session['uid'])
-        user_id = user_id['users'][0]['localId']
-        product = database.child('restaurants').child(rest_id).child('menu').child(pk).get()
-        quantity = request.POST.get('quantity')
-        price = request.POST.get('price')
-        increase = float(quantity) * float(price)
-        basket_item = {str(product.key()): {'item': product.val()['name'], 'quantity': int(quantity), 'price': price,
-                                            'url': product.val()['url']}}
-        try:
-            prev = database.child('users').child(user_id).child('last_basket').child(product.key()).child('quantity').get()
-            basket_item[str(product.key())]['quantity'] += int(prev.val())
-            pass
-        except:
-            traceback.print_exc()
-            pass
-        database.child('users').child(user_id).child('last_basket').update(basket_item)
-
-        total = database.child('users').child(user_id).child('last_basket').child('total').get().val()
-
-        if total is None:
-            database.child('users').child(user_id).child('last_basket').child('total').set(increase)
-        else:
-            actual = database.child('users').child(user_id).child('last_basket').child('total').get().val()
-            total = float(actual) + increase
-            database.child('users').child(user_id).child('last_basket').child('total').set(total)
-
-        message = "You added " + str(quantity) + \
-            " of " + str(product.val()['name'])
-
-        data = database.child('restaurants').child(rest_id).child('menu').get().val()
-        name = database.child('users').child(user_id).child('details').child('name').get().val()  #
-        basket_list = dict(database.child('users').child(user_id).child('last_basket').get().val())
-        total = database.child('users').child(user_id).child('last_basket').child('total').get().val()
-        context = {
-            'data': data,
-            'b_list': basket_list,
-            'user': name,
-            'message': message,
-            'rest_id': rest_id,
-            'tot': total
-        }
-
-        return render(request, 'food/menu.html', context)
+    user_id = authe.get_account_info(request.session['uid'])
+    user_id = user_id['users'][0]['localId']
+    context = cart("add django", request, database, user_id, rest_id, pk) 
+    return render(request, 'food/menu.html', context)
+    '''
     except:
-        msg="Something goes wrong! Probably session is expired, try again!"
+        msg="Something went wrong! Probably session is expired, try again!"
         ctx = {
         'messg': msg
         }
         return render(request, 'food/login.html', ctx)
+    '''
 
 
 def remove_from_cart(request, rest_id, pk):
     try:
-        #idtoken = request.session['uid']
         rest_id = str(rest_id)
-        #user_id = authe.get_account_info(idtoken)
-        #user_id = user_id['users'][0]['localId']
         user_id = request.session['user_id']
 
-
-        try:
-            actual = database.child('users').child(user_id).child(
-                'last_basket').child('total').get().val()
-            to_delete = database.child('users').child(
-                user_id).child('last_basket').child(pk).get().val()
-            print("To delete \n\n")
-            print(to_delete)
-            price = float(database.child('users').child(user_id).child(
-                'last_basket').child(pk).child('price').get().val())
-            quantity = float(
-                database.child('users').child(user_id).child('last_basket').child(pk).child('quantity').get().val())
-            decrease = price * quantity
-            database.child('users').child(user_id).child(
-                'last_basket').child(pk).remove()
-            total = float(actual) - decrease
-            database.child('users').child(user_id).child(
-                'last_basket').child('total').set(total)
-            message = "You deleted all the " + str(to_delete['item'])
-
-        except:
-            message = "You have tried to delete a product: the item is already deleted from your cart, check in the bottom cart section"
-
-        data = database.child('restaurants').child(
-            rest_id).child('menu').get().val()
-        name = database.child('users').child(user_id).child(
-            'details').child('name').get().val()
-
-        total = database.child('users').child(user_id).child(
-            'last_basket').child('total').get().val()  #
-        basket_list = dict(database.child('users').child(
-            user_id).child('last_basket').get().val())
-
-        # total = sum([value for value in basket_list.values()['price']])
-        print(total)
-
-        context = {
-            'data': data,
-            'b_list': basket_list,
-            'user': name,
-            'message': message,
-            'rest_id': rest_id,
-            'tot': total
-        }
+        context = cart("remove django", request, database, user_id, rest_id, pk)
 
         return render(request, 'food/menu.html', context)
     except:
-        msg="Something goes wrong! Probably session is expired, try again!"
+        msg="Something went wrong! Probably session is expired, try again!"
         ctx = {
         'messg': msg
         }
@@ -389,11 +289,11 @@ POST request: client address (it's a delivery order)
 2)Create delivery order in Thingsboard
 """
 def checkout(request, rest_id):
-    try:
+    try: 
         now = datetime.now()
         dt_string = now.strftime("%d%m%Y%H%M%S")
         idtoken = request.session['user_id']    #usually called user_id, maybe I was drunk
-        client_name = database.child('users').child(idtoken).child('details').child('name').get().val()
+        client_name = database.child('users').child(idtoken).child('details/name').get().val()
         client_address = request.POST.get('address')
         is_bot = 0   #False
         delivery = {
@@ -408,7 +308,7 @@ def checkout(request, rest_id):
 
             message = "Your order has been accepted by OrderEat"
         except:
-            message = "Something goes wrong, please try again"
+            message = "Something went wrong, please try again"
 
         order = dict(database.child('orders').child(
             idtoken).child(rest_id).child(dt_string).get().val())
@@ -422,14 +322,9 @@ def checkout(request, rest_id):
         database.child('orders').child(idtoken).child(rest_id).child(dt_string).child('order_status').set(order_status)
 
         #Create delivery order on Thingsboard 
-        td = ThingsDash()
         token = database.child('restaurants').child(rest_id).child('details').child('token_order').get().val()
-        togo_token = f"{token}_togo"
-        x = ""
-        for dish in order.values():
-            x += f"{dish['item']}*{dish['quantity']}, "
-        td.create_togo_order(device_access_token=togo_token, payload={"client": client_name, "order": x, "obs": client_address})   #TODO: change to aDDress
-        
+        togo_order(token, order, client_name, client_address)
+
         context = {
             'message': message,
             'user': client_name,
@@ -441,7 +336,7 @@ def checkout(request, rest_id):
         }
         return render(request, 'food/checkout.html', context)
     except:
-        msg="Something goes wrong! Probably session is expired, try again!"
+        msg="Something went wrong! Probably session is expired, try again!"
         ctx = {
         'messg': msg
         }
@@ -452,51 +347,22 @@ GET REQUEST
 
 """
 def orders(request):
-    try:
+    try: 
         user_id = request.session['user_id']
-        client_name = database.child('users').child(user_id).child('details').child('name').get().val()
+        client_name = database.child('users').child(user_id).child('details/name').get().val()
         try:
 
             last_order = dict(database.child('users').child(user_id).child('last_basket').get().val())
             del last_order['total']
-            pprint(last_order)
-            last_order_total = database.child('users').child(
-                user_id).child('last_basket').child('total').get().val()
-            pprint(last_order_total)
+            #pprint(last_order)
+            last_order_total = database.child('users').child(user_id).child('last_basket').child('total').get().val()
+            #pprint(last_order_total)
         except:
             last_order = None
             last_order_total = None
 
         orders = database.child('orders').child(user_id).get().val()
-        pprint(orders)
-        if orders != None:
-            my_orders = {}
-            for rest, values in orders.items():
-                for ts, order in values.items():
-                    print(rest)
-                    print(ts)
-                    d = datetime(
-                        day=int(ts[:2]),
-                        month=int(ts[2:4]),
-                        year=int(ts[4:8]),
-                        hour=int(ts[8:10]),
-                        minute=int(ts[10:12]),
-                        second=int(ts[12:14]),
-                        )
-                    timestamp = datetime.timestamp(d)
-                    print(d)
-                    print(timestamp)
-                    my_orders[timestamp]={
-                        'rest_name': database.child('restaurants').child(rest).child('details').child('name').get().val(),
-                        'ts': d,
-                        'order': order,
-                    }
-
-            my_orders = OrderedDict(sorted(my_orders.items(),key=lambda x:x[0], reverse=True))
-        else:
-            my_orders=None
-
-
+        my_orders = mapping_customer_orders(orders, database)
         context = {
             'my_orders': my_orders,
             'user': client_name,
@@ -507,7 +373,7 @@ def orders(request):
         return render(request, 'food/order.html', context)
 
     except:
-        msg = "Something goes wrong! Please Try again :)"
+        msg = "Something went wrong! Please Try again :)"
         ctx = {
         'messg': msg
         }

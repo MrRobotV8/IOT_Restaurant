@@ -1,3 +1,5 @@
+"Created with Django startproject"
+
 from django.contrib import admin
 
 from .models import *

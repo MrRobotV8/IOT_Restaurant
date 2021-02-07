@@ -1,3 +1,6 @@
+"""
+File created automatically when you start a django project
+"""
 from django.db import models
 
 """ ******************DEPRECATED***************** """

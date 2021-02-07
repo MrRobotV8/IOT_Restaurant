@@ -1,3 +1,6 @@
+"""
+Here it is defined the restaurant panel url pattern 
+"""
 from django.urls import path
 
 from . import views
