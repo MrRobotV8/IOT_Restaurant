@@ -650,7 +650,7 @@
         "sizeY": 2.5,
         "config": {
           "targetDeviceAliases": [],
-          "showTitle": true,
+          "showTitle": false,
           "backgroundColor": "#e6e7e8",
           "color": "rgba(0, 0, 0, 0.87)",
           "padding": "0px",
@@ -662,7 +662,8 @@
             "retrieveValueMethod": "attribute",
             "performCheckStatus": false,
             "checkStatusMethod": "checkStatus",
-            "parseValueFunction": "return data === 1 ? true:false;"
+            "parseValueFunction": "return data === 1 ? true:false;",
+            "title": "Bathroom"
           },
           "title": "Sensor - Occupied Bathroom",
           "dropShadow": false,
@@ -680,7 +681,7 @@
           "targetDeviceAliasIds": [
             "0e9c7ddb-4c21-792f-23e4-9840107ae22a"
           ],
-          "showTitleIcon": true,
+          "showTitleIcon": false,
           "iconColor": "rgba(0, 0, 0, 0.87)",
           "iconSize": "24px",
           "titleTooltip": "",
@@ -943,125 +944,6 @@
         "row": 0,
         "col": 0,
         "id": "80bcb273-dd47-ffb8-1bed-d0491a96012c"
-      },
-      "64faf3d8-bac0-f981-b0be-31ef5d741f76": {
-        "isSystemType": true,
-        "bundleAlias": "charts",
-        "typeAlias": "basic_timeseries",
-        "type": "timeseries",
-        "title": "New widget",
-        "sizeX": 8,
-        "sizeY": 5,
-        "config": {
-          "datasources": [
-            {
-              "type": "entity",
-              "name": null,
-              "entityAliasId": "0e9c7ddb-4c21-792f-23e4-9840107ae22a",
-              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
-              "dataKeys": [
-                {
-                  "name": "temperature",
-                  "type": "timeseries",
-                  "label": "Temperature [°C]",
-                  "color": "#ff0000",
-                  "settings": {
-                    "excludeFromStacking": false,
-                    "hideDataByDefault": false,
-                    "disableDataHiding": false,
-                    "removeFromLegend": false,
-                    "showLines": true,
-                    "fillLines": true,
-                    "showPoints": false,
-                    "showPointShape": "circle",
-                    "pointShapeFormatter": "var size = radius * Math.sqrt(Math.PI) / 2;\nctx.moveTo(x - size, y - size);\nctx.lineTo(x + size, y + size);\nctx.moveTo(x - size, y + size);\nctx.lineTo(x + size, y - size);",
-                    "showPointsLineWidth": 5,
-                    "showPointsRadius": 3,
-                    "showSeparateAxis": false,
-                    "axisPosition": "left",
-                    "thresholds": [
-                      {
-                        "thresholdValueSource": "predefinedValue"
-                      }
-                    ],
-                    "comparisonSettings": {
-                      "showValuesForComparison": true
-                    }
-                  },
-                  "_hash": 0.24997553852745558,
-                  "units": null,
-                  "decimals": null,
-                  "funcBody": null,
-                  "usePostProcessing": null,
-                  "postFuncBody": null
-                }
-              ]
-            }
-          ],
-          "timewindow": {
-            "realtime": {
-              "timewindowMs": 60000
-            }
-          },
-          "showTitle": true,
-          "backgroundColor": "#fff",
-          "color": "rgba(0, 0, 0, 0.87)",
-          "padding": "8px",
-          "settings": {
-            "shadowSize": 4,
-            "fontColor": "#545454",
-            "fontSize": 10,
-            "xaxis": {
-              "showLabels": true,
-              "color": "#545454"
-            },
-            "yaxis": {
-              "showLabels": true,
-              "color": "#545454"
-            },
-            "grid": {
-              "color": "#545454",
-              "tickColor": "#DDDDDD",
-              "verticalLines": true,
-              "horizontalLines": true,
-              "outlineWidth": 1
-            },
-            "stack": false,
-            "tooltipIndividual": false,
-            "timeForComparison": "months",
-            "xaxisSecond": {
-              "axisPosition": "top",
-              "showLabels": true
-            }
-          },
-          "title": "Sensor - Temperature",
-          "dropShadow": true,
-          "enableFullscreen": true,
-          "titleStyle": {
-            "fontSize": "16px",
-            "fontWeight": 400
-          },
-          "useDashboardTimewindow": true,
-          "showTitleIcon": false,
-          "iconColor": "rgba(0, 0, 0, 0.87)",
-          "iconSize": "24px",
-          "titleTooltip": "",
-          "widgetStyle": {},
-          "showLegend": true,
-          "legendConfig": {
-            "direction": "column",
-            "position": "bottom",
-            "sortDataKeys": false,
-            "showMin": false,
-            "showMax": false,
-            "showAvg": true,
-            "showTotal": false
-          },
-          "units": "°C"
-        },
-        "row": 0,
-        "col": 0,
-        "id": "64faf3d8-bac0-f981-b0be-31ef5d741f76"
       },
       "5f94bd56-f2f3-84c2-ff90-a913b7593570": {
         "isSystemType": true,
@@ -1335,14 +1217,14 @@
             }
           },
           "showTitle": true,
-          "backgroundColor": "#d8d8d8",
+          "backgroundColor": "rgba(204,204,204,0.5)",
           "color": "rgba(0, 0, 0, 0.87)",
           "padding": "8px",
           "settings": {
             "showResultMessage": false,
             "showLabel": false
           },
-          "title": "Temperature Feedback Threshold (Admin)",
+          "title": "Temperature Feedback Threshold",
           "dropShadow": true,
           "enableFullscreen": false,
           "widgetStyle": {},
@@ -1357,7 +1239,7 @@
           "iconColor": "rgba(255,0,0,0.87)",
           "iconSize": "24px",
           "titleTooltip": "Cumulative temperature feedback of the last 30 minutes to create alarm",
-          "titleIcon": "lock_outline"
+          "titleIcon": "thumbs_up_down"
         },
         "row": 0,
         "col": 0,
@@ -1492,133 +1374,6 @@
         "col": 0,
         "id": "84696b6f-9946-2789-344a-a020cbbd8c78"
       },
-      "b8e987b9-ef0f-71a2-368c-f63e8f85f80f": {
-        "isSystemType": true,
-        "bundleAlias": "charts",
-        "typeAlias": "timeseries_bars_flot",
-        "type": "timeseries",
-        "title": "New widget",
-        "sizeX": 8,
-        "sizeY": 5,
-        "config": {
-          "datasources": [
-            {
-              "type": "entity",
-              "name": null,
-              "entityAliasId": "0e9c7ddb-4c21-792f-23e4-9840107ae22a",
-              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
-              "dataKeys": [
-                {
-                  "name": "pressure",
-                  "type": "timeseries",
-                  "label": "Pressure [hPa]",
-                  "color": "#008f16",
-                  "settings": {
-                    "excludeFromStacking": false,
-                    "hideDataByDefault": false,
-                    "disableDataHiding": false,
-                    "removeFromLegend": false,
-                    "showLines": false,
-                    "fillLines": false,
-                    "showPoints": false,
-                    "showPointShape": "circle",
-                    "pointShapeFormatter": "var size = radius * Math.sqrt(Math.PI) / 2;\nctx.moveTo(x - size, y - size);\nctx.lineTo(x + size, y + size);\nctx.moveTo(x - size, y + size);\nctx.lineTo(x + size, y - size);",
-                    "showPointsLineWidth": 5,
-                    "showPointsRadius": 3,
-                    "showSeparateAxis": false,
-                    "axisPosition": "left",
-                    "thresholds": [
-                      {
-                        "thresholdValueSource": "predefinedValue"
-                      }
-                    ],
-                    "comparisonSettings": {
-                      "showValuesForComparison": true
-                    }
-                  },
-                  "_hash": 0.37197642784803575,
-                  "units": null,
-                  "decimals": null,
-                  "funcBody": null,
-                  "usePostProcessing": null,
-                  "postFuncBody": null
-                }
-              ]
-            }
-          ],
-          "timewindow": {
-            "realtime": {
-              "timewindowMs": 60000
-            },
-            "aggregation": {
-              "limit": 200,
-              "type": "AVG"
-            }
-          },
-          "showTitle": true,
-          "backgroundColor": "#fff",
-          "color": "rgba(0, 0, 0, 0.87)",
-          "padding": "8px",
-          "settings": {
-            "shadowSize": 4,
-            "fontColor": "#545454",
-            "fontSize": 10,
-            "xaxis": {
-              "showLabels": true,
-              "color": "#545454"
-            },
-            "yaxis": {
-              "showLabels": true,
-              "color": "#545454"
-            },
-            "grid": {
-              "color": "#545454",
-              "tickColor": "#DDDDDD",
-              "verticalLines": true,
-              "horizontalLines": true,
-              "outlineWidth": 1
-            },
-            "stack": true,
-            "tooltipIndividual": false,
-            "defaultBarWidth": 600,
-            "barAlignment": "left",
-            "timeForComparison": "months",
-            "xaxisSecond": {
-              "axisPosition": "top",
-              "showLabels": true
-            }
-          },
-          "title": "Sensor - Pressure ",
-          "dropShadow": true,
-          "enableFullscreen": true,
-          "titleStyle": {
-            "fontSize": "16px",
-            "fontWeight": 400
-          },
-          "widgetStyle": {},
-          "useDashboardTimewindow": true,
-          "showLegend": true,
-          "actions": {},
-          "showTitleIcon": false,
-          "iconColor": "rgba(0, 0, 0, 0.87)",
-          "iconSize": "24px",
-          "titleTooltip": "",
-          "units": "hPa",
-          "decimals": 0,
-          "legendConfig": {
-            "direction": "column",
-            "position": "bottom",
-            "sortDataKeys": false,
-            "showMin": false,
-            "showMax": false,
-            "showAvg": true,
-            "showTotal": false
-          }
-        },
-        "row": 0,
-        "col": 0,
-        "id": "b8e987b9-ef0f-71a2-368c-f63e8f85f80f"
-      },
       "f2f56c31-2807-766c-c75c-7c8433cc28fd": {
         "isSystemType": true,
         "bundleAlias": "charts",
@@ -1738,125 +1493,6 @@
         "col": 0,
         "id": "f2f56c31-2807-766c-c75c-7c8433cc28fd"
       },
-      "1e3b44d7-1226-7390-7dff-82dbb708d077": {
-        "isSystemType": true,
-        "bundleAlias": "charts",
-        "typeAlias": "basic_timeseries",
-        "type": "timeseries",
-        "title": "New widget",
-        "sizeX": 8,
-        "sizeY": 5,
-        "config": {
-          "datasources": [
-            {
-              "type": "entity",
-              "name": null,
-              "entityAliasId": "0e9c7ddb-4c21-792f-23e4-9840107ae22a",
-              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
-              "dataKeys": [
-                {
-                  "name": "altitude",
-                  "type": "timeseries",
-                  "label": "Altitude [m]",
-                  "color": "#2000ff",
-                  "settings": {
-                    "excludeFromStacking": false,
-                    "hideDataByDefault": false,
-                    "disableDataHiding": false,
-                    "removeFromLegend": false,
-                    "showLines": true,
-                    "fillLines": false,
-                    "showPoints": false,
-                    "showPointShape": "circle",
-                    "pointShapeFormatter": "var size = radius * Math.sqrt(Math.PI) / 2;\nctx.moveTo(x - size, y - size);\nctx.lineTo(x + size, y + size);\nctx.moveTo(x - size, y + size);\nctx.lineTo(x + size, y - size);",
-                    "showPointsLineWidth": 5,
-                    "showPointsRadius": 3,
-                    "showSeparateAxis": false,
-                    "axisPosition": "left",
-                    "thresholds": [
-                      {
-                        "thresholdValueSource": "predefinedValue"
-                      }
-                    ],
-                    "comparisonSettings": {
-                      "showValuesForComparison": true
-                    }
-                  },
-                  "_hash": 0.15604048359505907,
-                  "units": null,
-                  "decimals": null,
-                  "funcBody": null,
-                  "usePostProcessing": null,
-                  "postFuncBody": null
-                }
-              ]
-            }
-          ],
-          "timewindow": {
-            "realtime": {
-              "timewindowMs": 60000
-            }
-          },
-          "showTitle": true,
-          "backgroundColor": "#fff",
-          "color": "rgba(0, 0, 0, 0.87)",
-          "padding": "8px",
-          "settings": {
-            "shadowSize": 4,
-            "fontColor": "#545454",
-            "fontSize": 10,
-            "xaxis": {
-              "showLabels": true,
-              "color": "#545454"
-            },
-            "yaxis": {
-              "showLabels": true,
-              "color": "#545454"
-            },
-            "grid": {
-              "color": "#545454",
-              "tickColor": "#DDDDDD",
-              "verticalLines": true,
-              "horizontalLines": true,
-              "outlineWidth": 1
-            },
-            "stack": false,
-            "tooltipIndividual": false,
-            "timeForComparison": "months",
-            "xaxisSecond": {
-              "axisPosition": "top",
-              "showLabels": true
-            }
-          },
-          "title": "Sensor - Approx. Altitude",
-          "dropShadow": true,
-          "enableFullscreen": true,
-          "titleStyle": {
-            "fontSize": "16px",
-            "fontWeight": 400
-          },
-          "useDashboardTimewindow": true,
-          "showTitleIcon": false,
-          "iconColor": "rgba(0, 0, 0, 0.87)",
-          "iconSize": "24px",
-          "titleTooltip": "",
-          "widgetStyle": {},
-          "units": "m",
-          "showLegend": true,
-          "legendConfig": {
-            "direction": "column",
-            "position": "bottom",
-            "sortDataKeys": false,
-            "showMin": false,
-            "showMax": false,
-            "showAvg": true,
-            "showTotal": false
-          }
-        },
-        "row": 0,
-        "col": 0,
-        "id": "1e3b44d7-1226-7390-7dff-82dbb708d077"
-      },
       "a7b35c18-4e35-0f61-f45c-7303e0fbcb80": {
         "isSystemType": true,
         "bundleAlias": "input_widgets",
@@ -1897,7 +1533,7 @@
             }
           },
           "showTitle": true,
-          "backgroundColor": "#fff",
+          "backgroundColor": "rgba(204,204,204,0.5)",
           "color": "rgba(0, 0, 0, 0.87)",
           "padding": "8px",
           "settings": {
@@ -1923,6 +1559,119 @@
           "titleIcon": "ac_unit"
         },
         "id": "a7b35c18-4e35-0f61-f45c-7303e0fbcb80"
+      },
+      "72317a28-32c6-70ce-6cb8-9503164de410": {
+        "isSystemType": true,
+        "bundleAlias": "analogue_gauges",
+        "typeAlias": "radial_gauge_canvas_gauges",
+        "type": "latest",
+        "title": "New widget",
+        "sizeX": 6,
+        "sizeY": 5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": null,
+              "entityAliasId": "0e9c7ddb-4c21-792f-23e4-9840107ae22a",
+              "filterId": "13b2a505-0a36-8ea8-ec1e-99459f04d698",
+              "dataKeys": [
+                {
+                  "name": "temperature",
+                  "type": "timeseries",
+                  "label": "temperature",
+                  "color": "#2196f3",
+                  "settings": {},
+                  "_hash": 0.0973042071134742
+                }
+              ]
+            }
+          ],
+          "timewindow": {
+            "realtime": {
+              "timewindowMs": 60000
+            }
+          },
+          "showTitle": false,
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "8px",
+          "settings": {
+            "maxValue": 60,
+            "startAngle": 45,
+            "ticksAngle": 270,
+            "showBorder": true,
+            "defaultColor": "#e65100",
+            "highlights": [],
+            "showUnitTitle": true,
+            "colorPlate": "#fff",
+            "colorMajorTicks": "#444",
+            "colorMinorTicks": "#666",
+            "minorTicks": 5,
+            "valueBox": true,
+            "animation": true,
+            "animationDuration": 500,
+            "animationRule": "cycle",
+            "colorNeedleShadowUp": "rgba(2, 255, 255, 0)",
+            "numbersFont": {
+              "family": "Roboto",
+              "size": 25,
+              "style": "normal",
+              "weight": "500",
+              "color": "#616161"
+            },
+            "titleFont": {
+              "family": "Roboto",
+              "size": 35,
+              "style": "normal",
+              "weight": "500",
+              "color": "#888"
+            },
+            "unitsFont": {
+              "family": "Roboto",
+              "size": 22,
+              "style": "normal",
+              "weight": "500",
+              "color": "#616161"
+            },
+            "valueFont": {
+              "family": "Segment7Standard",
+              "size": 36,
+              "style": "normal",
+              "weight": "normal",
+              "shadowColor": "rgba(0, 0, 0, 0.49)",
+              "color": "#444"
+            },
+            "colorNeedleShadowDown": "rgba(188,143,143,0.45)",
+            "colorValueBoxRect": "#888",
+            "colorValueBoxRectEnd": "#666",
+            "colorValueBoxBackground": "#babab2",
+            "colorValueBoxShadow": "rgba(0,0,0,1)",
+            "unitTitle": "°C",
+            "valueInt": 2,
+            "highlightsWidth": 15,
+            "needleCircleSize": 10,
+            "minValue": -10
+          },
+          "title": "New Radial gauge - Canvas Gauges",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "widgetStyle": {},
+          "units": "",
+          "decimals": 1,
+          "showLegend": false
+        },
+        "row": 0,
+        "col": 0,
+        "id": "72317a28-32c6-70ce-6cb8-9503164de410"
       }
     },
     "states": {
@@ -1940,7 +1689,7 @@
               },
               "d8bf0257-80b6-7fb1-1482-01adb8463751": {
                 "sizeX": 24,
-                "sizeY": 9,
+                "sizeY": 4,
                 "row": 8,
                 "col": 0
               },
@@ -1976,14 +1725,14 @@
               "879cfcb1-b309-90b5-5301-c555c8cd17fe": {
                 "sizeX": 8,
                 "sizeY": 6,
-                "row": 8,
+                "row": 6,
                 "col": 0
               },
               "7cc9370f-7e65-4f3d-d3dd-ac1feab65b7e": {
-                "sizeX": 4,
-                "sizeY": 3,
-                "row": 8,
-                "col": 8
+                "sizeX": 2,
+                "sizeY": 2,
+                "row": 2,
+                "col": 23
               },
               "b4f6b498-e87e-17e3-095f-8ae43889f23c": {
                 "sizeX": 25,
@@ -1992,58 +1741,46 @@
                 "col": 0
               },
               "25b8900c-fb59-b600-34b4-b6d824607357": {
-                "sizeX": 5,
-                "sizeY": 6,
+                "sizeX": 6,
+                "sizeY": 4,
                 "row": 2,
-                "col": 0
+                "col": 4
               },
               "80bcb273-dd47-ffb8-1bed-d0491a96012c": {
-                "sizeX": 8,
-                "sizeY": 6,
-                "row": 8,
-                "col": 17
-              },
-              "64faf3d8-bac0-f981-b0be-31ef5d741f76": {
-                "sizeX": 4,
-                "sizeY": 6,
-                "row": 2,
-                "col": 5
-              },
-              "5f94bd56-f2f3-84c2-ff90-a913b7593570": {
-                "sizeX": 4,
-                "sizeY": 6,
-                "row": 2,
-                "col": 9
-              },
-              "cc2d8769-556f-98aa-ce64-4a573456704e": {
                 "sizeX": 9,
-                "sizeY": 3,
-                "row": 11,
-                "col": 8
-              },
-              "b8e987b9-ef0f-71a2-368c-f63e8f85f80f": {
-                "sizeX": 4,
                 "sizeY": 6,
-                "row": 2,
+                "row": 6,
                 "col": 13
               },
-              "f2f56c31-2807-766c-c75c-7c8433cc28fd": {
-                "sizeX": 4,
-                "sizeY": 6,
+              "5f94bd56-f2f3-84c2-ff90-a913b7593570": {
+                "sizeX": 6,
+                "sizeY": 4,
                 "row": 2,
-                "col": 17
+                "col": 10
               },
-              "1e3b44d7-1226-7390-7dff-82dbb708d077": {
-                "sizeX": 4,
-                "sizeY": 6,
+              "cc2d8769-556f-98aa-ce64-4a573456704e": {
+                "sizeX": 5,
+                "sizeY": 3,
+                "row": 9,
+                "col": 8
+              },
+              "f2f56c31-2807-766c-c75c-7c8433cc28fd": {
+                "sizeX": 6,
+                "sizeY": 4,
                 "row": 2,
-                "col": 21
+                "col": 16
               },
               "a7b35c18-4e35-0f61-f45c-7303e0fbcb80": {
                 "sizeX": 5,
                 "sizeY": 3,
-                "row": 8,
-                "col": 12
+                "row": 6,
+                "col": 8
+              },
+              "72317a28-32c6-70ce-6cb8-9503164de410": {
+                "sizeX": 4,
+                "sizeY": 4,
+                "row": 2,
+                "col": 0
               }
             },
             "gridSettings": {
