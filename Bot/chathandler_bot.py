@@ -3,13 +3,11 @@ Main of the TelegramBot. It is created as a class with states, following the gui
 Each state of the telegram is connected to a function handling two parameters: bot and update of the imported
 class Updater.
 """
-import random
 import traceback
 from telegram.ext import Updater, CommandHandler, MessageHandler
 from telegram.ext import ConversationHandler, Filters
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import ReplyKeyboardMarkup
 import logging
-import json
 import os
 from functions import *
 from BotFilters import *
@@ -57,11 +55,11 @@ class TelegramBot:
         self.key_restaurant_filter = KeyRestaurantFilter(self.restaurants_names)
 
         # states of the telegram bot
-        n_states = 17
+        n_states = 18
         self.START, self.START_RETURN, self.COND_1, self.EMAIL, self.PASSWORD, \
         self.PASSWORD_2, self.NICK, self.SIGN_IN, self.CHECK_SIGN, self.CHECK_BOOKING, \
         self.ORDER, self.FEED, self.JOIN, self.CHECK, \
-        self.PEOPLE, self.TIME, self.INFO = range(n_states)
+        self.PEOPLE, self.TIME, self.INFO, self.DELETE_BOOKING = range(n_states)
         self.STATE = self.START
 
     def check_signin(self):
@@ -179,20 +177,10 @@ class TelegramBot:
             'name': self.nickname,
             'is_bot': 1,
             'bot_id': self.user_id,
-            'timestamp': int(datetime.datetime.now().timestamp())
         }
 
         logger.info(f'{self.user_id} successfully singed-up.\nNew entry on the Firebase.\nPayload to Firebase: {data}')
         self.fb.db.child('users').child(uid).child('details').set(data)
-
-    # def return_user(self, key, value):
-    #     users = self.fb.download('users')
-    #     for k, v in users.items():
-    #         try:
-    #             if v['details'][key] == value:
-    #                 return v
-    #         except:
-    #             pass
 
     def sign_in(self):
         try:
@@ -225,7 +213,11 @@ class TelegramBot:
                 restaurant = self.fb.db.child('users').child(self.fb_id).child(
                     'active').child('restaurant_key').get().val()
                 message = 'Click on the link to begin the ordering phase'
-                link = f'{self.order_link}{self.fb_id}/{restaurant}'
+                if user['is_booker'] == 1:
+                    link = f'{self.order_link}{self.fb_id}/{restaurant}'
+                else:
+                    booker = user['booker']
+                    link = f'{self.order_link}{booker}/{restaurant}'
                 self.link = link
                 bot.message.reply_text(message)
                 bot.message.reply_text(link)
@@ -282,8 +274,7 @@ class TelegramBot:
                     active_customers = self.fb.db.child(f'restaurants/{restaurant_key}/customers').get().val()
                     n_active = len(list(active_customers.values()))
                     # M/M/m queue but not so much
-                    f = 20 if n_active < 3\
-                        else 20 + 20 / 3 * n_active
+                    f = 20 if n_active < 3 else 20 + 20 / 3 * n_active
                     message = f'There are {n_active} customers before you.\n' \
                               f'Your waiting time is approximately {int(f)} minutes'
                     bot.message.reply_text(message)
@@ -295,7 +286,9 @@ class TelegramBot:
             bot.message.reply_text(message)
 
             return self.CHECK
+
         elif selection == 'Info':
+            logger.info(f'INFO: {self.user_id} requested info about restaurant')
             restaurant = self.fb.db.child(f'users/{self.fb_id}/active/restaurant_key').get().val()
             if restaurant is not None:
                 token = self.fb.db.child(f'restaurants/{restaurant}/details/token_order').get().val()
@@ -329,27 +322,66 @@ class TelegramBot:
         logger.info(f'BOOK: {self.user_id} sent: {bot.message.text}')
         restaurant_chosen = bot.message.text
         self.restaurant_name = restaurant_chosen
-        restaurant_key = self.restaurants_mapper[restaurant_chosen]
-        try:
-            restaurant_ids = self.restaurants[restaurant_key]['customers'].keys()
-            if self.user_id in list(restaurant_ids):
-                logger.info(f'BOOK: {self.user_id} already has a booking in the restaurant')
-                message = f'You already have a Booking at {restaurant_chosen}. Do you want to delete it?'
-                reply_markup = ReplyKeyboardMarkup([['YES', 'NO']], one_time_keyboard=True, resize_keyboard=True)
-                bot.message.reply_text(message, reply_markup=reply_markup)
-
-                return self.DELETE_BOOKING
-            else:
-                logger.info(f'BOOK: number of people')
-                self.restaurant_key = restaurant_key
-                message = 'How many People'
-                bot.message.reply_text(message)
-                return self.PEOPLE
-        except:
-            self.restaurant_key = restaurant_key
+        self.restaurant_key = self.restaurants_mapper[restaurant_chosen]
+        # try:
+        #     restaurant_ids = self.restaurants[self.restaurant_key]['customers'].keys()
+        #     if self.user_id in list(restaurant_ids):
+        #         logger.info(f'BOOK: {self.user_id} already has a booking in the restaurant')
+        #         message = f'You already have a Booking at {restaurant_chosen}. Do you want to delete it?'
+        #         reply_markup = ReplyKeyboardMarkup([['YES', 'NO']], one_time_keyboard=True, resize_keyboard=True)
+        #         bot.message.reply_text(message, reply_markup=reply_markup)
+        #
+        #         return self.DELETE_BOOKING
+        #     else:
+        #         logger.info(f'BOOK: number of people')
+        #         message = 'How many People'
+        #         bot.message.reply_text(message)
+        #         return self.PEOPLE
+        if self.fb.db.child(f'users/{self.fb_id}/active').get().val() is not None:
+            logger.info(f'BOOK: {self.user_id} already has a booking in the restaurant')
+            message = f'You already have a Booking at {restaurant_chosen}. Do you want to delete it?'
+            reply_markup = ReplyKeyboardMarkup([['YES', 'NO']], one_time_keyboard=True, resize_keyboard=True)
+            bot.message.reply_text(message, reply_markup=reply_markup)
+            return self.DELETE_BOOKING
+        else:
             message = 'How many People'
             bot.message.reply_text(message)
             return self.PEOPLE
+
+    def delete_booking(self, bot, update):
+        response = bot.message.text
+        if response == 'YES':
+            logger.info(f'DELETE: {self.user_id} requested delete booking')
+            user_active = self.fb.db.child(f'users/{self.fb_id}/active').get().val()
+            if user_active['is_booker'] == 1:
+                if 'friends' in user_active.keys():
+                    friends = user_active['friends']
+                    for k, v in friends.items():
+                        self.fb.db.child(f'users/{k}/active').remove()
+                self.fb.db.child(f'users/{self.fb_id}/active').remove()
+            else:
+                booker = user_active['booker']
+                booker_active = self.fb.db.child(f'users/{booker}/active').get().val()
+                if 'friends' in booker_active.keys():
+                    for k, v in booker_active['friends'].items():
+                        self.fb.db.child(f'users/{k}/active').remove()
+                self.fb.db.child(f'users/{booker}/active').remove()
+            restaurant = self.fb.db.child(f'restaurants/{self.restaurant_key}').get().val()
+            bookings = restaurant['bookings']
+            token = restaurant['details']['token_order']
+            for k, v in bookings.items():
+                if v['bot_id'] == self.user_id:
+                    for t in v['table_id']:
+                        self.sender.send(f'{token}_item:table:{t}', {'reserved': False}, 'attributes')
+                    self.fb.db.child(f'restaurants/{self.restaurant_key}/bookings/{k}').remove()
+            self.fb.db.child(f'restaurants/{self.restaurant_key}/customers/{self.user_id}').remove()
+            message = 'Your booking has been canceled. See you soon.'
+            bot.message.reply_text(message)
+        else:
+            message = 'Start again the bot if tou want to continue'
+            bot.message.reply_text(message)
+
+            return self.START_RETURN
 
     def time_booking_creation(self, slot, time_booking):
         n = len(slot)
@@ -396,14 +428,14 @@ class TelegramBot:
             nick = u['details']['nickname']
         else:
             nick = u['details']['name']
-        self.table_key = self.key_creation(nick, self.restaurant_name)
+        self.join_key = self.key_creation(nick, self.restaurant_name)
         is_booked = self.post_booking()
         if is_booked:
             logger.info(f'BOOK: booking accepted')
             message = f'Booking has been accepted.\n' \
                       f'User {self.user_id} at {self.restaurant_name} for {self.people} at {self.time_selected}.\n'
             bot.message.reply_text(message)
-            message = f'Share this key to your friends to let them join your table: {self.table_key}'
+            message = f'Share this key to your friends to let them join your table: {self.join_key}'
             bot.message.reply_text(message)
             return self.START_RETURN
         else:
@@ -417,7 +449,7 @@ class TelegramBot:
         users = self.fb.download('users')
         for k, v in users.items():
             try:
-                if v['active']['table_key'] == key:
+                if v['active']['join_key'] == key:
                     return k, v
             except:
                 pass
@@ -426,7 +458,9 @@ class TelegramBot:
     def join_table(self, user_key, restaurant_key):
         self.fb.db.child('users').child(user_key).child('active').child('friends').update({self.fb_id: self.user_id})
         self.fb.db.child('users').child(self.fb_id).child('active').set({
-            'restaurant_key': restaurant_key
+            'restaurant_key': restaurant_key,
+            'is_booker': 0,
+            'booker': user_key
         })
 
     def join(self, bot, update):
@@ -455,15 +489,17 @@ class TelegramBot:
             self.fb.db.child('restaurants').child(self.restaurant_key).child('customers').child(self.user_id).set(obj)
             obj_active = {
                 'restaurant_key': self.restaurant_key,
-                'details': obj
+                'details': obj,
+                'is_booker': 1,
+                'join_key': self.join_key
             }
-            self.fb.db.child('users').child(self.fb_id).update({'table_key': self.table_key})
+            # self.fb.db.child('users').child(self.fb_id).update({'table_key': self.table_key})
 
             # add new booking to user's active
             self.fb.db.child('users').child(self.fb_id).child('active').set(obj_active)
             logger.info(f'BOOK: booking completed.\nNew active customer for {self.restaurant_key} with data: {obj}\n'
                         f'New active booking for {self.user_id} with data: {obj_active} '
-                        f'and table key: {self.table_key}')
+                        f'and table key: {self.join_key}')
             return True
         else:
             logger.info('BOOK: booking NOT completed')
@@ -517,8 +553,6 @@ class TelegramBot:
         self.fb.db.child('restaurants').child(restaurant).child('customers').child(self.user_id).remove()
         # remove from user active bookings
         self.fb.db.child('users').child(self.fb_id).child('active').remove()
-        # remove table key
-        self.fb.db.child('users').child(self.fb_id).child('table_key').remove()
         logger.info(f'CHECKOUT: removed from {self.user_id} the active object.\nRemoved from thingsboard'
                     f'reservation.\nRemoved from Firebase Restaurant\'s active customer')
 
@@ -554,6 +588,7 @@ class TelegramBot:
                 self.PASSWORD_2: [MessageHandler(Filters.text, self.password_2)],
                 self.COND_1: [MessageHandler(self.keyboard_filter, self.cond1)],
                 self.CHECK_BOOKING: [MessageHandler(self.key_restaurant_filter, self.check_booking)],
+                self.DELETE_BOOKING: [MessageHandler(Filters.text, self.delete_booking)],
                 self.PEOPLE: [MessageHandler(self.people_filter, self.people)],
                 self.TIME: [MessageHandler(Filters.text, self.time)],
                 self.FEED: [MessageHandler(Filters.text, self.feedback)],

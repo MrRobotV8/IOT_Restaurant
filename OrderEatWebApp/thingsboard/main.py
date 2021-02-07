@@ -7,15 +7,15 @@ from pathlib import Path
 
 class ThingsDash:
     def __init__(self):
-        p = Path('.')
-        print(p)
-        p = p.resolve()
-        parent = p.parents[0]
-        print(parent)
-        parent.joinpath('catalog.json')
+        # p = Path('.')
+        # print(p)
+        # p = p.resolve()
+        # parent = p.parents[0]
+        # print(parent)
+        # parent.joinpath('catalog.json')
 
         # ThingsBoard REST API URL
-        with open(parent.joinpath('catalog.json'), 'r') as f:
+        with open('../catalog.json', 'r') as f:
             config = json.loads(f.read())['thingsboard']
         print(config)
         self.url = config['host']
@@ -63,6 +63,8 @@ class ThingsDash:
             payload["zip"] = zip
 
         response = requests.post(url_api, data=json.dumps(payload), headers=headers)
+        print(response)
+        print(response.text)
         if response.status_code == 200:
             print("response post request 200")
             self.customer_id = json.loads(response.text)["id"]["id"]
@@ -377,15 +379,13 @@ class ThingsDash:
 
 
 if __name__ == "__main__":
-
     td = ThingsDash()
-    exit()
     public = True
 
     # create customer/owner
-    customer_id = td.create_customer(title="Dan Group LTDA",
+    customer_id = td.create_customer(title="1",
                                      address="Corso Carlo e Nello Rosselli, 82, 10129 Torino TO, Italia")
-
+    exit()
     # create restaurant asset
     building_name = f"{customer_id}_building:1"
     building_label = "Corso Rosseli"

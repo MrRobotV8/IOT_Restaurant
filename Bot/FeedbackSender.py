@@ -1,5 +1,13 @@
 import json
 import requests as req
+import logging
+
+# Enable logging for displaying prints
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 class Sender:
@@ -16,6 +24,7 @@ class Sender:
         payload = {"username": str(self.username), "password": str(self.password)}
         post_url = f'{self.th_host}:{self.th_port}/api/auth/login'
         x = req.post(post_url, data=json.dumps(payload), headers=headers)
+        logger.info(f'Login to Thingsboard: POST {x.text}')
         if x.status_code == 200:
             self.jwt_token = json.loads(x.text)["token"]
 
@@ -23,7 +32,7 @@ class Sender:
         url = f'{self.url}/{token}/{attribute}'
         payload = json.dumps(payload)
         request = req.post(url=url, data=payload)
-        print(request)
+        logger.info(f'POST {request.text}')
 
     def get_device_telemetry(self, entity_id, keys=None, interval=None, limit=None, agg=None, entityType="DEVICE"):
         url_api = f"{self.th_host}:{self.th_port}/api/plugins/telemetry/{entityType}/{entity_id}/values/timeseries?"
@@ -60,6 +69,7 @@ class Sender:
         response = req.get(url_api, headers=headers)
         if response.status_code == 200:
             return response
+        logger.info(f'GET {response.text}')
 
 
 if __name__ == '__main__':

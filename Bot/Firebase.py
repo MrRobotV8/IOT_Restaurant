@@ -67,6 +67,7 @@ class Firebase:
                 self.sender.send(f'{token}_item:table:{t}', {'reserved': True}, 'attributes')
             self.db.child('restaurants').child(restaurant_key).child('bookings').child(hash_key).set(to_set)
             self.db.child(f'users/{user_firebase}/active').update({'table_id': table_key})
+            logger.info(f'UPLOAD BOOKING:\nRestaurant {restaurant_key} new booking')
             return True
         else:
             logger.info('TABLE: table NOT available')
