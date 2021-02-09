@@ -323,20 +323,6 @@ class TelegramBot:
         restaurant_chosen = bot.message.text
         self.restaurant_name = restaurant_chosen
         self.restaurant_key = self.restaurants_mapper[restaurant_chosen]
-        # try:
-        #     restaurant_ids = self.restaurants[self.restaurant_key]['customers'].keys()
-        #     if self.user_id in list(restaurant_ids):
-        #         logger.info(f'BOOK: {self.user_id} already has a booking in the restaurant')
-        #         message = f'You already have a Booking at {restaurant_chosen}. Do you want to delete it?'
-        #         reply_markup = ReplyKeyboardMarkup([['YES', 'NO']], one_time_keyboard=True, resize_keyboard=True)
-        #         bot.message.reply_text(message, reply_markup=reply_markup)
-        #
-        #         return self.DELETE_BOOKING
-        #     else:
-        #         logger.info(f'BOOK: number of people')
-        #         message = 'How many People'
-        #         bot.message.reply_text(message)
-        #         return self.PEOPLE
         if self.fb.db.child(f'users/{self.fb_id}/active').get().val() is not None:
             logger.info(f'BOOK: {self.user_id} already has a booking in the restaurant')
             message = f'You already have a Booking at {restaurant_chosen}. Do you want to delete it?'
@@ -417,8 +403,12 @@ class TelegramBot:
         return self.TIME
 
     def key_creation(self, user, restaurant):
-        s = f'{user}_{restaurant}'
-        return s
+        import hashlib
+        m = hashlib.md5()
+        s = f'{user}-{restaurant}'
+        m.update(s.encode('utf-8'))
+        uid = str(int(m.hexdigest(), 16))[:8]
+        return uid
 
     def time(self, bot, update):
         logger.info(f'BOOK: {self.user_id} sent: {bot.message.text}')
@@ -496,7 +486,7 @@ class TelegramBot:
             # self.fb.db.child('users').child(self.fb_id).update({'table_key': self.table_key})
 
             # add new booking to user's active
-            self.fb.db.child('users').child(self.fb_id).child('active').set(obj_active)
+            self.fb.db.child('users').child(self.fb_id).child('active').update(obj_active)
             logger.info(f'BOOK: booking completed.\nNew active customer for {self.restaurant_key} with data: {obj}\n'
                         f'New active booking for {self.user_id} with data: {obj_active} '
                         f'and table key: {self.join_key}')
@@ -547,12 +537,13 @@ class TelegramBot:
         # remove from thingsboard reservation table
         token = self.fb.db.child(f'restaurants/{restaurant}/details/token_order').get().val()
         tables = self.fb.db.child(f'users/{self.fb_id}/active/table_id').get().val()
-        for i, t in tables.items():
+        for t in tables:
             self.sender.send(f'{token}_item:table:{t}', {'reserved': False}, 'attributes')
 
         self.fb.db.child('restaurants').child(restaurant).child('customers').child(self.user_id).remove()
         # remove from user active bookings
         self.fb.db.child('users').child(self.fb_id).child('active').remove()
+        self.fb.db.child('users').child(self.fb_id).child('last_basket').remove()
         logger.info(f'CHECKOUT: removed from {self.user_id} the active object.\nRemoved from thingsboard'
                     f'reservation.\nRemoved from Firebase Restaurant\'s active customer')
 
@@ -608,12 +599,5 @@ class TelegramBot:
 
 
 if __name__ == '__main__':
-    import sys
-
     sr = TelegramBot()
-    # try:
     sr.main()
-    # except KeyboardInterrupt:
-    #     print('key')
-    #     sr.fb.stream.close()
-    #     sys.exit(0)

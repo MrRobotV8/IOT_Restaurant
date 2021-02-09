@@ -24,7 +24,6 @@ class Sender:
         payload = {"username": str(self.username), "password": str(self.password)}
         post_url = f'{self.th_host}:{self.th_port}/api/auth/login'
         x = req.post(post_url, data=json.dumps(payload), headers=headers)
-        logger.info(f'Login to Thingsboard: POST {x.text}')
         if x.status_code == 200:
             self.jwt_token = json.loads(x.text)["token"]
 
@@ -72,9 +71,16 @@ class Sender:
         logger.info(f'GET {response.text}')
 
 
-if __name__ == '__main__':
-    token_order = "a0d722d0-647f-11eb-bcf2-5f53f5d253b9"
-    token_telemetry = "a0718330-647f-11eb-bcf2-5f53f5d253b9"
-
-    s = Sender()
-    s.send(f'{token_order}_item:table:6', {'reserved': True, 'request': False}, 'attributes')
+# if __name__ == '__main__':
+#     token_order = "ce362010-6a00-11eb-b75f-4bfc07f09c84"
+#     token_telemetry = "cdd8bdd0-6a00-11eb-b75f-4bfc07f09c84"
+#     l = [1, -1]
+#     import numpy as np
+#     import time
+#     s = Sender()
+#
+#     while True:
+#     payload = {'temperature_feedback':}
+#
+#     s.send(f'{token_telemetry}_business:1', {'temperature_feedback'})
+#     # s.send(f'{token_order}_item:table:6', {'reserved': True, 'request': False}, 'attributes')

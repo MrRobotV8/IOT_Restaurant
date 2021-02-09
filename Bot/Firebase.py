@@ -25,19 +25,10 @@ class Firebase:
         self.start_stream = True
 
     def authenticate(self):
-        """
-            Authentication: allows to access the database
-        """
         self.auth = self.firebase.auth()
         self.db = self.firebase.database()
 
     def download(self, field):
-        """
-            input :
-                'field' = string : should take only 3 values
-            output :
-                'data_list' = list : list of all the elements in a given field
-        """
         all_data = self.db.child(field).get()
         obj = {}
         for e in all_data.each():
@@ -45,11 +36,6 @@ class Firebase:
         return obj
 
     def upload(self, field, data2upload, key=None):
-        """
-            input :
-                'field' = string : should take only 3 values
-                'data2upload' = json : file to upload on the DB
-        """
         self.db.child(field).child(key).set(data2upload)
 
     def upload_booking(self, user_firebase, restaurant_key, hour, n_people, user_id):
@@ -175,10 +161,12 @@ class Firebase:
             pass
         else:
             try:
+                logger.info('ORDER: received new order on Firebase')
                 event = message['event']
                 if event == 'put':
                     path = message['path']
                     data = message['data']
+                    print(data)
                     path = path[1:].split('/')
                     if len(path) == 1:
                         user_key = path[0]
@@ -202,6 +190,9 @@ class Firebase:
                     order = [f"{v['item']} x {v['quantity']}" for v in ts.values()]
                     order = ' - '.join(order)
                     payload = {"order": order, "user": user_name, 'total': total}
+                    logger.info(f'ORDER: {user_name} created order {order}.\n'
+                                f'POST on {rest_key} Dashboard order details.\n'
+                                f'Creation of Table Order with access token {token}_item:table:{table_key}')
                     for t in table_key:
                         access_token = f"{token}_item:table:{t}"
                         self.td.create_table_order(device_access_token=access_token,
