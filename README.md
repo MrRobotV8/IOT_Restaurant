@@ -68,7 +68,7 @@ The platform has been divided in three different applications exploiting OOP and
 
 # [TB] Custom Thingsboard CE
 ## [TB] Introduction:
-The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboard) installed on a Ubuntu Server 18.04 LTS VM ([PaaS](https://en.wikipedia.org/wiki/Platform_as_a_service)). The main utilized features are:
+The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboard) installed on a Ubuntu Server 18.04 LTS VM ([IaaS](https://en.wikipedia.org/wiki/Infrastructure_as_a_service)). The main utilized features are:
 * **Rule Chains:** Default Root Rule Chain with additional "save attributes" node for shared attributes, and additional "rule chain" node for Alarm Rule Chain. Alarm Rule Chain manages the creation and clearance of alarms based on customer feedbacks according to a custom javascript code;
 * **HTTP/MQTT/REST API:** For client, asset and device provision, their telemetry and client/share attributes;
 * **Relations:** Relation between Assets, Devices and Clients;
