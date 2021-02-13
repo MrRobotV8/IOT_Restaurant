@@ -2,15 +2,15 @@
 Iot Project
 
 # WEB APP - Django Framework 
-Name Folder: OrderEatWebApp
-Name project: orderEat
-Name app1: food ---> Customer Panel
-Name app2: rpanel ---> Restaurant Panel
-Name app3: tg-menu --> Customer Panel for Telegram Orders at Restuarant
+## Name Folder: OrderEatWebApp 
+## Name project: orderEat 
+## Name app1: food ---> Customer Panel 
+## Name app2: rpanel ---> Restaurant Panel
+## Name app3: tg-menu --> Customer Panel for Telegram Orders at Restuarant
 
 **Requirements**
-asgiref==3.3.1
-dj-database-url==0.5.0
+asgiref==3.3.1 \n
+dj-database-url==0.5.0 \n
 Django==3.1.4
 django-heroku==0.3.1
 gcloud==0.17.0
@@ -46,7 +46,7 @@ Django is characterized by:
 6) Generic views’ to handle common requests
 7) Clean, powerful template language
 8) OOP approach
-
+##Default app
 ![Order Eat](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/OrderEatDeafaultAPP.png "Start app")
 ![Three Apps](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/threeapps.png "Three App, microservice approach")
 ![Url Patterns](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/Url%20Pattern.png "Url Pattern")
