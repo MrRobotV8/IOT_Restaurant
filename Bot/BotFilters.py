@@ -11,11 +11,11 @@ class KeyboardFilter(BaseFilter):
 
 class KeyRestaurantFilter(BaseFilter):
     def __init__(self, restaurants):
-        self.restaurants = [r.lower() for r in restaurants]
+        self.restaurants = [r.lower().strip() for r in restaurants]
 
     def filter(self, message):
         key_restaurant = message.text
-        if key_restaurant.lower() in self.restaurants:
+        if key_restaurant.lower().strip() in self.restaurants:
             return True
         else:
             return False

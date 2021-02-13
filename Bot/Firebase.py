@@ -1,7 +1,7 @@
 import traceback
 import logging
 import pyrebase
-from thingsboard.main import ThingsDash
+from ThingsDash import ThingsDash
 import datetime
 import copy
 from FeedbackSender import Sender
@@ -203,13 +203,13 @@ class Firebase:
         self.start_stream = False
 
     def listener(self):
+        logger.info('FIREBASE: Stream-Callback Started')
         self.stream = self.db.child('orders').stream(self.callback_listen)
 
 
 if __name__ == '__main__':
     fb = Firebase()
     fb.authenticate()
-    import time
     fb.listener()
     try:
         while True:
