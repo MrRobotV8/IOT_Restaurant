@@ -13,8 +13,8 @@
       {
         "additionalInfo": {
           "description": "",
-          "layoutX": 836,
-          "layoutY": 78
+          "layoutX": 812,
+          "layoutY": 175
         },
         "type": "org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode",
         "name": "Save Client Attributes",
@@ -57,8 +57,8 @@
       {
         "additionalInfo": {
           "description": null,
-          "layoutX": 828,
-          "layoutY": 245
+          "layoutX": 827,
+          "layoutY": 296
         },
         "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
         "name": "Save Timeseries",
@@ -70,8 +70,8 @@
       {
         "additionalInfo": {
           "description": null,
-          "layoutX": 825,
-          "layoutY": 0
+          "layoutX": 776,
+          "layoutY": 119
         },
         "type": "org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode",
         "name": "Save Shared Attributes",
@@ -84,8 +84,8 @@
       {
         "additionalInfo": {
           "description": null,
-          "layoutX": 347,
-          "layoutY": 149
+          "layoutX": 338,
+          "layoutY": 323
         },
         "type": "org.thingsboard.rule.engine.filter.TbMsgTypeSwitchNode",
         "name": "Message Type Switch",
@@ -97,8 +97,8 @@
       {
         "additionalInfo": {
           "description": null,
-          "layoutX": 812,
-          "layoutY": 421
+          "layoutX": 803,
+          "layoutY": 423
         },
         "type": "org.thingsboard.rule.engine.action.TbLogNode",
         "name": "Log RPC from Device",
@@ -110,8 +110,8 @@
       {
         "additionalInfo": {
           "description": null,
-          "layoutX": 821,
-          "layoutY": 519
+          "layoutX": 778,
+          "layoutY": 484
         },
         "type": "org.thingsboard.rule.engine.action.TbLogNode",
         "name": "Log Other",
@@ -123,8 +123,8 @@
       {
         "additionalInfo": {
           "description": null,
-          "layoutX": 789,
-          "layoutY": 633
+          "layoutX": 721,
+          "layoutY": 540
         },
         "type": "org.thingsboard.rule.engine.rpc.TbSendRPCRequestNode",
         "name": "RPC Call Request",
@@ -136,7 +136,7 @@
       {
         "additionalInfo": {
           "description": "Process incoming messages from devices with the alarm rules defined in the device profile. Dispatch all incoming messages with \"Success\" relation type.",
-          "layoutX": 204,
+          "layoutX": 187,
           "layoutY": 240
         },
         "type": "org.thingsboard.rule.engine.profile.TbDeviceProfileNode",
@@ -199,9 +199,9 @@
         },
         "additionalInfo": {
           "description": "",
-          "layoutX": 835,
-          "layoutY": 148,
-          "ruleChainNodeId": "rule-chain-node-10"
+          "layoutX": 829,
+          "layoutY": 233,
+          "ruleChainNodeId": "rule-chain-node-11"
         },
         "type": "Post telemetry"
       }
