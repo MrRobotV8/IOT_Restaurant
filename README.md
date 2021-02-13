@@ -20,7 +20,7 @@ Then click CTRL + link(localhost:8080) in the console and the platform will be a
 *You can find a deployed version of the platform here: 
 [link](order-eat2021-django.herokuapp.com) 
 
-We have tried to adopt *Agile Methodology 
+We have tried to adopt *Agile Methodology*
 ## Requirements
 - asgiref==3.3.1 \n
 - dj-database-url==0.5.0 \n
@@ -51,14 +51,14 @@ We have tried to adopt *Agile Methodology
 
 ## WHY DJANGO?
 Django is characterized by:
-1) *High-level framework for rapid web development
-2) *Complete stack of tools
+1) *High-level framework for rapid web development*
+2) *Complete stack of tools*
 3) *Data modelled with Python classes*
 4) *Production-ready data admin interface, generated dynamically*
-5) *Elegant system for mapping URLs to Python code
-6) *Generic views’ to handle common requests
-7) *Clean, powerful template language
-8) *OOP approach
+5) *Elegant system for mapping URLs to Python code*
+6) *Generic views’ to handle common requests*
+7) *Clean, powerful template language*
+8) *OOP approach*
 ## Default app
 ![Order Eat](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/OrderEatDeafaultAPP.png "Start app")
 ## Three different apps
