@@ -93,3 +93,9 @@ The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboa
 ## [S&A] Setup
 * **Comments:** BME680 SDO -> GND for I2C Address: 0x76
 ![Wiring](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/Wiring.jpg "Wiring")
+
+# [TGB] TelegramBot
+1) Interactive chat
+2) User friendly keyboard to improve interactiviy
+3) Communication with Thingsboard
+4) Communication with Firebase
