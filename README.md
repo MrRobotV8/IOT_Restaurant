@@ -37,7 +37,9 @@ The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboa
 # Sensors and Actuators
 ## Introduction
 * **Main Components:** [ESP32 Dev Kic C](https://www.espressif.com/en/products/devkits/esp32-devkitc/overview); [BME680](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Sensors%26Actuators/BME680ShuttleBoard.pdf)
-* **Communication:** BME680<->uC: I2C; BME680<->Thingsboard: MQTT
+* **Communication:** 
+  * **BME680<->ESP32:** I2C; 
+  * **BME680<->Thingsboard:** MQTT
 
 ## Setup
 * **Comments:** BME680 SDO -> GND for I2C Address: 0x76
