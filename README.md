@@ -1,54 +1,58 @@
 # IOT_Restaurant
-Iot Project
+OrderEat project for course Programming for IOT @ PoliTo.
+
 
 # WEB APP - Django Framework 
-## Name Folder: OrderEatWebApp 
-## Name project: orderEat 
-## Name app1: food ---> Customer Panel 
-## Name app2: rpanel ---> Restaurant Panel
-## Name app3: tg-menu --> Customer Panel for Telegram Orders at Restuarant
+- Name Folder: OrderEatWebApp 
+- Name project: orderEat 
+- Name app1: food ---> Customer Panel 
+- Name app2: rpanel ---> Restaurant Panel
+- Name app3: tg-menu --> Customer Panel for Telegram Orders at Restuarant
 
-**Requirements**
-asgiref==3.3.1 \n
-dj-database-url==0.5.0 \n
-Django==3.1.4
-django-heroku==0.3.1
-gcloud==0.17.0
-googleapis-common-protos==1.52.0
-gunicorn==20.0.4
-httplib2==0.18.1
-jws==0.1.3
-oauth2client==3.0.0
-paho-mqtt==1.5.1
-Pillow==8.0.1
-protobuf==3.14.0
-psycopg2==2.8.6
-pyasn1==0.4.8
-pyasn1-modules==0.2.8
-pycryptodome==3.4.3
-Pyrebase==3.0.27
-python-jwt==2.0.1
-pytz==2020.5
-requests==2.11.1
-requests-toolbelt==0.7.0
-rsa==4.6
-six==1.15.0
-sqlparse==0.4.1
-whitenoise==5.2.0
+## Requirements
+- asgiref==3.3.1 \n
+- dj-database-url==0.5.0 \n
+- Django==3.1.4
+- django-heroku==0.3.1
+- gcloud==0.17.0
+- googleapis-common-protos==1.52.0
+- gunicorn==20.0.4
+- httplib2==0.18.1
+- jws==0.1.3
+- oauth2client==3.0.0
+- paho-mqtt==1.5.1
+- Pillow==8.0.1
+- protobuf==3.14.0
+- psycopg2==2.8.6
+- pyasn1==0.4.8
+- pyasn1-modules==0.2.8
+- pycryptodome==3.4.3
+- Pyrebase==3.0.27
+- python-jwt==2.0.1
+- pytz==2020.5
+- requests==2.11.1
+- requests-toolbelt==0.7.0
+- rsa==4.6
+- six==1.15.0
+- sqlparse==0.4.1
+- whitenoise==5.2.0
 
-**WHY DJANGO?**
+## WHY DJANGO?
 Django is characterized by:
-1) High-level framework for rapid web development
-2) Complete stack of tools
-3) Data modelled with Python classes*
-4) Production-ready data admin interface, generated dynamically*
-5) Elegant system for mapping URLs to Python code
-6) Generic views’ to handle common requests
-7) Clean, powerful template language
-8) OOP approach
-##Default app
+1) *High-level framework for rapid web development
+2) *Complete stack of tools
+3) *Data modelled with Python classes*
+4) *Production-ready data admin interface, generated dynamically*
+5) *Elegant system for mapping URLs to Python code
+6) *Generic views’ to handle common requests
+7) *Clean, powerful template language
+8) * OOP approach
+## Default app
 ![Order Eat](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/OrderEatDeafaultAPP.png "Start app")
-![Three Apps](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/threeapps.png "Three App, microservice approach")
+## Task Division, Microservice approach
+The platform has been divided in three different applications
+![Three Apps](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/threeapps.png "Three App"")
+## Url Pattern
 ![Url Patterns](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/Url%20Pattern.png "Url Pattern")
 
 # [TB] Custom Thingsboard CE
