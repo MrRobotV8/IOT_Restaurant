@@ -21,7 +21,7 @@ python manage.py runserver
 
 # [TB] Custom Thingsboard CE
 ## [TB] Introduction:
-The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboard), specifically the following features:
+The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboard) installed on a Ubuntu Server 18.04 LTS VM (PaaS), specifically the following features:
 * **Rule Chains:** Default Root Rule Chain with additional "save attributes" node for shared attributes, and additional "rule chain" node for Alarm Rule Chain. Alarm Rule Chain manages the creation and clearance of alarms based on customer feedbacks according to a custom javascript code;
 * **HTTP/MQTT/REST API:** For client, asset and device provision, their telemetry and client/share attributes;
 * **Relations:** Relation between Assets, Devices and Clients;
