@@ -12,7 +12,7 @@ OrderEat project for course Programming for IOT @ PoliTo.
 
 -Config File is shared in the folder between actors
 
-# [dj]WEB APP - Django Framework 
+# [dj] WEB APP - Django Framework 
 - Name Folder: OrderEatWebApp 
 - Name project: orderEat 
 - Name app1: food ---> Customer Panel 
@@ -30,7 +30,7 @@ Then click CTRL + link(localhost:8080) in the console and the platform will be a
 [link](order-eat2021-django.herokuapp.com) 
 
 We have tried to adopt *Agile Methodology*
-## [dj]Requirements
+## [dj] Requirements
 - asgiref==3.3.1 \n
 - dj-database-url==0.5.0 \n
 - Django==3.1.4
@@ -58,22 +58,12 @@ We have tried to adopt *Agile Methodology*
 - sqlparse==0.4.1
 - whitenoise==5.2.0
 
-## [dj]WHY DJANGO?
-Django is characterized by:
-1) *High-level framework for rapid web development*
-2) *Complete stack of tools*
-3) *Data modelled with Python classes*
-4) *Production-ready data admin interface, generated dynamically*
-5) *Elegant system for mapping URLs to Python code*
-6) *Generic views’ to handle common requests*
-7) *Clean, powerful template language*
-8) *OOP approach*
-## [dj]Default app
+## [dj] Default app
 ![Order Eat](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/OrderEatDeafaultAPP.png "Start app")
-## [dj]Three different apps
+## [dj] Three different apps
 The platform has been divided in three different applications exploiting OOP and tasks division
 ![Three Apps](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/threeapps.png "Three App")
-## [dj]Url Pattern
+## [dj] Url Pattern
 ![Url Patterns](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/Url%20Pattern.png "Url Pattern")
 
 # [TB] Custom Thingsboard CE
