@@ -26,7 +26,7 @@ $ python manage.py runserver
 ====
 Then click CTRL + link(localhost:8080) in the console and the platform will be available in the browser. 
 
-*You can find a deployed version through Heroku (PaaS) of the platform here*: 
+*You can find a deployed version through Heroku ([PaaS](https://en.wikipedia.org/wiki/Platform_as_a_service)) of the platform here*: 
 [link](order-eat2021-django.herokuapp.com) 
 
 We have tried to adopt *Agile Methodology*
