@@ -10,16 +10,17 @@ OrderEat project for course Programming for IOT @ PoliTo.
 - Name app2: rpanel ---> Restaurant Panel
 - Name app3: tg-menu --> Customer Panel for Telegram Orders at Restuarant
 
-To run the web app in your local host, be sure to install the following requirements in a virtual environment, activate the venv and the run the following command: 
+To run the web app in your localhost, be sure to install the following requirements in a virtual environment, activate the venv and the run the following command: 
 
 $ python manage.py runserver
 
 ====
-Then click CTRL + link(localhost:808) in the console and the platform will be available in the browser. 
+Then click CTRL + link(localhost:8080) in the console and the platform will be available in the browser. 
 
-You can find a deployed version of the platform here: 
+*You can find a deployed version of the platform here: 
 [link](order-eat2021-django.herokuapp.com) 
 
+We have tried to adopt *Agile Methodology 
 ## Requirements
 - asgiref==3.3.1 \n
 - dj-database-url==0.5.0 \n
@@ -60,8 +61,8 @@ Django is characterized by:
 8) *OOP approach
 ## Default app
 ![Order Eat](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/OrderEatDeafaultAPP.png "Start app")
-## Task Division, Microservice approach
-The platform has been divided in three different applications, exploiting OOP. 
+## Three different apps
+The platform has been divided in three different applications exploiting OOP and tasks division
 ![Three Apps](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/threeapps.png "Three App")
 ## Url Pattern
 ![Url Patterns](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/Url%20Pattern.png "Url Pattern")
