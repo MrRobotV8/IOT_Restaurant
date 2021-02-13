@@ -1,6 +1,15 @@
 # IOT_Restaurant
 OrderEat project for course Programming for IOT @ PoliTo.
 
+1) Scalable on the number of users;
+2) Scalable on the number of restaurants;
+3) Scalable to manage various IoT devices, users and contexts (e.g. adding/removing new devices, users and context at run-time without modifying the source-code). 
+4) Automatic setup process;
+5) Comfort for the customer;
+6) Consumption control for restaurateur;
+7) Unique Configuration File; 
+8) Guarantee information exchange among the actors in the system over the internet (REST and MQTT)
+
 -Config File is shared in the folder between actors
 
 # WEB APP - Django Framework 
