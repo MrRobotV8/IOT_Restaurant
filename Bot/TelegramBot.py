@@ -193,7 +193,7 @@ class TelegramBot:
             traceback.print_exc()
             return False
 
-    def cond1(self, bot, update):
+    def path_selection(self, bot, update):
         logger.info(f'{self.user_id} sent: {bot.message.text}')
         selection = bot.message.text
         if selection == 'Book':
@@ -582,7 +582,7 @@ class TelegramBot:
                 self.NICK: [MessageHandler(Filters.text, self.nickname)],
                 self.PASSWORD: [MessageHandler(Filters.text, self.password)],
                 self.PASSWORD_2: [MessageHandler(Filters.text, self.password_2)],
-                self.COND_1: [MessageHandler(self.keyboard_filter, self.cond1)],
+                self.COND_1: [MessageHandler(self.keyboard_filter, self.path_selection)],
                 self.CHECK_BOOKING: [MessageHandler(self.key_restaurant_filter, self.check_booking)],
                 self.DELETE_BOOKING: [MessageHandler(Filters.text, self.delete_booking)],
                 self.PEOPLE: [MessageHandler(self.people_filter, self.people)],
