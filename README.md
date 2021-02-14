@@ -29,35 +29,6 @@ Then click CTRL + link(localhost:8080) in the console and the platform will be a
 *You can find a deployed version through Heroku ([PaaS](https://en.wikipedia.org/wiki/Platform_as_a_service)) of the platform here*: 
 [link](order-eat2021-django.herokuapp.com) 
 
-We have tried to adopt *Agile Methodology*
-## [dj] Requirements
-- asgiref==3.3.1 \n
-- dj-database-url==0.5.0 \n
-- Django==3.1.4
-- django-heroku==0.3.1
-- gcloud==0.17.0
-- googleapis-common-protos==1.52.0
-- gunicorn==20.0.4
-- httplib2==0.18.1
-- jws==0.1.3
-- oauth2client==3.0.0
-- paho-mqtt==1.5.1
-- Pillow==8.0.1
-- protobuf==3.14.0
-- psycopg2==2.8.6
-- pyasn1==0.4.8
-- pyasn1-modules==0.2.8
-- pycryptodome==3.4.3
-- Pyrebase==3.0.27
-- python-jwt==2.0.1
-- pytz==2020.5
-- requests==2.11.1
-- requests-toolbelt==0.7.0
-- rsa==4.6
-- six==1.15.0
-- sqlparse==0.4.1
-- whitenoise==5.2.0
-
 ## [dj] Default app
 ![Order Eat](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/OrderEatDeafaultAPP.png "Start app")
 ## [dj] Three different apps
