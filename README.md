@@ -87,7 +87,9 @@ The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboa
 
 # [S&A] Sensors and Actuators
 ## [S&A] Introduction
-* **Main Components:** [ESP32 Dev Kic C](https://www.espressif.com/en/products/devkits/esp32-devkitc/overview); [BME680](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/BME680ShuttleBoard.pdf)
+* **Main Components:** 
+  * [ESP32 Dev Kic C](https://www.espressif.com/en/products/devkits/esp32-devkitc/overview); 
+  * [BME680](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/BME680ShuttleBoard.pdf)
 * **Communication:** 
   * **BME680<->ESP32:** I2C; 
   * **BME680<->Thingsboard:** MQTT
