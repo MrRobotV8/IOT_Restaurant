@@ -186,7 +186,7 @@ class TelegramBot:
         try:
             user = self.fb.auth.sign_in_with_email_and_password(self.email, self.password)
             self.fb_id = user['localId']
-            ref = self.fb.db.child('users').child(self.fb_id)
+            ref = self.fb.db.child('users').child(self.fb_id).child('details')
             ref.update({'bot_id': self.user_id})
             return True
         except:
@@ -569,7 +569,7 @@ class TelegramBot:
 
     def main(self):
         APP_URL = f'{self.heroku_link.replace("$APP_NAME", self.app_name)}' + self.token
-        updater = Updater(self.token, use_context=True)
+        updater = Updater(self.token, use_context=True,)
         self.updater = updater
         # Get the dispatcher to register handlers:
         dp = updater.dispatcher
@@ -592,7 +592,8 @@ class TelegramBot:
 
             },
             fallbacks=[CommandHandler('help', self.help_)],
-            allow_reentry=True
+            allow_reentry=True,
+            conversation_timeout=600
         )
 
         dp.add_handler(conv_handler)
