@@ -80,8 +80,10 @@ The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboa
 ![Custom TB Architecture](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/dashboard_high_level_architecture.png "Custom TB Architecture")
 
 ## [TB] Rule Chains:
-![Alarm Rule Chain](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/alarm_rule_chain.png "Alarm Rule Chain")
-![Root Rule Chain](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/root_rule_chain.png "Root Rule Chain")
+<img src="https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/alarm_rule_chain.png" width="750" />
+
+<img src="https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/root_rule_chain.png" width="750" />
+
 
 # [S&A] Sensors and Actuators
 ## [S&A] Introduction
@@ -92,7 +94,9 @@ The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboa
 
 ## [S&A] Setup
 * **Comments:** BME680 SDO -> GND for I2C Address: 0x76
-![Wiring](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/Wiring.jpg "Wiring")
+
+<img src="https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/Wiring.jpg" width="750" />
+
 
 # [TGB] TelegramBot
 1) Interactive chat
