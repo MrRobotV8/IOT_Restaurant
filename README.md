@@ -102,6 +102,6 @@ The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboa
 
 # [TGB] TelegramBot
 1) Interactive chat
-2) User friendly keyboard to improve interactiviy
+2) User UNfriendly keyboard to improve interactiviy
 3) Communication with Thingsboard
 4) Communication with Firebase
