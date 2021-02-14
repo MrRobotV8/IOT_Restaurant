@@ -91,11 +91,11 @@ The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboa
   * [ESP32 Dev Kic C](https://www.espressif.com/en/products/devkits/esp32-devkitc/overview); 
   * [BME680](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/BME680ShuttleBoard.pdf)
 * **Communication:** 
-  * **BME680<->ESP32:** I2C; 
-  * **BME680<->Thingsboard:** MQTT
+  * **BME680⟺ESP32:** I2C; 
+  * **BME680⟺Thingsboard:** MQTT
 
 ## [S&A] Setup
-* **Comments:** BME680 SDO -> GND for I2C Address: 0x76
+* **Comments:** BME680 SDO ⟹ GND for I2C Address: 0x76
 
 <img src="https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/Wiring.jpg" width="750" />
 
