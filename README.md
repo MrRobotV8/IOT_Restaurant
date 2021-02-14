@@ -74,7 +74,7 @@ The dashboard exploits [Thingsboard CE](https://github.com/thingsboard/thingsboa
 * **Relations:** Relation between Assets, Devices and Clients;
 * **Dashboard**
 ### Thingsboard CE High-Level Architecture
-![TB Architecture](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/thingsboard_architecture_overview.png "TB Architecture")
+<img src="https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/thingsboard_architecture_overview.png" width="650" />
 
 ## [TB] Architecture:
 ![Custom TB Architecture](https://github.com/MrRobotV8/IOT_Restaurant/blob/master/Resources/dashboard_high_level_architecture.png "Custom TB Architecture")
